@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg-dark: #020305;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.5);
+  --accent-cyan: #00f0ff;
+  --accent-gold: #ffcc00;
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --mouse-x: 50vw;
+  --mouse-y: 50vh;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .display-font { font-family: 'Syne', sans-serif; }
+
+/* Sfondo e grana pellicola alta fedeltà */
+.studio-canvas {
+  position: fixed; inset: 0; z-index: 0;
+  background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(0, 240, 255, 0.06) 0%, transparent 40%),
+              radial-gradient(circle at 50% 50%, #0a0d14 0%, #020305 100%);
+}
+
+.noise-film {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* Header */
+.brand-header {
+  position: fixed; top: 45px; left: 55px; z-index: 20; pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.brand-header.hidden { opacity: 0; }
+.kicker { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.35em; color: var(--accent-cyan); margin-bottom: 12px; font-weight: 600; }
+.brand-header h1 { font-size: 4.2rem; font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; }
+
+/* Minimalist Dock - Non distrae dal 3D */
+.configurator-dock {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 25;
+  display: flex; gap: 24px; padding: 10px; background: transparent;
+}
+.dock-item {
+  background: transparent; border: none; color: var(--text-secondary);
+  font-family: 'Inter', sans-serif; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.2em;
+  cursor: pointer; transition: all 0.3s ease; border-bottom: 1px solid transparent; padding-bottom: 4px;
+}
+.dock-item:hover { color: var(--text-primary); }
+.dock-item.active { color: var(--text-primary); border-bottom-color: var(--accent-gold); font-weight: 600; }
+
+/* Side Panel - UI Iper-Pulita */
+.side-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(600px, 95vw);
+  background: linear-gradient(to right, rgba(2, 3, 5, 0.6), #020305 40%);
+  border-left: 1px solid var(--glass-border); backdrop-filter: blur(50px);
+  padding: 60px 50px 120px; z-index: 40; overflow-y: auto;
+  transform: translateX(100%); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.side-panel.open { transform: translateX(0); }
+.close-btn {
+  background: none; border: none; color: var(--text-secondary);
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em;
+  cursor: pointer; margin-bottom: 35px; transition: color 0.3s;
+  display: flex; align-items: center; gap: 8px;
+}
+.close-btn:hover { color: var(--text-primary); }
+
+.side-panel h2 { font-size: 3.8rem; margin-bottom: 10px; line-height: 0.95; letter-spacing: -0.03em; }
+.panel-brand-link { display: inline-block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent-cyan); text-decoration: none; margin-bottom: 40px; border-bottom: 1px solid rgba(0, 240, 255, 0.3); padding-bottom: 2px; transition: color 0.3s; }
+.panel-brand-link:hover { color: #ffffff; border-color: #ffffff; }
+
+/* Liste puntate pulite */
+.data-block { margin-bottom: 40px; }
+.data-block h4 { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--text-secondary); margin-bottom: 16px; }
+.feature-list { list-style: none; }
+.feature-list li { position: relative; padding-left: 20px; font-size: 1rem; color: var(--text-primary); margin-bottom: 12px; line-height: 1.6; font-weight: 300; }
+.feature-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent-cyan); font-family: 'Syne', sans-serif; font-weight: 700; }
+
+/* Livelli a Griglia */
+.level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.level-card { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 16px; border-radius: 8px; transition: border-color 0.3s; cursor: pointer; }
+.level-card:hover { border-color: rgba(255,255,255,0.2); }
+.level-card.active { border-color: var(--accent-gold); background: rgba(255, 204, 0, 0.05); }
+.level-card span { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-secondary); margin-bottom: 6px; }
+.level-card p { font-size: 0.9rem; line-height: 1.5; color: var(--text-primary); font-weight: 300; }
+
+/* Calcolatori Typeform */
+.typeform-module { margin-top: 50px; padding-top: 40px; border-top: 1px solid var(--glass-border); }
+.tf-slider-group { margin-bottom: 35px; }
+.tf-slider-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; }
+.tf-slider-header label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-secondary); }
+.tf-slider-header span { font-size: 1.8rem; font-family: 'Syne', sans-serif; color: var(--accent-cyan); line-height: 1; }
+
+input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: var(--text-primary); margin-top: -11px; transition: transform 0.2s, background 0.2s; border: 2px solid var(--bg-dark); box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
+input[type=range]:active::-webkit-slider-thumb { transform: scale(1.4); background: var(--accent-cyan); }
+
+.tf-choice-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
+.tf-choice-btn { padding: 18px 10px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.tf-choice-btn span { display: block; font-size: 1.4rem; font-family: 'Syne', sans-serif; color: var(--text-primary); margin-bottom: 4px; }
+.tf-choice-btn small { font-size: 0.6rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.1em; }
+.tf-choice-btn:hover { border-color: rgba(255,255,255,0.3); }
+.tf-choice-btn.active { border-color: var(--accent-cyan); background: rgba(0,240,255,0.05); }
+.tf-choice-btn.active span, .tf-choice-btn.active small { color: var(--accent-cyan); }
+
+.tf-result { margin-top: 50px; text-align: center; }
+.tf-result p { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.25em; color: var(--text-secondary); margin-bottom: 12px; }
+.tf-result h3 { font-size: 5.5rem; color: var(--accent-gold); line-height: 0.9; letter-spacing: -0.03em; }
+
+/* Hotspots Scena (Effetto pulsazione sottile) */
+.hotspot-node { position: relative; width: 32px; height: 32px; cursor: pointer; display: grid; place-items: center; }
+.hotspot-dot { width: 10px; height: 10px; background: rgba(255,255,255,0.9); border-radius: 50%; box-shadow: 0 0 15px rgba(255,255,255,0.6); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.hotspot-node:hover .hotspot-dot { transform: scale(2.2); background: var(--accent-cyan); box-shadow: 0 0 25px var(--accent-cyan); }
+.hotspot-node.active .hotspot-dot { transform: scale(2.2); background: var(--accent-gold); box-shadow: 0 0 25px var(--accent-gold); }
