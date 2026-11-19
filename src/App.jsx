@@ -6,7 +6,7 @@ import './index.css';
 
 const MACROS = [
   { id: 'performance', label: 'Performance', items: ['sci', 'scarpone'] },
-  { id: 'sicurezza', label: 'Sicurezza', items: ['attacchi', 'casco'] },
+  { id: 'sicurezza', label: 'Sicurezza', items: ['casco', 'attacchi'] },
   { id: 'comfort', label: 'Comfort', items: ['termoregolazione', 'guanti'] },
   { id: 'dati_visione', label: 'Visione & Dati', items: ['maschera_outof', 'maschera_audio', 'telemetria'] }
 ];
@@ -15,27 +15,27 @@ const DATA = {
   casco: {
     id: 'casco',
     macro: 'sicurezza',
-    shortLabel: 'Caschi MIPS',
-    title: 'Caschi MIPS & Audio',
+    shortLabel: 'Caschi',
+    title: 'Dentro un Casco da Sci',
     brand: 'Visita Sena Snow ↗',
     url: 'https://www.sena.com',
     novita: [
-      'Calotte ibride ultraleggere (Carbonio / Policarbonato)',
-      'Sistema MIPS per dissipare gli impatti rotazionali obliqui',
-      'Moduli audio Mesh Sena integrati per comunicazione didattica'
+      'Calotta esterna ibrida (policarbonato / ABS / compositi) e nucleo assorbente EPS / EPP',
+      'Gestione dell’impatto obliquo (Mips, Koroyd, WaveCel) e omologazioni EN 1077 A/B, ASTM F2040, FIS RH 2013',
+      'Sistemi di soccorso (RECCO, NFC Twiceme) e comunicazione Mesh Sena'
     ],
-    info: 'La calotta interna a basso attrito (MIPS) permette un micro-scorrimento di 10–15 mm nell’impatto angolato, riducendo lo stress rotazionale sul cervello.',
-    consiglio: 'Fondamentale per tutti i livelli; per il Maestro l’audio integrato Sena permette di correggere l’allievo in tempo reale senza urlare in pista.'
+    info: 'La calotta distribuisce il carico, il nucleo si deforma assorbendo energia e gli strati interni gestiscono la rotazione negli impatti obliqui.',
+    consiglio: 'Esplora qui sotto l’anatomia a strati, le differenze tra sigle/omologazioni, il consigliatore per disciplina e il mini quiz.'
   },
   maschera_outof: {
     id: 'maschera_outof',
     macro: 'dati_visione',
-    shortLabel: 'Ottica IRID',
-    title: 'Out Of — Ottica IRID',
+    shortLabel: 'Out Of',
+    title: 'Out Of',
     brand: 'Visita Out Of ↗',
     url: 'https://out-of.com',
     novita: [
-      'Lente elettronica IRID alimentata a cella solare (zero batterie)',
+      'Lente elettronica IRID alimentata a cella solare (zero batterie da ricaricare)',
       'Adattamento istantaneo continuo tra S1 e S3 in meno di 1 secondo'
     ],
     info: 'Un micro-chip solare legge la luminosità ambientale e regola la tinta della lente in tempo reale, superando i limiti delle lenti fotocromatiche tradizionali.',
@@ -73,7 +73,7 @@ const DATA = {
     id: 'guanti',
     macro: 'comfort',
     shortLabel: 'Guanti & Grip',
-    title: 'Guanti & Grip Tech',
+    title: 'Guanti & Grip',
     brand: 'Visita Leki ↗',
     url: 'https://www.leki.com',
     novita: [
@@ -182,17 +182,430 @@ const BOOT_BRANDS = [
   }
 ];
 
+// Dati modulo interattivo Casco (integrati dall'HTML allegato)
+const HELMET_LAYERS = {
+  shell: {
+    title: 'La prima barriera (Calotta)',
+    copy: 'La calotta esterna protegge la struttura interna e contribuisce a distribuire il carico. Può essere in policarbonato, ABS o materiali compositi.'
+  },
+  foam: {
+    title: 'Il materiale che assorbe energia',
+    copy: 'Il nucleo si deforma durante l’urto. L’EPS assorbe energia schiacciandosi; l’EPP è più resiliente. Dopo un urto importante va comunque sostituito.'
+  },
+  rotation: {
+    title: 'Quando l’impatto è obliquo (Rotazione)',
+    copy: 'Sistemi come Mips permettono un piccolo movimento relativo interno (10–15 mm), progettato per ridurre il movimento rotazionale trasmesso alla testa.'
+  }
+};
+
+const HELMET_SIGLE = {
+  standards: {
+    note: 'Classe A e classe B prevedono coperture e prove di penetrazione differenti. La classe A, da sola, non equivale a FIS RH 2013.',
+    cards: [
+      ['Norma europea', 'EN 1077 A', 'Più superficie protetta.', 'Prevede una copertura maggiore della testa e una prova di penetrazione più severa rispetto alla classe B. Tipica dei caschi da gara.'],
+      ['Norma europea', 'EN 1077 B', 'Una copertura differente.', 'Consente una copertura inferiore rispetto alla classe A, favorendo ventilazione e percezione dei suoni. Comune nei caschi da pista.'],
+      ['Standard USA', 'ASTM F2040', 'Prove per sport sulla neve.', 'Comprende prove di impatto su diverse superfici, stabilità del casco e resistenza del sistema di ritenzione.'],
+      ['Requisiti gara', 'FIS RH 2013', 'Requisiti aggiuntivi FIS.', 'Per GS, SG e DH FIS richiede EN 1077 A, ASTM F2040 e una prova aggiuntiva a 6,8 m/s.']
+    ]
+  },
+  tech: {
+    note: 'Mips, Koroyd e WaveCel sono tecnologie costruttive. I risultati del casco completo dipendono dal progetto complessivo.',
+    cards: [
+      ['Rotazione', 'Mips', 'Piccolo movimento interno.', 'Strato a basso attrito che consente movimento relativo interno negli urti obliqui (varianti Integra e Spherical).'],
+      ['Assorbimento', 'Koroyd', 'Tubi che si accartocciano.', 'Piccoli tubi saldati si deformano in modo controllato per assorbire energia e favorire la ventilazione.'],
+      ['Struttura cellulare', 'WaveCel', 'Flette, collassa e scorre.', 'Rete cellulare progettata per gestire componenti dirette e rotazionali dell’impatto.']
+    ]
+  },
+  rescue: {
+    note: 'Ricerca, identificazione e allarme hanno funzioni diverse. Il riflettore o il chip non aumentano l’assorbimento degli urti.',
+    cards: [
+      ['Ricerca soccorritori', 'RECCO', 'Riflettore senza batteria.', 'Rilevabile dai soccorritori dotati di sistema RECCO. Non è un GPS e non sostituisce ARTVA, pala e sonda.'],
+      ['Identificazione', 'NFC / Twiceme', 'Dati medici con un tocco.', 'Avvicinando uno smartphone si accede ai contatti e alle informazioni emergenziali configurate.'],
+      ['Rilevazione caduta', 'Sensori con SOS', 'Avviso automatico via app.', 'Alcuni sistemi (es. LIVALL) inviano un allarme ai contatti tramite smartphone collegato.']
+    ]
+  }
+};
+
+const HELMET_USES = {
+  piste: {
+    title: 'Un casco certificato per lo sci',
+    copy: 'Verifica EN 1077 e dichiarazione UE di conformità. Valuta anche i risultati di test indipendenti (es. Virginia Tech) e provalo sempre con la tua maschera.'
+  },
+  race: {
+    title: 'Controlla FIS RH 2013',
+    copy: 'Per GS, SG e DH FIS verifica l’etichetta RH 2013 (EN 1077 A + ASTM F2040 + test 6,8 m/s). Il solo marchio Mips non attesta l’idoneità alla gara.'
+  },
+  tour: {
+    title: 'Sci e alpinismo hanno rischi diversi',
+    copy: 'Verifica le certificazioni dedicate: EN 18100 è la norma specifica per lo scialpinismo; diversi modelli riportano doppia omologazione EN 1077 ed EN 12492.'
+  }
+};
+
+const HELMET_QUIZ = [
+  {
+    question: 'Mips è…',
+    answers: ['un’omologazione da gara.', 'un sistema per gestire la rotazione.', 'un localizzatore GPS.'],
+    correct: 1,
+    explanation: 'Mips è una tecnologia costruttiva. EN 1077 e ASTM F2040 sono invece standard di prova.'
+  },
+  {
+    question: 'Che cosa fa un riflettore RECCO?',
+    answers: ['Invia automaticamente un SOS.', 'Mostra la posizione su qualsiasi telefono.', 'Aiuta la ricerca con un rilevatore dedicato.'],
+    correct: 2,
+    explanation: 'Il riflettore è passivo: viene cercato con un rilevatore RECCO e non trasmette autonomamente la posizione.'
+  },
+  {
+    question: 'Per una gara FIS di gigante, quale etichetta cerchi?',
+    answers: ['FIS RH 2013.', 'Soltanto Mips.', 'Soltanto EN 1078 per il ciclismo.'],
+    correct: 0,
+    explanation: 'La conformità FIS RH 2013 comprende EN 1077 A, ASTM F2040 e una prova aggiuntiva d’impatto.'
+  }
+];
+
 const calcDIN = (w, type) => (Math.round((w / 10 + (type === 2 ? 1 : type === 3 ? 2.2 : 0)) * 4) / 4).toFixed(2);
 
-const recommendSki = (terrain, level, budget) => {
-  if (level === 'principiante') return 'All-Round Entry Level (Rocker facilitante e flex morbido)';
-  if (terrain === 'fuoripista') return 'Freeride / Backcountry (Centro 95–105 mm, anima leggera)';
-  if (level === 'esperto' && terrain === 'pista') {
-    if (budget === 'alto') return 'Race Carve / Custom Algoritmico (ORIGINAL+ / HEAD EMC)';
-    return 'All-Mountain Performance (Struttura Titanal + smorzamento attivo)';
+// 27 combinazioni distinte (Terreno x Livello x Giorni/Budget)
+const SKI_RECOMMENDATIONS = {
+  pista: {
+    principiante: {
+      basso: { cat: 'Easy Carve Pista (Raggio 11–13 m)', ref: 'Anima leggera e rocker in spatola (es. Rossignol Forza 20° / Salomon S/Max 6): facilita l’ingresso curva senza sforzo.' },
+      medio: { cat: 'All-Round Pista Evolutivo', ref: 'Nucleo legno/composito progressivo (es. Head Shape e-V5 / Atomic Cloud Q9): accompagna il passaggio alle prime conduzioni.' },
+      alto: { cat: 'Piste Progression Comfort', ref: 'Costruzione sandwich leggera (es. Völkl Deacon 72 / Fischer RC One 73): massima stabilità sul duro senza affaticare.' }
+    },
+    intermedio: {
+      basso: { cat: 'Frontside Carve Sport (Centro 72–75 mm)', ref: 'Inversione di spigolo rapida e tollerante (es. Elan Primetime 33 / Nordica Spitfire 73).' },
+      medio: { cat: 'Sport Carve Multi-Turn', ref: 'Rinforzo in Titanal leggero + smorzamento attivo (es. Head Supershape e-Magnum / Salomon S/Max 10).' },
+      alto: { cat: 'High-Performance Piste Carve', ref: 'Precisione chirurgica sul ghiaccio con raggio 14–15 m (es. Stöckli Montero AS / Kästle MX75).' }
+    },
+    esperto: {
+      basso: { cat: 'Race Carve Commerciale (SL / GS)', ref: 'Reattività immediata e tenuta torsionale su neve barrata (es. Rossignol Hero Elite MT Ti / Atomic Redster Q9.8).' },
+      medio: { cat: 'Master Race Carve Doppio Titanal', ref: 'Piastra gara e struttura agonistica (es. Head Worldcup Rebels e-Speed / Blizzard Thunderbird R15).' },
+      alto: { cat: 'Sci Custom Algoritmico / Workshop', ref: 'Geometria e rigidità calibrati su misura (es. ORIGINAL+ Custom 6X / Wagner Custom Skis).' }
+    }
+  },
+  allmountain: {
+    principiante: {
+      basso: { cat: 'All-Mountain Light Rocker (80 mm)', ref: 'Spatola rialzata tollerante su cumuli pomeridiani e neve morbida (es. Salomon Stance 80 / K2 Mindbender 85).' },
+      medio: { cat: 'All-Mountain Comfort (82 mm)', ref: 'Fibra di basalto e flex progressivo (es. Rossignol Experience 82 Basalt / Elan Wingman 82).' },
+      alto: { cat: 'All-Mountain Crossover Leggero', ref: 'Ottima galleggiabilità su neve trasformata e presa sicura in pista (es. Völkl Kanjo 84).' }
+    },
+    intermedio: {
+      basso: { cat: 'All-Mountain Resort (84–86 mm)', ref: 'Versatilità 70% pista / 30% bordo pista su neve rotta (es. Atomic Maverick 86 C).' },
+      medio: { cat: 'All-Mountain Titanal (84–88 mm)', ref: 'Struttura rinforzata per condurre sul duro e galleggiare su gobbe (es. Blizzard Anomaly 84 / Head Kore 85 X).' },
+      alto: { cat: 'All-Mountain Adattivo Antivibrazione', ref: 'Polimeri a risposta variabile o costruzione artigianale (es. Renoun Endurance 88 VibeStop / Stöckli Stormrider 88).' }
+    },
+    esperto: {
+      basso: { cat: 'All-Mountain Charger (88–90 mm)', ref: 'Rigidità torsionale elevata per sciare ad alta velocità su ogni neve (es. Völkl Mantra M7 / Salomon Stance 90).' },
+      medio: { cat: 'Freeride-Carve Crossover (92–94 mm)', ref: 'Potenza in pista e galleggiamento sicuro fuori dalle linee battute (es. Nordica Enforcer 94 / Blizzard Rustler 9).' },
+      alto: { cat: 'Custom All-Mountain Biometrico', ref: 'Profilo rocker e flex progettati sull’atleta (es. Wagner Custom All-Mountain / ORIGINAL+ Custom 8X).' }
+    }
+  },
+  fuoripista: {
+    principiante: {
+      basso: { cat: 'Freeride Entry & Twin-Tip (90–92 mm)', ref: 'Rocker generoso e peso contenuto per i primi approcci in neve fresca (es. Salomon QST 92 / K2 Reckoner 92).' },
+      medio: { cat: 'All-Terrain Powder (94–96 mm)', ref: 'Maneggevole nei boschi e gestibile nei rientri in pista (es. Rossignol Sender 94 Ti / Atomic Bent 90).' },
+      alto: { cat: 'Freetouring Leggero (95–98 mm)', ref: 'Agilità immediata e peso ridotto anche per brevi risalite con pelli (es. Black Crows Camox / Blizzard Hustle 9).' }
+    },
+    intermedio: {
+      basso: { cat: 'Freeride Playful (98–100 mm)', ref: 'Galleggiabilità naturale e grande manovrabilità sullo stretto (es. Salomon QST 98 / Faction Prodigy 2).' },
+      medio: { cat: 'Freeride All-Conditions (100–102 mm)', ref: 'Equilibrio tra galleggiamento in powder e tenuta su neve ventata (es. Blizzard Rustler 10 / Atomic Maverick 100 Ti).' },
+      alto: { cat: 'Freeride Carbon Tech (100–105 mm)', ref: 'Anima in legno e carbonio per reattività istantanea (es. DPS Pagoda 100 RP / Black Crows Atris).' }
+    },
+    esperto: {
+      basso: { cat: 'Big Mountain Freeride (106–108 mm)', ref: 'Stabilità assoluta su pendii ripidi e neve rotta ad alta velocità (es. Salomon QST Blank / Nordica Unleashed 108).' },
+      medio: { cat: 'Big Mountain Charger (110–114 mm)', ref: 'Struttura rinforzata per linee aggressive e powder profonda (es. Blizzard Cochise / Völkl Revolt 114).' },
+      alto: { cat: 'Custom Powder & Big Mountain', ref: 'Sciancratura, rocker e flex costruiti su misura (es. Wagner Custom Powder / DPS Kaizen 112).' }
+    }
   }
-  return 'All-Mountain Polivalente (Raggio 14–16 m, centro 76–84 mm)';
 };
+
+function HelmetInteractiveGuide() {
+  const [section, setSection] = useState('anatomy');
+  const [layer, setLayer] = useState('shell');
+  const [sigleTab, setSigleTab] = useState('standards');
+  const [openCard, setOpenCard] = useState(0);
+  const [useCase, setUseCase] = useState('piste');
+
+  // Quiz state
+  const [qIndex, setQIndex] = useState(0);
+  const [selectedAns, setSelectedAns] = useState(null);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+
+  const currentQ = HELMET_QUIZ[qIndex];
+
+  const handleAnswer = (idx) => {
+    if (selectedAns !== null) return;
+    setSelectedAns(idx);
+    if (idx === currentQ.correct) setScore((s) => s + 1);
+  };
+
+  const handleNextQ = () => {
+    if (qIndex < HELMET_QUIZ.length - 1) {
+      setQIndex((i) => i + 1);
+      setSelectedAns(null);
+    } else {
+      setFinished(true);
+    }
+  };
+
+  const resetQuiz = () => {
+    setQIndex(0);
+    setSelectedAns(null);
+    setScore(0);
+    setFinished(false);
+  };
+
+  return (
+    <div className="helmet-lab">
+      <div className="helmet-tabs">
+        <button className={`helmet-tab ${section === 'anatomy' ? 'active' : ''}`} onClick={() => setSection('anatomy')}>
+          Anatomia
+        </button>
+        <button className={`helmet-tab ${section === 'sigle' ? 'active' : ''}`} onClick={() => setSection('sigle')}>
+          Le Sigle
+        </button>
+        <button className={`helmet-tab ${section === 'choose' ? 'active' : ''}`} onClick={() => setSection('choose')}>
+          Consigliatore
+        </button>
+        <button className={`helmet-tab ${section === 'quiz' ? 'active' : ''}`} onClick={() => setSection('quiz')}>
+          Mini Quiz
+        </button>
+      </div>
+
+      {/* 1. ANATOMIA INTERATTIVA DEL CASCO (SVG Dark Studio) */}
+      {section === 'anatomy' && (
+        <div>
+          <div className="helmet-diagram-box">
+            <svg viewBox="0 0 620 345" role="img" aria-label="Sezione illustrativa di un casco da sci">
+              <defs>
+                <linearGradient id="dark-shell-grad" x1="0.15" y1="0" x2="0.8" y2="1">
+                  <stop stopColor={layer === 'shell' ? '#00e5ff' : '#334155'} />
+                  <stop offset="1" stopColor={layer === 'shell' ? '#0284c7' : '#0f172a'} />
+                </linearGradient>
+              </defs>
+              <ellipse cx="307" cy="318" rx="175" ry="9" fill="rgba(0, 229, 255, 0.14)" />
+              {/* Calotta esterna */}
+              <path
+                fill="url(#dark-shell-grad)"
+                stroke={layer === 'shell' ? '#ffffff' : 'rgba(255,255,255,0.2)'}
+                strokeWidth={layer === 'shell' ? '2.5' : '1'}
+                d="M130 266C92 230 91 159 124 110C166 47 237 21 309 28C404 35 470 84 509 158L529 201L481 218L455 202C440 195 427 200 418 216L390 261L346 287L300 267L276 246L255 271L230 297L193 300L176 275L154 270Z"
+              />
+              {/* Prese d'aria */}
+              <path d="m224 59 31-6 3 17-29 6zm57-8 31 1-1 17-29-1zm58 7 29 9-5 16-27-9z" fill="#020305" />
+              {/* Nucleo assorbente EPS/EPP */}
+              <path
+                fill={layer === 'foam' ? 'rgba(0, 229, 255, 0.42)' : 'rgba(148, 163, 184, 0.28)'}
+                stroke={layer === 'foam' ? '#00e5ff' : 'rgba(255,255,255,0.15)'}
+                strokeWidth={layer === 'foam' ? '2.5' : '1'}
+                d="M150 247C126 213 127 160 156 121C189 76 243 58 302 65C380 72 433 111 465 171L485 201L459 186C435 173 414 185 400 208L372 247L345 264L307 247L276 217L244 250L220 275L201 277L190 255Z"
+              />
+              {/* Strato rotazione Mips */}
+              <path
+                d="M167 238C148 201 154 160 178 131C208 96 250 85 296 90C363 98 407 128 438 177"
+                stroke={layer === 'rotation' ? '#ffcc00' : '#f97316'}
+                strokeWidth={layer === 'rotation' ? '13' : '8'}
+                strokeLinecap="round"
+                fill="none"
+              />
+              {/* Imbottitura interna */}
+              <path
+                d="M184 229C171 199 177 169 197 147C222 119 254 108 290 114C345 121 384 144 408 173"
+                stroke="rgba(255,255,255,0.22)"
+                strokeWidth="10"
+                strokeLinecap="round"
+                strokeDasharray="24 10"
+                fill="none"
+              />
+              {/* Sottogola */}
+              <path d="m226 286 38 39c8 7 18 7 27 0l62-53" stroke="#64748b" strokeWidth="7" fill="none" strokeLinejoin="round" />
+              <rect x="265" y="315" width="24" height="11" rx="4" fill="#ffcc00" transform="rotate(-4 265 315)" />
+
+              {/* Callout lines */}
+              <path d="M102 63h44l18 20" stroke={layer === 'shell' ? '#00e5ff' : 'rgba(255,255,255,0.4)'} strokeWidth="1.5" fill="none" />
+              <circle cx="164" cy="83" r="4" fill="#00e5ff" />
+              <text x="34" y="67" fill="#ffffff" fontSize="13" fontFamily="Inter, sans-serif">Calotta</text>
+
+              <path d="M475 89h-44l-40 19" stroke={layer === 'foam' ? '#00e5ff' : 'rgba(255,255,255,0.4)'} strokeWidth="1.5" fill="none" />
+              <circle cx="391" cy="108" r="4" fill="#00e5ff" />
+              <text x="484" y="94" fill="#ffffff" fontSize="13" fontFamily="Inter, sans-serif">Assorbimento</text>
+
+              <path d="M84 199h45l35-4" stroke={layer === 'rotation' ? '#ffcc00' : 'rgba(255,255,255,0.4)'} strokeWidth="1.5" fill="none" />
+              <circle cx="164" cy="195" r="4" fill="#ffcc00" />
+              <text x="20" y="188" fill="#ffcc00" fontSize="13" fontFamily="Inter, sans-serif">Rotazione*</text>
+            </svg>
+          </div>
+
+          <div className="helmet-layer-btns">
+            <button className={`helmet-layer-btn ${layer === 'shell' ? 'active' : ''}`} onClick={() => setLayer('shell')}>
+              <span className="layer-dot" style={{ background: '#00e5ff' }} />
+              Calotta
+            </button>
+            <button className={`helmet-layer-btn ${layer === 'foam' ? 'active' : ''}`} onClick={() => setLayer('foam')}>
+              <span className="layer-dot" style={{ background: '#94a3b8' }} />
+              Assorbimento
+            </button>
+            <button className={`helmet-layer-btn ${layer === 'rotation' ? 'active' : ''}`} onClick={() => setLayer('rotation')}>
+              <span className="layer-dot" style={{ background: '#ffcc00' }} />
+              Rotazione
+            </button>
+          </div>
+
+          <div className="helmet-info-box">
+            <h5>{HELMET_LAYERS[layer].title}</h5>
+            <p>{HELMET_LAYERS[layer].copy}</p>
+          </div>
+        </div>
+      )}
+
+      {/* 2. LE SIGLE IN CHIARO */}
+      {section === 'sigle' && (
+        <div>
+          <div className="sigle-subtabs">
+            {[
+              { id: 'standards', label: 'Omologazioni' },
+              { id: 'tech', label: 'Tecnologie' },
+              { id: 'rescue', label: 'Soccorso' }
+            ].map((t) => (
+              <button
+                key={t.id}
+                className={`sigle-subtab ${sigleTab === t.id ? 'active' : ''}`}
+                onClick={() => {
+                  setSigleTab(t.id);
+                  setOpenCard(0);
+                }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="sigle-list">
+            {HELMET_SIGLE[sigleTab].cards.map((c, idx) => {
+              const isOpen = openCard === idx;
+              return (
+                <div key={c[1]} className="sigle-card" onClick={() => setOpenCard(isOpen ? -1 : idx)}>
+                  <div className="sigle-card-head">
+                    <div>
+                      <div className="sigle-badge">{c[0]}</div>
+                      <div className="sigle-card-title">{c[1]}</div>
+                      <div className="sigle-card-sub">{c[2]}</div>
+                    </div>
+                    <span style={{ color: 'var(--accent-cyan)', fontSize: '1.2rem' }}>{isOpen ? '−' : '+'}</span>
+                  </div>
+                  {isOpen && <p className="sigle-card-detail">{c[3]}</p>}
+                </div>
+              );
+            })}
+          </div>
+
+          <p style={{ marginTop: '12px', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            {HELMET_SIGLE[sigleTab].note}
+          </p>
+        </div>
+      )}
+
+      {/* 3. CONSIGLIATORE CASCO PER ATTIVITÀ */}
+      {section === 'choose' && (
+        <div>
+          <div className="tf-choice-grid" style={{ marginBottom: '16px' }}>
+            <div className={`tf-choice-btn ${useCase === 'piste' ? 'active' : ''}`} onClick={() => setUseCase('piste')}>
+              <span>Pista</span>
+              <small>EN 1077</small>
+            </div>
+            <div className={`tf-choice-btn ${useCase === 'race' ? 'active' : ''}`} onClick={() => setUseCase('race')}>
+              <span>Gara</span>
+              <small>FIS RH 2013</small>
+            </div>
+            <div className={`tf-choice-btn ${useCase === 'tour' ? 'active' : ''}`} onClick={() => setUseCase('tour')}>
+              <span>Skialp</span>
+              <small>EN 18100</small>
+            </div>
+          </div>
+
+          <div className="helmet-info-box">
+            <h5>{HELMET_USES[useCase].title}</h5>
+            <p>{HELMET_USES[useCase].copy}</p>
+          </div>
+
+          <div className="thermo-wink" style={{ marginTop: '14px', marginBottom: 0 }}>
+            <strong>La calzata conta:</strong> provalo sempre con la tua maschera per evitare spazi vuoti sulla fronte, regola il sottogola e verifica che rimanga stabile.
+          </div>
+        </div>
+      )}
+
+      {/* 4. MINI QUIZ INTERATTIVO */}
+      {section === 'quiz' && (
+        <div>
+          {!finished ? (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                <span>
+                  Domanda {qIndex + 1} di {HELMET_QUIZ.length}
+                </span>
+                <span>{score} corrette</span>
+              </div>
+              <h5 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.15rem', color: '#ffffff' }}>{currentQ.question}</h5>
+
+              <div className="quiz-options">
+                {currentQ.answers.map((ans, idx) => {
+                  let cls = 'quiz-opt-btn';
+                  if (selectedAns !== null) {
+                    if (idx === currentQ.correct) cls += ' correct';
+                    else if (idx === selectedAns) cls += ' incorrect';
+                  }
+                  return (
+                    <button key={idx} className={cls} disabled={selectedAns !== null} onClick={() => handleAnswer(idx)}>
+                      <span className="quiz-letter">
+                        {selectedAns !== null && idx === currentQ.correct
+                          ? '✓'
+                          : selectedAns === idx
+                          ? '×'
+                          : String.fromCharCode(65 + idx)}
+                      </span>
+                      <span>{ans}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedAns !== null && (
+                <p style={{ marginTop: '12px', fontSize: '0.84rem', lineHeight: 1.5, color: 'rgba(255,255,255,0.82)' }}>
+                  <strong style={{ color: selectedAns === currentQ.correct ? 'var(--accent-green)' : 'var(--accent-gold)' }}>
+                    {selectedAns === currentQ.correct ? 'Esatto. ' : 'Da ricordare. '}
+                  </strong>
+                  {currentQ.explanation}
+                </p>
+              )}
+
+              <button className="quiz-action-btn" disabled={selectedAns === null} onClick={handleNextQ}>
+                {qIndex === HELMET_QUIZ.length - 1 ? 'Vedi il risultato' : 'Prossima domanda'}
+              </button>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '12px 0' }}>
+              <p style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--accent-cyan)' }}>
+                Quiz completato
+              </p>
+              <h3 style={{ fontSize: '2.8rem', color: 'var(--accent-gold)', margin: '8px 0' }}>
+                {score} / {HELMET_QUIZ.length}
+              </h3>
+              <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.78)', lineHeight: 1.55 }}>
+                {score === 3
+                  ? 'Perfetto: hai distinto omologazioni, tecnologie costruttive e sistemi di soccorso.'
+                  : 'Rivedi le schede tra omologazioni e tecnologie, poi riprova con calma.'}
+              </p>
+              <button className="quiz-action-btn" onClick={resetQuiz}>
+                Riprova il quiz
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function PerfectSkis() {
   const geom = useMemo(() => {
@@ -262,8 +675,9 @@ function SkierScene({ activeItem, onSelect }) {
     if (groupRef.current) {
       const breath = Math.sin(state.clock.elapsedTime * 1.4) * 0.015;
       const isDesktop = window.innerWidth > 768;
-      const targetX = activeItem && isDesktop ? -0.68 : 0;
-      const targetRotY = activeItem && isDesktop ? 0.24 : 0;
+      // Spostato ancora più a sinistra (-0.92) quando il pannello è aperto
+      const targetX = activeItem && isDesktop ? -0.92 : 0;
+      const targetRotY = activeItem && isDesktop ? 0.28 : 0;
 
       groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.07);
       groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.07);
@@ -281,7 +695,7 @@ function SkierScene({ activeItem, onSelect }) {
             className={`hotspot-container ${side} ${activeItem === id ? 'active' : ''}`}
             onClick={(e) => {
               e.stopPropagation();
-              onSelect(activeItem === id ? null : id);
+              onSelect(activeItem === id ? null : id, false);
             }}
             onMouseEnter={() => document.body.classList.add('cursor-hovering')}
             onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
@@ -300,9 +714,9 @@ function SkierScene({ activeItem, onSelect }) {
       <primitive object={normalizedModel} />
       <PerfectSkis />
 
-      <Hotspot pos={[0.08, 0.90, 0.10]} id="casco" side="right" />
-      <Hotspot pos={[-0.10, 0.80, 0.12]} id="maschera_outof" side="left" />
-      <Hotspot pos={[0.12, 0.72, 0.08]} id="maschera_audio" side="right" />
+      <Hotspot pos={[0.06, 0.92, 0.08]} id="casco" side="right" />
+      <Hotspot pos={[-0.09, 0.80, 0.12]} id="maschera_outof" side="left" />
+      <Hotspot pos={[0.11, 0.70, 0.08]} id="maschera_audio" side="right" />
       <Hotspot pos={[-0.16, 0.34, 0.12]} id="termoregolazione" side="left" />
       <Hotspot pos={[0.30, 0.04, 0.14]} id="guanti" side="right" />
       <Hotspot pos={[-0.14, -0.66, 0.10]} id="scarpone" side="left" />
@@ -317,12 +731,19 @@ useGLTF.preload('/mannequin.glb');
 
 export default function App() {
   const [activeItem, setActiveItem] = useState(null);
+  const [openedFromMacro, setOpenedFromMacro] = useState(false);
+
   const [dinW, setDinW] = useState(75);
   const [dinType, setDinType] = useState(2);
 
   const [quizTerrain, setQuizTerrain] = useState('pista');
   const [quizLevel, setQuizLevel] = useState('intermedio');
   const [quizBudget, setQuizBudget] = useState('medio');
+
+  const handleSelectItem = (id, fromMacro = false) => {
+    setActiveItem(id);
+    setOpenedFromMacro(Boolean(id && fromMacro));
+  };
 
   useEffect(() => {
     let mouseX = window.innerWidth / 2;
@@ -355,7 +776,8 @@ export default function App() {
   }, []);
 
   const data = activeItem ? DATA[activeItem] : null;
-  const activeMacroObj = data ? MACROS.find((m) => m.id === data.macro) : null;
+  const activeMacroObj = data && openedFromMacro ? MACROS.find((m) => m.id === data.macro) : null;
+  const skiRec = SKI_RECOMMENDATIONS[quizTerrain][quizLevel][quizBudget];
 
   return (
     <>
@@ -374,14 +796,14 @@ export default function App() {
       </header>
 
       <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
-        <Canvas dpr={[1, 2]} camera={{ position: [0, 0.02, 4.35], fov: 44 }} onPointerMissed={() => setActiveItem(null)}>
+        <Canvas dpr={[1, 2]} camera={{ position: [0, 0.02, 4.35], fov: 44 }} onPointerMissed={() => handleSelectItem(null, false)}>
           <ambientLight intensity={1.65} />
           <directionalLight position={[3, 5, 4]} intensity={2.3} color="#ffffff" />
           <directionalLight position={[-4, 2, -2]} intensity={1.6} color="#00e5ff" />
           <Environment preset="city" />
 
           <Suspense fallback={null}>
-            <SkierScene activeItem={activeItem} onSelect={setActiveItem} />
+            <SkierScene activeItem={activeItem} onSelect={handleSelectItem} />
           </Suspense>
 
           <OrbitControls
@@ -403,7 +825,7 @@ export default function App() {
           <button
             key={m.id}
             className="macro-btn"
-            onClick={() => setActiveItem(m.items[0])}
+            onClick={() => handleSelectItem(m.items[0], true)}
             onMouseEnter={() => document.body.classList.add('cursor-hovering')}
             onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
           >
@@ -414,17 +836,18 @@ export default function App() {
 
       {/* Pannello Laterale */}
       <aside className={`side-panel ${activeItem ? 'open' : ''}`}>
-        <button className="close-btn" onClick={() => setActiveItem(null)}>
+        <button className="close-btn" onClick={() => handleSelectItem(null, false)}>
           ✕ Chiudi esplorazione
         </button>
 
+        {/* Mostra le sottocategorie SOLO se si naviga dal menu macro in basso */}
         {activeMacroObj && activeMacroObj.items.length > 1 && (
           <div className="sub-nav">
             {activeMacroObj.items.map((subId) => (
               <button
                 key={subId}
                 className={`sub-pill ${activeItem === subId ? 'active' : ''}`}
-                onClick={() => setActiveItem(subId)}
+                onClick={() => handleSelectItem(subId, true)}
               >
                 {DATA[subId].shortLabel}
               </button>
@@ -458,6 +881,9 @@ export default function App() {
                 </p>
               </div>
             </details>
+
+            {/* Modulo Interattivo Casco (Anatomia, Sigle, Consigliatore, Quiz) */}
+            {data.id === 'casco' && <HelmetInteractiveGuide />}
 
             {/* Sezione dedicata Termoformatura Scarpetta & Scafo + Brand */}
             {data.id === 'scarpone' && (
@@ -518,7 +944,7 @@ export default function App() {
               </div>
             )}
 
-            {/* Quiz Trova lo Sci */}
+            {/* Consigliatore Sci (27 profili differenziati) */}
             {data.id === 'sci' && (
               <div className="typeform-module">
                 <h4 style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--accent-cyan)', marginBottom: '16px' }}>
@@ -588,8 +1014,11 @@ export default function App() {
                 <div className="tf-result">
                   <p>Macro-Categoria Consigliata</p>
                   <h3 style={{ fontSize: '1.35rem', color: '#fff', lineHeight: 1.35, marginTop: '8px' }}>
-                    {recommendSki(quizTerrain, quizLevel, quizBudget)}
+                    {skiRec.cat}
                   </h3>
+                  <p style={{ marginTop: '10px', fontSize: '0.84rem', textTransform: 'none', letterSpacing: 'normal', color: 'rgba(255,255,255,0.72)', lineHeight: 1.5 }}>
+                    {skiRec.ref}
+                  </p>
                 </div>
               </div>
             )}
