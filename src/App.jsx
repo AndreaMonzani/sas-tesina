@@ -1,12 +1,32 @@
-import React, { useState, useRef, useEffect, useMemo, Suspense } from 'react';
+import React, { useState, useRef, useEffect, useMemo, Suspense, Component } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, Html, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import './index.css';
 
+class SceneErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', zIndex: 5 }}>
+          Usa il menu in basso per esplorare le categorie.
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const MACROS = [
   { id: 'performance', label: 'Performance', items: ['sci', 'scarpone'] },
-  { id: 'sicurezza', label: 'Sicurezza', items: ['casco', 'attacchi'] },
+  { id: 'sicurezza', label: 'Sicurezza', items: ['casco', 'attacchi', 'bastoni'] },
   { id: 'comfort', label: 'Comfort', items: ['termoregolazione', 'guanti'] },
   { id: 'dati_visione', label: 'Visione & Dati', items: ['maschera_outof', 'maschera_audio', 'telemetria'] }
 ];
@@ -21,10 +41,10 @@ const DATA = {
     url: 'https://www.sena.com',
     novita: [
       'Calotta esterna ibrida (policarbonato / ABS / compositi) e nucleo assorbente EPS / EPP',
-      'Gestione dell’impatto obliquo (Mips, Koroyd, WaveCel) e omologazioni EN 1077 A/B, ASTM F2040, FIS RH 2013',
+      'Protezione negli impatti obliqui (Mips, Koroyd, WaveCel) e omologazioni EN 1077 A/B, ASTM F2040, FIS RH 2013',
       'Sistemi di soccorso (RECCO, NFC Twiceme) e comunicazione Mesh Sena'
     ],
-    info: 'La calotta distribuisce il carico, il nucleo si deforma assorbendo energia e gli strati interni gestiscono la rotazione negli impatti obliqui.',
+    info: 'La calotta distribuisce il carico, il nucleo si deforma assorbendo energia e gli strati interni gestiscono le forze rotazionali negli impatti obliqui.',
     consiglio: 'Esplora qui sotto l’anatomia a strati, le differenze tra sigle/omologazioni, il consigliatore per disciplina e il mini quiz.'
   },
   maschera_outof: {
@@ -63,11 +83,11 @@ const DATA = {
     brand: 'Scopri ISPO & Aerogel ↗',
     url: 'https://www.ispo.com',
     novita: [
-      'Isolamento spaziale in Aerogel a spessore ultra-ridotto e sistemi attivi Heat Sphere',
-      'Membrane impermeabili ad alte prestazioni (colonna d\'acqua 20.000+ mm) con trattamento DWR'
+      'Isolamento spaziale in Aerogel a spessore ultra-ridotto e riscaldamento attivo Heat Sphere',
+      'Membrane impermeabili ad alte prestazioni (colonna d’acqua 20.000+ mm), cuciture termonastrate e trattamento DWR'
     ],
-    info: 'Oltre all\'Aerogel (che blocca la dispersione termica) e le resistenze Heat Sphere, la protezione esterna è vitale. L\'impermeabilità si misura in colonna d\'acqua: 10.000 mm resistono a neve leggera, oltre i 20.000 mm (con cuciture termonastrate) si è protetti anche sotto nevicate intense o seduti a lungo sulla neve bagnata.',
-    consiglio: 'Per l\'amatore bastano 10k-15k. Il Maestro o il freerider esigono >20k mm, Aerogel e calzini riscaldati per sopravvivere alle lunghe soste e ai cambi repentini di clima.'
+    info: 'Oltre all’Aerogel (che blocca la dispersione termica) e alle resistenze Heat Sphere, è decisiva la barriera esterna: l’impermeabilità si misura in colonna d’acqua (10.000 mm reggono neve leggera, oltre 20.000 mm con cuciture nastrate proteggono anche sotto nevicate umide o in seggiovia bagnata), abbinata alla traspirabilità (g/m²/24h) per evacuare il sudore.',
+    consiglio: 'Per l’amatore bastano 10k–15k mm; per il Maestro o il freerider servono >20k mm, Aerogel e calzini riscaldati per gestire l’alternanza tra sforzo e soste al freddo.'
   },
   guanti: {
     id: 'guanti',
@@ -83,16 +103,30 @@ const DATA = {
     info: 'Il loop integrato nel guanto si aggancia direttamente all’impugnatura del bastone eliminando il lacciolo tradizionale e sganciandosi automaticamente in caso di caduta.',
     consiglio: 'Ideale per prevenire infortuni al pollice dello sciatore e mantenere le mani calde nelle giornate più rigide.'
   },
+  bastoni: {
+    id: 'bastoni',
+    macro: 'sicurezza',
+    shortLabel: 'Bastoni',
+    title: 'Bastoni & Misura',
+    brand: 'Visita Nordica Poles ↗',
+    url: 'https://www.nordica.com',
+    novita: [
+      'Tubi in carbonio ad alto modulo con bilanciamento spostato verso l’impugnatura',
+      'Impugnature ergonomiche 3D e sistemi di sgancio di sicurezza'
+    ],
+    info: 'La lunghezza corretta del bastone mantiene il baricentro centrale e favorisce il tempismo di ingresso curva senza arretrare con le spalle.',
+    consiglio: 'Fino a Livello 5 si usa il divisore 1,50 (assetto centrale); dal Livello 6 al Pro si passa a 1,53 per un assetto più raccolto.'
+  },
   scarpone: {
     id: 'scarpone',
     macro: 'performance',
     shortLabel: 'Fit & Calzata',
     title: 'Fit & Calzata',
-    brand: 'Scopri BOA Fit ↗',
-    url: 'https://www.boafit.com',
+    brand: 'Scopri Nordica & BOA ↗',
+    url: 'https://www.nordica.com',
     novita: [
-      'Chiusura BOA Dial sullo scafo inferiore per avvolgimento a 360°',
-      'Termoformatura personalizzata di scarpetta e scafo in 10–15 minuti',
+      'Chiusura BOA Dial sullo scafo inferiore per avvolgimento a 360° (es. Nordica Speedmachine 3 BOA)',
+      'Termoformatura personalizzata di scarpetta e scafo in 10–15 minuti (Infrared Technology)',
       'Memoria meccanica della tensione di chiusura (Kästle RYF)'
     ],
     info: 'La combinazione tra chiusure micro-regolabili e plastiche termoformabili permette di adattare lo scarpone alla morfologia esatta del piede.',
@@ -110,7 +144,7 @@ const DATA = {
       'Riduzione fino al 50% dei carichi torsionali sul crociato (LCA)'
     ],
     info: 'Nelle cadute torsionali all’indietro, la talloniera ruota lateralmente accompagnando lo scarpone anziché bloccarlo, scaricando le forze dal ginocchio.',
-    consiglio: 'Consigliato a tutti i livelli — dal principiante allo sciatore esperto — per proteggere il ginocchio anche a bassa velocità.'
+    consiglio: 'Usa il calcolatore ISO 11088 qui sotto per ricavare il valore DIN corretto in base ai tuoi parametri.'
   },
   telemetria: {
     id: 'telemetria',
@@ -120,31 +154,37 @@ const DATA = {
     brand: 'Scopri Carv 2 ↗',
     url: 'https://getcarv.com',
     novita: [
-      'Carv 2: metriche live su Ski:IQ, simmetria, G-Force e edge angle',
-      'Lympic e GPS Pro per atleti: tracciamento traiettorie e cronometraggio millimetrico',
-      'Pettorine GPS per bambini e scuole sci'
+      'Carv 2: punteggio Ski:IQ, angolazione di spigolo, simmetria destra/sinistra, G-Force e bilanciamento anteroposteriore con coaching vocale live',
+      'Lympic & GPS Pro per atleti: tracciamento traiettorie, velocità istantanea e intertempi al centesimo senza fotocellule fisse',
+      'Pettorine GPS per bambini e scuole sci: geolocalizzazione in tempo reale del gruppo e allerta allontanamento'
     ],
-    info: 'Carv 2 fornisce feedback audio dinamici e statistiche a fine giornata sul bilanciamento e sulla conduzione. Sistemi professionali come Lympic misurano centesimi e linee di gara. Per le scuole, i tracker GPS integrati nelle pettorine permettono di localizzare i bambini in ogni momento.',
-    consiglio: 'Carv è perfetto per chi vuole migliorarsi con dati oggettivi. I GPS nelle pettorine sono ormai uno standard di sicurezza richiesto dalle famiglie ai maestri.'
+    info: 'Carv 2 elabora migliaia di campioni per discesa offrendo statistiche dettagliate a fine giornata e correzioni vocali istantanee. In ambito agonistico, Lympic e i sistemi GPS professionali analizzano linee e micro-variazioni di velocità; nella didattica, le pettorine GPS garantiscono sicurezza attiva per i bambini.',
+    consiglio: 'Carv 2 è perfetto per chi vuole migliorare la tecnica con dati oggettivi; le pettorine GPS rappresentano uno standard di sicurezza sempre più apprezzato da scuole sci e famiglie.'
   },
   sci: {
     id: 'sci',
     macro: 'performance',
     shortLabel: 'Sci & Struttura',
     title: 'Sci & Struttura',
-    brand: 'Scopri ORIGINAL+ ↗',
-    url: 'https://www.original.plus',
+    brand: 'Esplora Gamma Nordica ↗',
+    url: 'https://www.nordica.com',
     novita: [
-      'Costruzione algoritmica su misura (ORIGINAL+ Custom 6X / Wagner)',
-      'Smorzamento piezoelettrico (HEAD EMC) e risposta variabile (Renoun VibeStop)',
+      'Costruzione Energy TI Double Core (Nordica Spitfire / Dobermann DC): doppio nucleo in legno con Titanal ed elastomero',
+      'Costruzione algoritmica su misura (ORIGINAL+ Custom 6X) e smorzamento piezoelettrico (HEAD EMC)',
       'Ricerca: Smart Ski Experience (Rossignol/CEA) che genera energia sciando'
     ],
-    info: 'Gli sci moderni integrano circuiti piezoelettrici e polimeri intelligenti per assorbire le vibrazioni sul duro o vengono progettati via algoritmo su peso e stile.',
-    consiglio: 'Usa il selettore qui sotto per individuare la macro-categoria di sci più adatta al tuo utilizzo.'
+    info: 'La tecnologia Double Core inserisce uno strato antivibrazione tra due anime in legno, garantendo fluidità sul duro e precisione in conduzione.',
+    consiglio: 'Usa il configuratore qui sotto per trovare il modello Nordica e la categoria di sci ideale per te.'
   }
 };
 
 const BOOT_BRANDS = [
+  {
+    name: 'Nordica',
+    tech: 'Infrared + Tri-Force + BOA',
+    desc: 'Personalizzazione mirata a lampada infrarossi su scafi Speedmachine e Sportmachine senza stressare la plastica.',
+    url: 'https://www.nordica.com'
+  },
   {
     name: 'Salomon',
     tech: 'Custom Shell HD',
@@ -174,12 +214,6 @@ const BOOT_BRANDS = [
     tech: 'Micro-Adjust Dial',
     desc: 'Avvolgimento uniforme dello scafo inferiore senza punti di pressione e rilascio istantaneo.',
     url: 'https://www.boafit.com'
-  },
-  {
-    name: 'Kästle',
-    tech: 'RYF Mechanical Memory',
-    desc: 'Sistema con memoria meccanica della tensione per ritrovare al volo il fit calibrato.',
-    url: 'https://www.kaestle.com'
   }
 ];
 
@@ -266,16 +300,174 @@ const HELMET_QUIZ = [
   }
 ];
 
-const calcDIN = (w, type) => (Math.round((w / 10 + (type === 2 ? 1 : type === 3 ? 2.2 : 0)) * 4) / 4).toFixed(2);
+const calcDIN = (w, h, type, boot) => {
+  let base = w / 10;
+  if (h < 155) base -= 0.5;
+  if (type === 2) base += 1.0;
+  if (type === 3) base += 2.2;
+  const factor = 290 / Math.max(240, Math.min(360, boot || 305));
+  return (Math.round(Math.max(0.75, Math.min(13, base * factor)) * 4) / 4).toFixed(2);
+};
 
-const recommendSki = (terrain, level, budget) => {
-  if (level === 'principiante') return 'All-Round Entry Level (Rocker facilitante e flex morbido)';
-  if (terrain === 'fuoripista') return 'Freeride / Backcountry (Centro 95–105 mm, anima leggera)';
-  if (level === 'esperto' && terrain === 'pista') {
-    if (budget === 'alto') return 'Race Carve / Custom Algoritmico (ORIGINAL+ / HEAD EMC)';
-    return 'All-Mountain Performance (Struttura Titanal + smorzamento attivo)';
+const calcPole = (h, levelStr) => {
+  const exact = Math.round(h / (levelStr === 'l1' ? 1.50 : 1.53));
+  const commercial = Math.round(exact / 5) * 5;
+  return { exact, commercial };
+};
+
+const calcLayering = (temp) => {
+  if (temp <= -12) {
+    return {
+      title: 'Assetto Artico (-12°C e oltre)',
+      detail: 'Intimo Merino pesante + Midlayer in Aerogel + Guscio 20.000 mm + Calzini e guanti riscaldati attivamente (Heat Sphere).'
+    };
   }
-  return 'All-Mountain Polivalente (Raggio 14–16 m, centro 76–84 mm)';
+  if (temp <= -3) {
+    return {
+      title: 'Assetto Invernale (-3°C / -11°C)',
+      detail: 'Intimo termico traspirante + Pile tecnico / isolamento leggero + Giacca 20k mm termonastrata e scaldacollo antivento.'
+    };
+  }
+  return {
+    title: 'Assetto Primaverile (sopra -2°C)',
+    detail: 'Intimo leggero ad asciugatura rapida + Guscio 3L sfoderato (15k–20k mm) con zip di ventilazione aperte.'
+  };
+};
+
+// 27 combinazioni orientate sulla gamma Nordica
+const SKI_RECOMMENDATIONS = {
+  pista: {
+    principiante: {
+      basso: {
+        cat: 'Nordica Spitfire 73 · Easy Carve',
+        ref: 'Sciancratura multi-raggio morbida e rocker in spatola per curvare con il minimo sforzo fin dalle prime discese.'
+      },
+      medio: {
+        cat: 'Nordica Spitfire 75 FDT · Progression',
+        ref: 'Nucleo leggero e tollerante (75 mm al centro): accompagna la transizione dallo spazzaneve agli sci paralleli.'
+      },
+      alto: {
+        cat: 'Nordica Spitfire CA FDT · Piste Comfort',
+        ref: 'Costruzione in legno e carbonio (senza Titanal) per avere stabilità sul duro restando agile e riposante tutto il giorno.'
+      }
+    },
+    intermedio: {
+      basso: {
+        cat: 'Nordica Spitfire CA · Frontside Sport',
+        ref: 'Inversione di spigolo rapida e intuitiva su piste battute per affinare la conduzione a velocità medie.'
+      },
+      medio: {
+        cat: 'Nordica Spitfire TI FDT · Sport Carve',
+        ref: 'Rinforzo in Titanal ed elastomero: grande tenuta sul ghiaccio mattutino con raggio polivalente.'
+      },
+      alto: {
+        cat: 'Nordica Dobermann Multipista DC 74 TI',
+        ref: 'Tecnologia Energy TI Double Core: stabilità di derivazione race unita a una spatola docile e gestibile.'
+      }
+    },
+    esperto: {
+      basso: {
+        cat: 'Nordica Dobermann SLR DC / GSR DC',
+        ref: 'Precisione chirurgica nello stretto (SLR) o negli archi ampi (GSR) con piastra FDT ad alta trasmissione.'
+      },
+      medio: {
+        cat: 'Nordica Dobermann Multigara DC',
+        ref: 'Doppio nucleo in legno e doppio Titanal per sciatori di livello L6–L7 che spingono al massimo sul ripido.'
+      },
+      alto: {
+        cat: 'Nordica Dobermann FIS / Custom Workshop',
+        ref: 'Struttura gara pura (Dobermann GS/SL WC Dept) oppure sci su misura algoritmico (ORIGINAL+ Custom 6X).'
+      }
+    }
+  },
+  allmountain: {
+    principiante: {
+      basso: {
+        cat: 'Nordica Steadfast 75 CA · All-Mountain Light',
+        ref: 'Leggero e facile da girare, perdona gli arretramenti e gestisce bene la neve smossa del pomeriggio.'
+      },
+      medio: {
+        cat: 'Nordica Steadfast 80 CA · Resort Comfort',
+        ref: 'Centro da 80 mm con nucleo Energy CA: equilibrio ideale tra pista battuta e primi bordi pista.'
+      },
+      alto: {
+        cat: 'Nordica Wild Belle 78 CA / Steadfast 80',
+        ref: 'Profilo rocker progressivo per sciare in totale controllo da mattina a sera con pochissimo affaticamento.'
+      }
+    },
+    intermedio: {
+      basso: {
+        cat: 'Nordica Steadfast 80 DC · Double Core',
+        ref: 'Ammortizzazione naturale grazie al Double Core: assorbe le sconnessioni della neve rotta senza vibrare.'
+      },
+      medio: {
+        cat: 'Nordica Steadfast 85 DC · All-Conditions',
+        ref: '85 mm sotto il piede con rinforzo in elastomero: perfetto 70% pista e 30% neve fresca a bordo tracciato.'
+      },
+      alto: {
+        cat: 'Nordica Enforcer 89 · All-Mountain Performance',
+        ref: 'Anima in legno, doppio Titanal e spatola in carbonio: conduce come uno sci da pista ma galleggia ovunque.'
+      }
+    },
+    esperto: {
+      basso: {
+        cat: 'Nordica Enforcer 89 / Dobermann Multipista 80',
+        ref: 'Reattività e rigidità torsionale elevate per carvare forte anche su neve trasformata o primaverile.'
+      },
+      medio: {
+        cat: 'Nordica Enforcer 94 · Benchmark All-Mountain',
+        ref: 'Il riferimento assoluto per gli sciatori esperti che cercano un unico sci potente su ogni tipo di neve.'
+      },
+      alto: {
+        cat: 'Nordica Enforcer 99 / Custom Biometrico',
+        ref: 'Massima potenza e galleggiamento ad alta velocità (o profilo su misura Wagner / ORIGINAL+ Custom 8X).'
+      }
+    }
+  },
+  fuoripista: {
+    principiante: {
+      basso: {
+        cat: 'Nordica Unleashed 90 · Freeride Entry',
+        ref: 'Twin-tip agile e leggero (90 mm) per prendere confidenza con neve fresca, gobbe e boschetti.'
+      },
+      medio: {
+        cat: 'Nordica Unleashed 98 CA · Playful Powder',
+        ref: 'Costruzione senza metallo per una risposta elastica e intuitiva nei primi approcci fuori pista.'
+      },
+      alto: {
+        cat: 'Nordica Unlimited 94 · Freetouring Light',
+        ref: 'Peso contenuto per combinare discese in neve fresca e brevi risalite con le pelli di foca.'
+      }
+    },
+    intermedio: {
+      basso: {
+        cat: 'Nordica Unleashed 98 · All-Terrain Freeski',
+        ref: 'Foglio di Titanal sagomato per unire pop creativo, galleggiamento in powder e tenuta nei rientri in pista.'
+      },
+      medio: {
+        cat: 'Nordica Enforcer 104 · Freeride Versatility',
+        ref: 'Stabilità fluida su neve ventata e tracciata grazie alla costruzione Energy 2 TI True Tip.'
+      },
+      alto: {
+        cat: 'Nordica Unlimited 104 · Backcountry Tour',
+        ref: 'Rocker generoso e leggerezza strutturale per affrontare itinerari freeride impegnativi.'
+      }
+    },
+    esperto: {
+      basso: {
+        cat: 'Nordica Unleashed 106 · Big Mountain Agile',
+        ref: 'Galleggiamento immediato e controllo totale nei canali ripidi e nei boschi fitti.'
+      },
+      medio: {
+        cat: 'Nordica Unleashed 114 · Deep Powder Charger',
+        ref: '114 mm al centro con doppio rocker e Titanal per surfare la polvere profonda ad alta velocità.'
+      },
+      alto: {
+        cat: 'Nordica Unleashed 120 · Pro Backcountry',
+        ref: 'Il modello più largo della gamma Nordica, sviluppato con gli atleti del Freeride World Tour.'
+      }
+    }
+  }
 };
 
 function HelmetInteractiveGuide() {
@@ -660,7 +852,8 @@ function SkierScene({ activeItem, onSelect }) {
       <Hotspot pos={[-0.09, 0.80, 0.12]} id="maschera_outof" side="left" />
       <Hotspot pos={[0.11, 0.70, 0.08]} id="maschera_audio" side="right" />
       <Hotspot pos={[-0.16, 0.34, 0.12]} id="termoregolazione" side="left" />
-      <Hotspot pos={[0.30, 0.04, 0.14]} id="guanti" side="right" />
+      <Hotspot pos={[0.30, 0.06, 0.14]} id="guanti" side="right" />
+      <Hotspot pos={[-0.30, -0.04, 0.14]} id="bastoni" side="left" />
       <Hotspot pos={[-0.14, -0.66, 0.10]} id="scarpone" side="left" />
       <Hotspot pos={[0.18, -0.80, 0.06]} id="telemetria" side="right" />
       <Hotspot pos={[-0.15, -0.94, -0.05]} id="attacchi" side="left" />
@@ -676,7 +869,14 @@ export default function App() {
   const [openedFromMacro, setOpenedFromMacro] = useState(false);
 
   const [dinW, setDinW] = useState(75);
+  const [dinH, setDinH] = useState(176);
+  const [dinBoot, setDinBoot] = useState(305);
   const [dinType, setDinType] = useState(2);
+
+  const [poleH, setPoleH] = useState(176);
+  const [poleL, setPoleL] = useState('l1');
+
+  const [temp, setTemp] = useState(-5);
 
   const [quizTerrain, setQuizTerrain] = useState('pista');
   const [quizLevel, setQuizLevel] = useState('intermedio');
@@ -720,6 +920,8 @@ export default function App() {
   const data = activeItem ? DATA[activeItem] : null;
   const activeMacroObj = data && openedFromMacro ? MACROS.find((m) => m.id === data.macro) : null;
   const skiRec = SKI_RECOMMENDATIONS[quizTerrain][quizLevel][quizBudget];
+  const poleRes = calcPole(poleH, poleL);
+  const layerRes = calcLayering(temp);
 
   return (
     <>
@@ -737,31 +939,32 @@ export default function App() {
         </h1>
       </header>
 
-      <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
-        <Canvas dpr={[1, 2]} camera={{ position: [0, 0.02, 4.35], fov: 44 }} onPointerMissed={() => handleSelectItem(null, false)}>
-          <ambientLight intensity={1.65} />
-          <directionalLight position={[3, 5, 4]} intensity={2.3} color="#ffffff" />
-          <directionalLight position={[-4, 2, -2]} intensity={1.6} color="#00e5ff" />
-          <Environment preset="city" />
+      <SceneErrorBoundary>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
+          <Canvas dpr={[1, 2]} camera={{ position: [0, 0.02, 4.35], fov: 44 }} onPointerMissed={() => handleSelectItem(null, false)}>
+            <ambientLight intensity={1.65} />
+            <directionalLight position={[3, 5, 4]} intensity={2.3} color="#ffffff" />
+            <directionalLight position={[-4, 2, -2]} intensity={1.6} color="#00e5ff" />
+            <Environment preset="city" />
 
-          <Suspense fallback={null}>
-            <SkierScene activeItem={activeItem} onSelect={handleSelectItem} />
-          </Suspense>
+            <Suspense fallback={null}>
+              <SkierScene activeItem={activeItem} onSelect={handleSelectItem} />
+            </Suspense>
 
-          <OrbitControls
-            enableZoom={true}
-            enablePan={false}
-            autoRotate={!activeItem}
-            autoRotateSpeed={0.4}
-            minDistance={3.0}
-            maxDistance={6.0}
-            minPolarAngle={Math.PI / 3}
-            maxPolarAngle={Math.PI / 1.85}
-          />
-        </Canvas>
-      </div>
+            <OrbitControls
+              enableZoom={true}
+              enablePan={false}
+              autoRotate={!activeItem}
+              autoRotateSpeed={0.4}
+              minDistance={3.0}
+              maxDistance={6.0}
+              minPolarAngle={Math.PI / 3}
+              maxPolarAngle={Math.PI / 1.85}
+            />
+          </Canvas>
+        </div>
+      </SceneErrorBoundary>
 
-      {/* Menu Macro Desktop (Max 4) */}
       <nav className={`macro-dock ${activeItem ? 'hidden' : ''}`}>
         {MACROS.map((m) => (
           <button
@@ -776,7 +979,6 @@ export default function App() {
         ))}
       </nav>
 
-      {/* Pannello Laterale */}
       <aside className={`side-panel ${activeItem ? 'open' : ''}`}>
         <button className="close-btn" onClick={() => handleSelectItem(null, false)}>
           ✕ Chiudi esplorazione
@@ -823,10 +1025,41 @@ export default function App() {
               </div>
             </details>
 
-            {/* Modulo Interattivo Casco (Anatomia, Sigle, Consigliatore, Quiz) */}
             {data.id === 'casco' && <HelmetInteractiveGuide />}
 
-            {/* Sezione dedicata Termoformatura Scarpetta & Scafo + Brand */}
+            {data.id === 'termoregolazione' && (
+              <>
+                <div className="thermo-section">
+                  <h4>Protezione & Impermeabilità (Colonna d’Acqua)</h4>
+                  <p className="thermo-intro">
+                    La colonna d’acqua misura la pressione (in millimetri) che il tessuto sopporta prima di lasciar passare l’umidità: <strong>10.000 mm</strong> bastano per neve asciutta o brevi nevicate, mentre <strong>20.000+ mm</strong> (abbinati a cuciture termonastrate e trattamento idrorepellente DWR) garantiscono tenuta totale sotto neve bagnata e vento forte.
+                  </p>
+                  <div className="thermo-wink" style={{ marginBottom: 0 }}>
+                    <strong>Equilibrio termico:</strong> l’impermeabilità da sola non basta senza traspirabilità (almeno 15.000–20.000 g/m²/24h) per evacuare il vapore corporeo ed evitare il raffreddamento in seggiovia.
+                  </div>
+                </div>
+
+                <div className="typeform-module">
+                  <h4 style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--accent-cyan)', marginBottom: '16px' }}>
+                    Simulatore: Quanto coprirsi?
+                  </h4>
+                  <div className="tf-slider-group">
+                    <div className="tf-slider-header">
+                      <label>Temperatura in Pista</label>
+                      <span>{temp}°C</span>
+                    </div>
+                    <input type="range" min="-20" max="10" value={temp} onChange={(e) => setTemp(Number(e.target.value))} />
+                  </div>
+                  <div className="tf-result">
+                    <p>{layerRes.title}</p>
+                    <h3 style={{ fontSize: '1.15rem', color: '#fff', lineHeight: 1.45, marginTop: '8px' }}>
+                      {layerRes.detail}
+                    </h3>
+                  </div>
+                </div>
+              </>
+            )}
+
             {data.id === 'scarpone' && (
               <div className="thermo-section">
                 <h4>Termoformatura Scarpetta & Scafo</h4>
@@ -854,15 +1087,31 @@ export default function App() {
               </div>
             )}
 
-            {/* Simulatore DIN */}
             {data.id === 'attacchi' && (
               <div className="typeform-module">
+                <h4 style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--accent-cyan)', marginBottom: '16px' }}>
+                  Calcolatore DIN (ISO 11088)
+                </h4>
                 <div className="tf-slider-group">
                   <div className="tf-slider-header">
                     <label>Peso (kg)</label>
                     <span>{dinW} kg</span>
                   </div>
-                  <input type="range" min="40" max="110" value={dinW} onChange={(e) => setDinW(Number(e.target.value))} />
+                  <input type="range" min="40" max="115" value={dinW} onChange={(e) => setDinW(Number(e.target.value))} />
+                </div>
+                <div className="tf-slider-group">
+                  <div className="tf-slider-header">
+                    <label>Altezza (cm)</label>
+                    <span>{dinH} cm</span>
+                  </div>
+                  <input type="range" min="145" max="205" value={dinH} onChange={(e) => setDinH(Number(e.target.value))} />
+                </div>
+                <div className="tf-slider-group">
+                  <div className="tf-slider-header">
+                    <label>Scafo Scarpone (mm)</label>
+                    <span>{dinBoot} mm</span>
+                  </div>
+                  <input type="range" min="250" max="350" value={dinBoot} onChange={(e) => setDinBoot(Number(e.target.value))} />
                 </div>
                 <div className="tf-choice-grid">
                   <div className={`tf-choice-btn ${dinType === 1 ? 'active' : ''}`} onClick={() => setDinType(1)}>
@@ -880,16 +1129,54 @@ export default function App() {
                 </div>
                 <div className="tf-result">
                   <p>Valore DIN Indicativo</p>
-                  <h3>{calcDIN(dinW, dinType)}</h3>
+                  <h3>{calcDIN(dinW, dinH, dinType, dinBoot)}</h3>
                 </div>
               </div>
             )}
 
-            {/* Consigliatore Sci (27 profili differenziati) */}
+            {data.id === 'bastoni' && (
+              <div className="typeform-module">
+                <h4 style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--accent-cyan)', marginBottom: '16px' }}>
+                  Calcolatore Altezza Bastone
+                </h4>
+                <div className="tf-slider-group">
+                  <div className="tf-slider-header">
+                    <label>Altezza Sciatore (cm)</label>
+                    <span>{poleH} cm</span>
+                  </div>
+                  <input type="range" min="145" max="205" value={poleH} onChange={(e) => setPoleH(Number(e.target.value))} />
+                </div>
+                <div className="tf-slider-group">
+                  <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                    Livello Tecnico (Scuola Sci Italiana)
+                  </label>
+                  <div className="tf-choice-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                    <div className={`tf-choice-btn ${poleL === 'l1' ? 'active' : ''}`} onClick={() => setPoleL('l1')}>
+                      <span>Fino a L5</span>
+                      <small>Altezza / 1,50</small>
+                    </div>
+                    <div className={`tf-choice-btn ${poleL === 'l6' ? 'active' : ''}`} onClick={() => setPoleL('l6')}>
+                      <span>L6 – Pro</span>
+                      <small>Altezza / 1,53</small>
+                    </div>
+                  </div>
+                </div>
+                <div className="tf-result">
+                  <p>Lunghezza Consigliata</p>
+                  <h3>
+                    {poleRes.exact} cm{' '}
+                    <small style={{ fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
+                      (misura {poleRes.commercial} cm)
+                    </small>
+                  </h3>
+                </div>
+              </div>
+            )}
+
             {data.id === 'sci' && (
               <div className="typeform-module">
                 <h4 style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--accent-cyan)', marginBottom: '16px' }}>
-                  Consigliatore Sci
+                  Consigliatore Sci · Gamma Nordica
                 </h4>
 
                 <div className="tf-slider-group">
@@ -953,7 +1240,7 @@ export default function App() {
                 </div>
 
                 <div className="tf-result">
-                  <p>Macro-Categoria Consigliata</p>
+                  <p>Modello & Categoria Consigliata</p>
                   <h3 style={{ fontSize: '1.35rem', color: '#fff', lineHeight: 1.35, marginTop: '8px' }}>
                     {skiRec.cat}
                   </h3>
