@@ -1,295 +1,338 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Environment, ContactShadows, Html, useGLTF } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
+import { OrbitControls, Environment, Html, useGLTF } from '@react-three/drei';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import './index.css';
 
-// DATABASE COMPLETO A LISTE PUNTATE + LINK DIRETTI
 const DATA = {
-  casco: {
-    id: 'casco', label: 'Caschi MIPS', title: 'Casco & Audio',
-    brand: 'Scopri Sena Snow ↗', url: 'https://www.sena.com/eu-en/snow-sports',
-    novita: ['Calotte ibride ultraleggere (Carbonio/ABS)', 'Sistema MIPS per l\'assorbimento degli impatti rotazionali', 'Moduli audio Sena Mesh per comunicazione vocale in gruppo'],
-    livelli: { principiante: 'Ventilazione passiva e fit regolabile.', evoluto: 'Calotta ibrida + MIPS.', pro: 'Omologazione FIS RH 2013, mentoniera rimovibile.', maestro: 'Leggerezza per 8h + interfono Sena per didattica a distanza.' }
+  maschera_outof: {
+    id: 'maschera_outof',
+    title: 'Out Of Electra 3',
+    brand: 'Visita Out Of ↗',
+    url: 'https://out-of.com',
+    novita: ['Lente elettronica IRID a cella solare (zero batterie)', 'Adattamento istantaneo S1–S3 in meno di 1 secondo'],
+    info: 'Una lente attiva che si scurisce o schiarisce in meno di 1 secondo catturando l’energia del sole, senza batterie da ricaricare.',
+    consiglio: 'Consigliata per Maestri ed Esperti (L6+) che passano continuamente da boschi in ombra a piste assolate.'
   },
-  maschera: {
-    id: 'maschera', label: 'Visori AR', title: 'Smart Goggles & AR',
-    brand: 'Scopri Out Of Electra 3 ↗', url: 'https://out-of.com/it/product/electra-3/',
-    novita: ['Lente elettronica IRID (S1-S3 in <1 secondo) a cella solare', 'HUD AR integrato (REKKIE 2027) per telemetria visiva', 'Lenti graduate native SnowVision Magnus'],
-    livelli: { principiante: 'Doppia lente S2 anti-appannamento.', evoluto: 'Transizione elettronica istantanea.', pro: 'Lente torica ad alto contrasto.', maestro: 'Out Of: adattamento istantaneo per transizioni luce/ombra nei boschi.' }
+  maschera_audio: {
+    id: 'maschera_audio',
+    title: 'Sound BRKR',
+    brand: 'Visita IceBRKR ↗',
+    url: 'https://www.icebrkr.com/',
+    novita: ['Conduzione ossea integrata nella montatura', 'Comunicazione Mesh Bluetooth multi-utente'],
+    info: 'Trasmette l’audio tramite micro-vibrazioni sulle ossa craniche, lasciando le orecchie completamente libere per percepire i rumori della pista.',
+    consiglio: 'Ideale per Maestri in didattica o gruppi freeride per comunicare in tempo reale senza isolarsi dall’ambiente.'
   },
-  abbigliamento: {
-    id: 'abbigliamento', label: 'Aerogel', title: 'Termoregolazione',
-    brand: 'Scopri Speed Demon Lab ↗', url: 'https://www.ispo.com',
-    novita: ['Isolamento termico spaziale in Aerogel', 'Tessuti a cambiamento di fase (PCM)', 'Layering riscaldato attivamente (calzini/guanti)'],
-    livelli: { principiante: 'Guscio impermeabile 10k.', evoluto: 'Layering modulare 3L (20k).', pro: 'Tute aerodinamiche (Speed Demon).', maestro: 'Aerogel + calzini riscaldati per sopravvivere alle fasi statiche.' }
-  },
-  protezioni: {
-    id: 'protezioni', label: 'Esoscheletri', title: 'Supporto Muscolare',
-    brand: 'Scopri Ski-Mojo ↗', url: 'https://www.ski-mojo.fr',
-    novita: ['Ski-Mojo: riduce il carico del 30% su quadricipiti e ginocchia', 'Againer: assistenza meccanica regolabile', 'Dainese D-Air Ski 2 Evo: airbag elettronico'],
-    livelli: { principiante: 'Paraschiena in materiale viscoelastico.', evoluto: 'Ski-Mojo a fine giornata per limitare la fatica.', pro: 'Airbag Dainese ad attivazione millisecondica.', maestro: 'Ski-Mojo è vitale per preservare le articolazioni usurate.' }
+  termoregolazione: {
+    id: 'termoregolazione',
+    title: 'Termoregolazione',
+    brand: 'Scopri ISPO & Aerogel ↗',
+    url: 'https://www.ispo.com',
+    novita: ['Isolamento spaziale in Aerogel a spessore ultra-ridotto', 'Calzini e layer riscaldati attivamente'],
+    info: 'L’aerogel intrappola l’aria impedendo la dispersione termica pur mantenendo libertà di movimento. I calzini riscaldati si gestiscono via app.',
+    consiglio: 'Per il principiante basta un buon 10k. L’Aerogel è fondamentale per il Maestro che alterna dimostrazioni a lunghe soste al gelo.'
   },
   scarpone: {
-    id: 'scarpone', label: 'Scarponi BOA', title: 'Calzata BOA',
-    brand: 'Scopri BOA Fit System ↗', url: 'https://www.boafit.com',
-    novita: ['Chiusura BOA Dial sullo scafo inferiore per avvolgimento a 360°', 'Memoria meccanica della tensione (Kästle RYF)', 'Scarpette termoformabili 3D ad alta densità'],
-    livelli: { principiante: 'Flex 80-90, Last 102mm, GripWalk.', evoluto: 'BOA per microregolazioni rapide.', pro: 'Scafo race plug 93mm fresato.', maestro: 'Regolazione rapida BOA in seggiovia per alternare comfort e performance.' }
+    id: 'scarpone',
+    title: 'Fit & Calzata BOA',
+    brand: 'BOA Fit System ↗',
+    url: 'https://www.boafit.com',
+    novita: ['Chiusura BOA Dial sullo scafo inferiore per avvolgimento a 360°', 'Memoria meccanica della tensione (Kästle RYF)'],
+    info: 'Sostituisce i ganci bassi con un cavo in acciaio micro-regolabile per avvolgere il piede in modo uniforme senza punti di pressione.',
+    consiglio: 'Ottimo per l’Amatore Evoluto. Il Maestro lo apprezza per allentare e richiudere lo scafo al volo in seggiovia.'
   },
   attacchi: {
-    id: 'attacchi', label: 'Sicurezza LCA', title: 'Protezione LCA',
-    brand: 'Scopri Tyrolia Protector ↗', url: 'https://www.tyrolia.com/it/protector',
-    novita: ['Talloniera a sgancio laterale intelligente (Tyrolia Protector)', 'Prevenzione meccanica contro le lesioni al Legamento Crociato Anteriore'],
-    livelli: { principiante: 'Attacco leggero (DIN basso).', evoluto: 'Tyrolia Protector: sgancio laterale talloniera.', pro: 'Piastra race rigida.', maestro: 'Prevenzione massima LCA per le continue dimostrazioni a spazzaneve.' }
-  },
-  sci: {
-    id: 'sci', label: 'Sci Custom', title: 'Energia & Custom',
-    brand: 'Scopri ORIGINAL+ 6X ↗', url: 'https://www.original.plus',
-    novita: ['Costruzione algoritmica su misura (ORIGINAL+ / Wagner)', 'Smart Ski Experience (Rossignol/CEA): energia dalle vibrazioni', 'Smorzamento piezoelettrico (HEAD EMC) e VibeStop'],
-    livelli: { principiante: 'Rocker per ingresso curva facile.', evoluto: 'Setup algoritmico ORIGINAL+.', pro: 'Race FIS Titanal reattivo.', maestro: 'L\'energia recuperata (Rossignol) alimenterà i device del professionista.' }
-  },
-  bastoni: {
-    id: 'bastoni', label: 'Bastoni Tech', title: 'Assetto in Carbonio',
-    brand: 'Scopri Leki Trigger ↗', url: 'https://www.leki.com',
-    novita: ['Tubi in carbonio alto modulo (bilanciamento in alto)', 'Grip ergonomici stampati 3D', 'Sganci magnetici di sicurezza al lacciolo'],
-    livelli: { principiante: 'Alluminio (Lunghezza: H/1.50).', evoluto: 'Carbonio ultraleggero (Lunghezza: H/1.53).', pro: 'Profilo curvo aerodinamico.', maestro: 'Grip anatomico prolungato e puntale in carburo.' }
+    id: 'attacchi',
+    title: 'Sicurezza LCA',
+    brand: 'Tyrolia Protector ↗',
+    url: 'https://www.tyrolia.com',
+    novita: ['Sgancio laterale intelligente della talloniera', 'Riduzione dei traumi torsionali al legamento crociato'],
+    info: 'A differenza degli attacchi tradizionali, la talloniera ruota anche lateralmente nelle cadute all’indietro, scaricando le forze sul ginocchio.',
+    consiglio: 'Indicato per tutti i livelli: riduce drasticamente il rischio di lesione al crociato anteriore (LCA).'
   },
   telemetria: {
-    id: 'telemetria', label: 'Telemetria IA', title: 'Sensori Inerziali',
-    brand: 'Scopri Carv 2 ↗', url: 'https://getcarv.com',
-    novita: ['Sensori wearable Carv 2 per l\'angolo di spigolo (audio live)', 'Solette Moticon OpenGo per mappare la pressione plantare', 'Analisi IA video (Dartfish, EDGIN)'],
-    livelli: { principiante: 'Videoanalisi base da tablet.', evoluto: 'Carv 2 (coaching audio live in cuffia).', pro: 'Protern Live e Moticon OpenGo.', maestro: 'Dati oggettivi da mostrare all\'allievo al posto delle sole sensazioni.' }
+    id: 'telemetria',
+    title: 'Telemetria IA',
+    brand: 'Scopri Carv 2 ↗',
+    url: 'https://getcarv.com',
+    novita: ['Sensori inerziali Carv 2 per angolo di spigolo e pressione', 'Solette Moticon OpenGo & video-analisi IA (Dartfish, EDGIN)'],
+    info: 'L’IA misura in tempo reale angolazione, parallelismo e distribuzione dei carichi, offrendo un coaching vocale immediato in cuffia.',
+    consiglio: 'Strumento ideale per l’Intermedio/Evoluto e per il Maestro che vuole mostrare dati oggettivi all’allievo.'
   }
 };
 
-// Formule
-const calculateDIN = (w, h, type, boot) => {
-  let base = w / 10;
-  if (h < 155) base -= 0.5;
-  if (type === 2) base += 1.0;
-  if (type === 3) base += 2.2;
-  const factor = 290 / Math.max(240, Math.min(360, boot));
-  return (Math.round(Math.max(0.75, Math.min(13, base * factor)) * 4) / 4).toFixed(2);
+const MACROS = [
+  { id: 'visione', label: 'Visione', items: ['maschera_outof', 'maschera_audio'] },
+  { id: 'comfort', label: 'Comfort', items: ['termoregolazione'] },
+  { id: 'setup', label: 'Assetto', items: ['scarpone', 'attacchi'] },
+  { id: 'dati', label: 'Dati', items: ['telemetria'] }
+];
+
+const calcDIN = (w, type) => (Math.round((w / 10 + (type === 2 ? 1 : type === 3 ? 2.2 : 0)) * 4) / 4).toFixed(2);
+
+const calcLayering = (temp) => {
+  if (temp < -10) return 'Aerogel + Midlayer Termico + Intimo Merino + Calzini Riscaldati';
+  if (temp < 0) return 'Guscio 3L + Pile Tecnico + Intimo Sintetico';
+  return 'Guscio Traspirante + Intimo Leggero';
 };
-const calculatePole = (h, levelStr) => Math.round(h / (levelStr === 'l1' ? 1.50 : 1.53));
 
-// Sci perfetti che non sprofondano
-function PerfectSkis() {
-  const geom = useMemo(() => {
-    const shape = new THREE.Shape();
-    shape.moveTo(-0.045, -0.9);
-    shape.quadraticCurveTo(-0.03, 0, -0.05, 0.9);
-    shape.quadraticCurveTo(0, 1.05, 0.05, 0.9);
-    shape.quadraticCurveTo(0.03, 0, 0.045, -0.9);
-    shape.quadraticCurveTo(0, -0.95, -0.045, -0.9);
-    const extrude = new THREE.ExtrudeGeometry(shape, { depth: 0.012, bevelEnabled: true, bevelSize: 0.003, bevelThickness: 0.003, bevelSegments: 3 });
-    extrude.rotateX(-Math.PI / 2);
-    return extrude;
-  }, []);
-  return (
-    <group position={[0, -0.006, 0.05]}> {/* Zero esatto per appoggiarsi alla shadow */}
-      <mesh geometry={geom} position={[-0.15, 0, 0]} castShadow receiveShadow><meshPhysicalMaterial color="#080a0d" roughness={0.2} metalness={0.8} clearcoat={1} /></mesh>
-      <mesh geometry={geom} position={[0.15, 0, 0]} castShadow receiveShadow><meshPhysicalMaterial color="#080a0d" roughness={0.2} metalness={0.8} clearcoat={1} /></mesh>
-    </group>
-  );
-}
+const calcLens = (weather) => {
+  if (weather === 'sole') return 'Filtro S3 (Specchiata scura)';
+  if (weather === 'nuvoloso') return 'Filtro S2 (Adattamento rapido)';
+  return 'Filtro S1 (Alto contrasto nebbia/neve)';
+};
 
-function StudioScene({ activePage, onSelect }) {
+function SkierModel({ activeItem, onSelect }) {
   const { scene } = useGLTF('/mannequin.glb');
   const groupRef = useRef();
 
-  // Bilanciamento del modello generato da AI per non farlo sprofondare
-  const normalizedModel = useMemo(() => {
-    const clone = scene.clone();
-    const box = new THREE.Box3().setFromObject(clone);
-    const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
-    box.getSize(size);
-    box.getCenter(center);
-    const targetScale = 2.0 / Math.max(size.x, size.y, size.z);
-    clone.scale.setScalar(targetScale);
-    
-    // Lo posizioniamo in modo che il punto più basso tocchi ESATTAMENTE y=0
-    clone.position.set(-center.x * targetScale, -box.min.y * targetScale, -center.z * targetScale);
-
-    clone.traverse((child) => {
+  useEffect(() => {
+    scene.traverse((child) => {
       if (child.isMesh) {
-        child.material = new THREE.MeshStandardMaterial({ color: '#13161f', roughness: 0.65, metalness: 0.3 });
-        child.castShadow = true;
+        child.material = new THREE.MeshStandardMaterial({ color: '#161924', roughness: 0.6, metalness: 0.3 });
       }
     });
-    return clone;
   }, [scene]);
 
   useFrame((state) => {
-    // Il gruppo intero fluttua lievemente senza toccare le ombre
-    if (groupRef.current) groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 1.5) * 0.015;
+    if (groupRef.current) {
+      const breath = Math.sin(state.clock.elapsedTime * 1.5) * 0.015;
+      const targetX = activeItem && window.innerWidth > 768 ? -0.45 : 0;
+      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.06);
+      groupRef.current.position.y = -1.2 + breath;
+    }
   });
 
   const Hotspot = ({ pos, id }) => (
     <Html position={pos} center zIndexRange={[50, 0]}>
-      <div className={`hotspot-node ${activePage === id ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); onSelect(activePage === id ? null : id); }}>
+      <div
+        className={`hotspot-container ${activeItem === id ? 'active' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect(activeItem === id ? null : id);
+        }}
+        onMouseEnter={() => document.body.classList.add('cursor-hovering')}
+        onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+      >
         <div className="hotspot-dot" />
-        <div className="hotspot-tag">{DATA[id].label}</div>
+        <div className="hotspot-line" />
+        <div className="hotspot-tag">{DATA[id].title}</div>
       </div>
     </Html>
   );
 
   return (
-    <group ref={groupRef} position={[0, -1.0, 0]}> {/* Gruppo posizionato esattamente sopra la contact shadow */}
-      <primitive object={normalizedModel} />
-      <PerfectSkis />
-
-      <Hotspot pos={[0.15, 1.7, 0.15]} id="casco" />
-      <Hotspot pos={[-0.15, 1.6, 0.2]} id="maschera" />
-      <Hotspot pos={[0.25, 1.15, 0.15]} id="abbigliamento" />
-      <Hotspot pos={[-0.25, 0.75, 0.15]} id="protezioni" />
-      <Hotspot pos={[0.45, 0.9, 0.2]} id="bastoni" />
-      <Hotspot pos={[-0.2, 0.25, 0.15]} id="scarpone" />
-      <Hotspot pos={[0.2, 0.15, 0.05]} id="telemetria" />
-      <Hotspot pos={[-0.2, 0.05, -0.05]} id="attacchi" />
-      <Hotspot pos={[0, 0.05, 0.8]} id="sci" />
+    <group ref={groupRef}>
+      <primitive object={scene} scale={1.8} position={[0, -0.6, 0]} />
+      <Hotspot pos={[0.12, 1.68, 0.1]} id="maschera_outof" />
+      <Hotspot pos={[-0.14, 1.5, 0.1]} id="maschera_audio" />
+      <Hotspot pos={[0.2, 0.98, 0.1]} id="termoregolazione" />
+      <Hotspot pos={[0.16, -0.68, 0.1]} id="scarpone" />
+      <Hotspot pos={[-0.16, -0.9, -0.05]} id="attacchi" />
+      <Hotspot pos={[0.22, -0.86, 0.05]} id="telemetria" />
     </group>
   );
 }
 
-export default function App() {
-  const [activePage, setActivePage] = useState(null);
-  const [activeLevel, setActiveLevel] = useState('maestro');
+useGLTF.preload('/mannequin.glb');
 
+export default function App() {
+  const [activeItem, setActiveItem] = useState(null);
   const [dinW, setDinW] = useState(75);
-  const [dinH, setDinH] = useState(175);
-  const [dinBoot, setDinBoot] = useState(315);
   const [dinType, setDinType] = useState(2);
-  const [poleH, setPoleH] = useState(175);
-  const [poleL, setPoleL] = useState('l1');
+  const [temp, setTemp] = useState(-5);
+  const [weather, setWeather] = useState('nuvoloso');
 
   useEffect(() => {
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let trailingX = mouseX;
+    let trailingY = mouseY;
+    const dot = document.querySelector('.cursor-dot');
+    const ring = document.querySelector('.cursor-ring');
+
     const onMove = (e) => {
-      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
-      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+      mouseX = e.clientX;
+      mouseY = e.clientY;
     };
     window.addEventListener('mousemove', onMove);
-    return () => window.removeEventListener('mousemove', onMove);
+
+    let raf;
+    const render = () => {
+      trailingX += (mouseX - trailingX) * 0.15;
+      trailingY += (mouseY - trailingY) * 0.15;
+      if (dot) dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+      if (ring) ring.style.transform = `translate3d(${trailingX}px, ${trailingY}px, 0) translate(-50%, -50%)`;
+      raf = requestAnimationFrame(render);
+    };
+    raf = requestAnimationFrame(render);
+
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
-  const activeData = activePage ? DATA[activePage] : null;
+  const data = activeItem ? DATA[activeItem] : null;
 
   return (
     <>
+      <div className="cursor-dot" />
+      <div className="cursor-ring" />
       <div className="studio-canvas" />
-      <div className="noise-film" />
 
-      <header className={`brand-header ${activePage ? 'hidden' : ''}`}>
+      <header className={`brand-header ${activeItem ? 'hidden' : ''}`}>
         <span className="kicker">SAS Academy — Gruppo 1</span>
-        <h1>Materiali<br/>Sci 2026</h1>
+        <h1>
+          Innovazione
+          <br />
+          Sci 2026
+        </h1>
       </header>
 
       <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
-        <Canvas shadows camera={{ position: [0, 0.1, 3.6], fov: 42 }} onPointerMissed={() => setActivePage(null)}>
+        <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 4.6], fov: 48 }} onPointerMissed={() => setActiveItem(null)}>
           <ambientLight intensity={1.5} />
-          <directionalLight position={[5, 6, 4]} intensity={2.5} castShadow color="#ffffff" />
-          <directionalLight position={[-5, 3, -4]} intensity={1.5} color="#00e5ff" />
+          <directionalLight position={[2, 5, 4]} intensity={2.5} color="#ffffff" />
+          <directionalLight position={[-4, 2, -2]} intensity={1.5} color="#00e5ff" />
           <Environment preset="city" />
-          
-          <StudioScene activePage={activePage} onSelect={setActivePage} />
-          
-          {/* Ombra di contatto fissa, esatta su y=-1.0 */}
-          <ContactShadows position={[0, -1.02, 0]} opacity={0.7} scale={6} blur={2.5} far={3} color="#000" />
-          <OrbitControls enableZoom={true} enablePan={false} autoRotate={!activePage} autoRotateSpeed={0.4} minPolarAngle={Math.PI/3} maxPolarAngle={Math.PI/1.9} />
-          
+
+          <SkierModel activeItem={activeItem} onSelect={setActiveItem} />
+
+          <OrbitControls
+            enableZoom={true}
+            enablePan={false}
+            autoRotate={!activeItem}
+            autoRotateSpeed={0.5}
+            minDistance={3.2}
+            maxDistance={6.2}
+            minPolarAngle={Math.PI / 3}
+            maxPolarAngle={Math.PI / 1.9}
+          />
           <EffectComposer>
-            <Bloom luminanceThreshold={0.9} mipmapBlur intensity={1.2} />
-            <Vignette eskil={false} offset={0.25} darkness={1.1} />
+            <Bloom luminanceThreshold={0.8} intensity={0.8} mipmapBlur />
           </EffectComposer>
         </Canvas>
       </div>
 
-      <nav className="configurator-dock">
-        {Object.values(DATA).map(cat => (
-          <button key={cat.id} className={`dock-item ${activePage === cat.id ? 'active' : ''}`} onClick={() => setActivePage(activePage === cat.id ? null : cat.id)}>
-            {cat.label}
+      <nav className={`macro-dock ${activeItem ? 'hidden' : ''}`}>
+        {MACROS.map((m) => (
+          <button
+            key={m.id}
+            className="macro-btn"
+            onClick={() => setActiveItem(m.items[0])}
+            onMouseEnter={() => document.body.classList.add('cursor-hovering')}
+            onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+          >
+            {m.label}
           </button>
         ))}
       </nav>
 
-      <aside className={`side-panel ${activePage ? 'open' : ''}`}>
-        <button className="close-btn" onClick={() => setActivePage(null)}>✕ Chiudi e ruota modello</button>
+      <aside className={`side-panel ${activeItem ? 'open' : ''}`}>
+        <button className="close-btn" onClick={() => setActiveItem(null)}>
+          ✕ Chiudi e Ruota
+        </button>
 
-        {activeData && (
+        {data && (
           <div>
-            <h2>{activeData.title}</h2>
-            <a href={activeData.url} target="_blank" rel="noreferrer" className="panel-brand-link">{activeData.brand}</a>
-            
-            <div className="data-block">
-              <h4>Innovazione 2026</h4>
-              <ul className="feature-list">
-                {activeData.novita.map((item, i) => <li key={i}>{item}</li>)}
-              </ul>
-            </div>
+            <h3 style={{ fontSize: '2rem', marginBottom: '10px' }}>{data.title}</h3>
+            <a href={data.url} target="_blank" rel="noreferrer" className="brand-link">
+              {data.brand}
+            </a>
 
-            <div className="data-block">
-              <h4>Scelta per Livello</h4>
-              <div className="level-grid">
-                {Object.keys(activeData.livelli).map(lvl => (
-                  <div key={lvl} className={`level-card ${activeLevel === lvl ? 'active' : ''}`} onClick={() => setActiveLevel(lvl)}>
-                    <span>{lvl === 'pro' ? 'Professionista' : lvl}</span>
-                    <p>{activeData.livelli[lvl]}</p>
-                  </div>
-                ))}
+            <ul style={{ marginTop: '25px', listStyle: 'none', color: '#fff', fontSize: '1rem', lineHeight: '1.6' }}>
+              {data.novita.map((n, i) => (
+                <li key={i} style={{ marginBottom: '10px' }}>
+                  — {n}
+                </li>
+              ))}
+            </ul>
+
+            <details>
+              <summary>Cos’è, Cosa fa & Consigli</summary>
+              <div className="details-content">
+                <p>
+                  <strong>Cos’è:</strong> {data.info}
+                </p>
+                <p style={{ marginTop: '10px' }}>
+                  <strong>Consiglio d’uso:</strong> {data.consiglio}
+                </p>
               </div>
-            </div>
+            </details>
 
-            {/* Typeform-style DIN Calculator */}
-            {activeData.id === 'attacchi' && (
+            {data.id === 'attacchi' && (
               <div className="typeform-module">
                 <div className="tf-slider-group">
-                  <div className="tf-slider-header"><label>Peso (kg)</label><span>{dinW} kg</span></div>
-                  <input type="range" min="30" max="120" value={dinW} onChange={e => setDinW(Number(e.target.value))} />
+                  <div className="tf-slider-header">
+                    <label>Peso (kg)</label>
+                    <span>{dinW} kg</span>
+                  </div>
+                  <input type="range" min="40" max="110" value={dinW} onChange={(e) => setDinW(Number(e.target.value))} />
                 </div>
-                <div className="tf-slider-group">
-                  <div className="tf-slider-header"><label>Altezza (cm)</label><span>{dinH} cm</span></div>
-                  <input type="range" min="140" max="210" value={dinH} onChange={e => setDinH(Number(e.target.value))} />
-                </div>
-                <div className="tf-slider-group">
-                  <div className="tf-slider-header"><label>Scafo Scarpone (mm)</label><span>{dinBoot} mm</span></div>
-                  <input type="range" min="250" max="360" value={dinBoot} onChange={e => setDinBoot(Number(e.target.value))} />
-                </div>
-                <div className="tf-slider-group">
-                  <label style={{fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.2em'}}>Profilo Sciatore</label>
-                  <div className="tf-choice-grid">
-                    <div className={`tf-choice-btn ${dinType === 1 ? 'active' : ''}`} onClick={() => setDinType(1)}><span>1</span><small>Prudente</small></div>
-                    <div className={`tf-choice-btn ${dinType === 2 ? 'active' : ''}`} onClick={() => setDinType(2)}><span>2</span><small>Intermedio</small></div>
-                    <div className={`tf-choice-btn ${dinType === 3 ? 'active' : ''}`} onClick={() => setDinType(3)}><span>3</span><small>Aggressivo</small></div>
+                <div className="tf-choice-grid">
+                  <div className={`tf-choice-btn ${dinType === 1 ? 'active' : ''}`} onClick={() => setDinType(1)}>
+                    <span>1</span>
+                    <small>Prudente</small>
+                  </div>
+                  <div className={`tf-choice-btn ${dinType === 2 ? 'active' : ''}`} onClick={() => setDinType(2)}>
+                    <span>2</span>
+                    <small>Intermedio</small>
+                  </div>
+                  <div className={`tf-choice-btn ${dinType === 3 ? 'active' : ''}`} onClick={() => setDinType(3)}>
+                    <span>3</span>
+                    <small>Aggressivo</small>
                   </div>
                 </div>
-                
                 <div className="tf-result">
-                  <p>Taratura DIN (ISO 11088)</p>
-                  <h3>{calculateDIN(dinW, dinH, dinType, dinBoot)}</h3>
+                  <p>Valore DIN Indicativo</p>
+                  <h3>{calcDIN(dinW, dinType)}</h3>
                 </div>
               </div>
             )}
 
-            {/* Typeform-style Pole Calculator */}
-            {activeData.id === 'bastoni' && (
+            {data.id === 'termoregolazione' && (
               <div className="typeform-module">
                 <div className="tf-slider-group">
-                  <div className="tf-slider-header"><label>Altezza Sciatore</label><span>{poleH} cm</span></div>
-                  <input type="range" min="140" max="210" value={poleH} onChange={e => setPoleH(Number(e.target.value))} />
-                </div>
-                <div className="tf-slider-group">
-                  <label style={{fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.2em'}}>Livello Tecnico</label>
-                  <div className="tf-choice-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                    <div className={`tf-choice-btn ${poleL === 'l1' ? 'active' : ''}`} onClick={() => setPoleL('l1')}><span>Fino a L5</span><small>Moltiplicatore 1.50</small></div>
-                    <div className={`tf-choice-btn ${poleL === 'l6' ? 'active' : ''}`} onClick={() => setPoleL('l6')}><span>L6 - Pro</span><small>Moltiplicatore 1.53</small></div>
+                  <div className="tf-slider-header">
+                    <label>Meteo In Pista</label>
+                    <span>{temp}°C</span>
                   </div>
+                  <input type="range" min="-20" max="10" value={temp} onChange={(e) => setTemp(Number(e.target.value))} />
                 </div>
-                
                 <div className="tf-result">
-                  <p>Lunghezza Consigliata</p>
-                  <h3>{calculatePole(poleH, poleL)} cm</h3>
+                  <p>Layering Ideale</p>
+                  <h3 style={{ fontSize: '1.2rem', color: '#fff', lineHeight: 1.4 }}>{calcLayering(temp)}</h3>
+                </div>
+              </div>
+            )}
+
+            {data.id.includes('maschera') && (
+              <div className="typeform-module">
+                <label style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                  Condizione Meteo
+                </label>
+                <select
+                  value={weather}
+                  onChange={(e) => setWeather(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: '#111',
+                    color: '#fff',
+                    padding: '12px',
+                    marginTop: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.15)'
+                  }}
+                >
+                  <option value="sole">Pieno Sole</option>
+                  <option value="nuvoloso">Variabile / Ombra nel bosco</option>
+                  <option value="nebbia">Nebbia / Neve fitta</option>
+                </select>
+                <div className="tf-result">
+                  <p>Categoria Lente</p>
+                  <h3 style={{ fontSize: '1.4rem', color: '#00e5ff' }}>{calcLens(weather)}</h3>
                 </div>
               </div>
             )}
