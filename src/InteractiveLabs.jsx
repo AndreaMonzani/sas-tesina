@@ -178,8 +178,8 @@ function HelmetLab() {
       copy: 'Si deforma durante l’urto assorbendo energia cinetica. L’EPS si schiaccia in modo permanente; l’EPP ha maggiore recupero elastico. Dopo un urto severo va comunque sostituito.'
     },
     rotation: {
-      title: 'Gestione della rotazione — Impatti obliqui',
-      copy: 'Sistemi come Mips permettono un micro-scorrimento interno (10–15 mm) progettato per ridurre le forze rotazionali trasmesse alla testa negli impatti angolati.'
+      title: 'Protezione negli impatti obliqui',
+      copy: 'Sistemi come Mips permettono un micro-scorrimento interno (10–15 mm) progettato per ridurre le forze rotazionali trasmesse al cervello durante gli impatti obliqui.'
     }
   };
 
@@ -206,7 +206,7 @@ function HelmetLab() {
       {
         badge: 'Requisiti gara',
         title: 'FIS RH 2013',
-        subtitle: 'Obbligatorio per GS, SG e DH FIS.',
+        subtitle: 'Obbligatorio per gare FIS.',
         body: 'Richiede EN 1077 A + ASTM F2040 + prova aggiuntiva d’impatto a 6,8 m/s (velocità di test di laboratorio, non limite massimo di sciata garantito).'
       }
     ],
@@ -258,7 +258,7 @@ function HelmetLab() {
       copy: 'Verifica la certificazione EN 1077 (A o B) e consulta test indipendenti sul singolo modello (es. Virginia Tech). Provalo sempre insieme alla maschera.'
     },
     race: {
-      title: 'Gara GS / SG / DH',
+      title: 'Gara',
       copy: 'Controlla la presenza dell’etichetta FIS RH 2013 sulla calotta. Il solo logo Mips non rende un casco idoneo alle competizioni FIS.'
     },
     tour: {
@@ -289,7 +289,7 @@ function HelmetLab() {
       explanation: 'È un riflettore passivo senza batteria: riflette il segnale del rilevatore RECCO dei soccorritori.'
     },
     {
-      question: 'Per una gara FIS di gigante, quale etichetta cerchi?',
+      question: 'Per una gara agonistica ufficiale, quale etichetta cerchi?',
       answers: ['FIS RH 2013.', 'Soltanto Mips.', 'Soltanto EN 1078 per ciclismo.'],
       correct: 0,
       explanation: 'FIS RH 2013 unisce EN 1077 A, ASTM F2040 e il test d’impatto aggiuntivo a 6,8 m/s.'
@@ -424,8 +424,7 @@ function HelmetLab() {
       <LabFooter
         sources={[
           { label: 'Mips Protection', url: 'https://mipsprotection.com/snow/' },
-          { label: 'RECCO', url: 'https://recco.com' },
-          { label: 'Virginia Tech Ratings', url: 'https://helmet.beam.vt.edu/snowsport-helmet-ratings.html' }
+          { label: 'RECCO', url: 'https://recco.com' }
         ]}
       />
     </div>
@@ -471,82 +470,75 @@ function SkiLab() {
 
   const techItems = [
     {
-      badge: 'Prodotto commerciale · Costruzione',
-      title: 'Nordica Energy TI Double Core',
-      subtitle: 'Doppio nucleo in legno con inserto centrale in elastomero e Titanal.',
-      body: 'Inserire uno strato ammortizzante tra due anime in legno permette di ottenere stabilità torsionale sul duro senza rendere lo sci eccessivamente nervoso o faticoso.'
+      badge: 'Costruzione · Rinforzi Strutturali',
+      title: 'Titanal, Carbonio e Double Core',
+      subtitle: 'Bilanciare stabilità e peso.',
+      body: 'L\'inserimento di fogli in Titanal (lega di alluminio) stabilizza lo sci ad alta velocità. Nuove costruzioni ibride o "Double Core" usano inserti in elastomero tra due anime in legno per filtrare le vibrazioni mantenendo un flex rotondo e meno faticoso.'
     },
     {
-      badge: 'Prodotto commerciale · Vibrazioni',
-      title: 'HEAD EMC (Energy Management Circuit)',
-      subtitle: 'Circuito piezoelettrico integrato.',
-      body: 'Converte l’energia cinetica delle vibrazioni in energia elettrica dissipata tramite un circuito interno, riducendo le oscillazioni parassite della spatola.'
+      badge: 'Smorzamento attivo delle vibrazioni',
+      title: 'Sistemi di dissipazione energetica (es. HEAD EMC)',
+      subtitle: 'Riduzione delle oscillazioni parassite.',
+      body: 'Alcuni sci moderni usano circuiti piezoelettrici o polimeri non newtoniani. Con l\'aumentare della velocità e delle vibrazioni sul ghiaccio, questi materiali dissipano l\'energia cinetica per stabilizzare rapidamente la spatola.'
     },
     {
-      badge: 'Su ordinazione · Personalizzazione',
-      title: 'ORIGINAL+ Custom 6X / Wagner Custom',
-      subtitle: 'Costruzione su misura guidata dai dati dello sciatore.',
-      body: 'La personalizzazione non riguarda solo la grafica: geometria, rigidità torsionale e distribuzione del flex vengono calibrate su peso, altezza, stile e terreno prevalente.'
-    },
-    {
-      badge: 'Progetto di ricerca · Non commerciale',
-      isResearch: true,
-      title: 'Smart Ski Experience (Rossignol & CEA)',
-      subtitle: 'Recupero energetico dalla deformazione dello sci.',
-      body: 'Prototipo sperimentale che trasforma la flessione meccanica dello sci in elettricità per alimentare sensori o accessori. Non è un prodotto commerciale di serie.'
+      badge: 'Geometrie Multi-Raggio',
+      title: 'Rocker, Camber e Multi-Radius',
+      subtitle: 'Versatilità in curva.',
+      body: 'Le sciancrature moderne fondono raggi corti in spatola (per un ingresso curva fulmineo) e raggi medi in coda (per stabilità). Il Rocker in spatola facilita l\'inversione e il galleggiamento in fresca, senza agganciare bruscamente lo spigolo.'
     }
   ];
 
-  const nordicaRecs = {
+  const generalRecs = {
     pista: {
       principiante: {
-        basso: 'Nordica Spitfire 73 · Easy Carve: sciancratura intuitiva e flex progressivo per facilitare le prime curve.',
-        medio: 'Nordica Spitfire 75 FDT · Progression: accompagna il passaggio allo sci parallelo con grande tolleranza.',
-        alto: 'Nordica Spitfire CA FDT: legno e carbonio per tenuta sul duro senza il peso del metallo.'
+        basso: 'Entry Level (Raggio 11-13 m): flex molto morbido e geometria tollerante (cap) per facilitare lo spazzaneve e le prime curve a sci paralleli.',
+        medio: 'All-Round Base (Raggio 12-14 m): nucleo leggero (spesso senza inserti in metallo), spatola morbida che perdona gli arretramenti.',
+        alto: 'All-Round Evolution: costruzione sandwich leggera in legno/carbonio. Stabile ma non faticoso, per accompagnare il progresso senza stressare le articolazioni.'
       },
       intermedio: {
-        basso: 'Nordica Spitfire CA · Frontside Sport: inversione rapida e maneggevolezza su piste battute.',
-        medio: 'Nordica Spitfire TI FDT · Sport Carve: Titanal + elastomero per conduzione stabile sul compatto.',
-        alto: 'Nordica Dobermann Multipista DC 74 TI: precisione Double Core con spatola gestibile tutto il giorno.'
+        basso: 'Sport Carve leggero (Centro 72-74 mm): reattivo ma tollerante, permette di sviluppare la conduzione senza richiedere fisicità eccessiva.',
+        medio: 'Sport Carve rinforzato (Raggio 14-15 m): rinforzi singoli in Titanal per mantenere stabilità a velocità di crociera su neve compatta.',
+        alto: 'Performance Multi-Raggio: struttura robusta ma spatola gestibile. Ideale per l\'amatore evoluto (L5) che cerca precisione ma scia tutto il giorno.'
       },
       esperto: {
-        basso: 'Nordica Dobermann SLR DC / GSR DC: reattività nello stretto o negli archi ampi sul ripido.',
-        medio: 'Nordica Dobermann Multigara DC: doppio legno e doppio Titanal per sciatori L6–L7.',
-        alto: 'Nordica Dobermann FIS / ORIGINAL+ Custom 6X: massima precisione agonistica o costruzione su misura.'
+        basso: 'Race Carve Commerciale (SL/GS): derivati dai modelli da gara, richiedono tecnica solida (L6) e preparazione atletica per essere sfruttati sul ghiaccio.',
+        medio: 'Race Carve Master (Doppio Titanal, Piastra Rigida): sci pesanti e ultra-strutturati, ideali solo per sciatori potenti (L7) su pendenze importanti.',
+        alto: 'Custom Biometrico o Workshop: costruzione artigianale o algoritmica calibrata esattamente su peso, altezza e biomeccanica dello sciatore (es. ORIGINAL+ o laboratori specializzati).'
       }
     },
     allmountain: {
       principiante: {
-        basso: 'Nordica Steadfast 75 CA: leggero e tollerante anche sulla neve smossa del pomeriggio.',
-        medio: 'Nordica Steadfast 80 CA: equilibrio tra pista battuta e bordo pista.',
-        alto: 'Nordica Steadfast 80 DC: assorbimento fluido delle sconnessioni con minimo affaticamento.'
+        basso: 'All-Mountain Easy (Centro 76-80 mm): largo sotto il piede per dare stabilità extra su nevi mosse o cumuli primaverili.',
+        medio: 'All-Mountain Base: profilo rocker accentuato in punta per galleggiare meglio e non agganciare lo spigolo per errore.',
+        alto: 'Crossover Leggero (80-84 mm): sci estremamente manovrabile che unisce la facilità in pista alla sicurezza a bordo pista.'
       },
       intermedio: {
-        basso: 'Nordica Steadfast 80 DC · Double Core: comfort e presa sicura su neve variabile.',
-        medio: 'Nordica Steadfast 85 DC: 85 mm al centro per alternare conduzione in pista e neve fresca.',
-        alto: 'Nordica Enforcer 89: doppio Titanal e spatola in carbonio per prestazioni elevate ovunque.'
+        basso: 'All-Mountain Resort (84-86 mm): 70% pista, 30% fuoripista. Attutisce le vibrazioni sulla neve rotta tipica del pomeriggio.',
+        medio: 'All-Mountain Strutturato (86-90 mm): spesso con rinforzi sotto l\'attacco. Conduce in pista ma non teme brevi uscite in neve fresca.',
+        alto: 'All-Mountain High Performance: anima in legno e leghe leggere, unisce tenuta su pista battuta a spiccate doti di galleggiamento.'
       },
       esperto: {
-        basso: 'Nordica Enforcer 89: rigidità torsionale elevata per carvare forte su neve trasformata.',
-        medio: 'Nordica Enforcer 94: riferimento polivalente per sciatori esperti su ogni tipo di pendio.',
-        alto: 'Nordica Enforcer 99 / Wagner Custom All-Mountain: galleggiamento e potenza ad alta velocità.'
+        basso: 'All-Mountain Charger (90-95 mm): sci rigido, richiede velocità per deformarsi. Perfetto per carvare sulla neve smossa o trasformata.',
+        medio: 'Freeride-Carve (95-100 mm): lo sci totale per l\'esperto. Doppia anima in metallo, distrugge il traffico in pista e vola nella polvere.',
+        alto: 'Custom All-Mountain: costruzione personalizzata per il professionista che alterna boschi ripidi a veloci rientri su pista.'
       }
     },
     fuoripista: {
       principiante: {
-        basso: 'Nordica Unleashed 90: twin-tip agile e leggero per i primi approcci fuori pista.',
-        medio: 'Nordica Unleashed 98 CA: risposta elastica e intuitiva in neve fresca e boschetti.',
-        alto: 'Nordica Unlimited 94: peso contenuto per freeride leggero e brevi risalite.'
+        basso: 'Freeride Entry (90-95 mm): twin-tip leggero e giocoso. Perfetto per i primissimi approcci nei boschetti a bordo pista.',
+        medio: 'Freeride Soft (95-100 mm): costruzione senza metallo. Flessibile e permissivo, perdona gli errori di bilanciamento in neve profonda.',
+        alto: 'Freetouring Leggero (95-100 mm): sci agile e leggero, adatto anche a brevi risalite con le pelli per chi vuole allontanarsi dagli impianti.'
       },
       intermedio: {
-        basso: 'Nordica Unleashed 98: Titanal sagomato per unire galleggiamento in powder e tenuta al rientro.',
-        medio: 'Nordica Enforcer 104: stabilità su neve ventata e tracciata.',
-        alto: 'Nordica Unlimited 104: geometria dedicata agli itinerari backcountry.'
+        basso: 'Freeride Playful (100-105 mm): grande galleggiabilità, ottimo per sciare in fresca con uno stile saltellante e creativo nei boschi.',
+        medio: 'Freeride All-Conditions (105-110 mm): il compromesso ideale per le grandi nevicate, mantenendo una struttura sufficiente per la neve crostosa.',
+        alto: 'Freeride Carbon Tech: inserti in carbonio per avere massima reattività sotto il piede senza aggiungere il peso del Titanal.'
       },
       esperto: {
-        basso: 'Nordica Unleashed 106: galleggiamento immediato nei canali ripidi.',
-        medio: 'Nordica Unleashed 114: 114 mm al centro con doppio rocker per polvere profonda.',
-        alto: 'Nordica Unleashed 120: massima superficie portante per big mountain.'
+        basso: 'Big Mountain (108-112 mm): sci direzionale per alte velocità su pendii aperti e incontaminati.',
+        medio: 'Deep Powder Charger (115+ mm): largo e rigido. La scelta per le giornate epiche, richiede gambe forti e spazi ampi.',
+        alto: 'Pro Freeride Custom: lo strumento definitivo per atleti e maestri che affrontano canali estremi o l\'heliskiing, calibrato su misura.'
       }
     }
   };
@@ -569,18 +561,17 @@ function SkiLab() {
       explanation: 'Sono due movimenti meccanici distinti che influenzano rispettivamente facilità di deformazione e tenuta di spigolo.'
     },
     {
-      question: 'Che cosa può riguardare la personalizzazione avanzata di uno sci (es. ORIGINAL+)?',
+      question: 'Come si comportano generalmente gli sci della categoria "All-Mountain" (80-95mm al centro)?',
       answers: [
-        'Anche la costruzione interna, la rigidità e la geometria oltre all’estetica.',
-        'Esclusivamente il colore della grafica.',
-        'Solo la lunghezza dei bastoni abbinati.'
+        'Sono sci esclusivamente da gara per le discipline veloci (Discesa Libera).',
+        'Offrono un compromesso: galleggiano meglio nella neve smossa/fresca ma sono leggermente più lenti nei cambi di spigolo in pista.',
+        'Hanno le lamine solo su un lato.'
       ],
-      correct: 0,
-      explanation: 'La produzione algoritmica su misura calibra stratificazione, flex e sciancratura sul singolo sciatore.'
+      correct: 1,
+      explanation: 'La maggiore larghezza al centro aumenta la superficie d\'appoggio (galleggiamento) a discapito della rapidità d\'inversione (edge-to-edge) su pista battuta.'
     }
   ];
 
-  // Calcolo visivo qualitativo SVG
   const arcDepth = 45 - (flexLong / 100) * 30;
   const twistSkew = 16 - (torsion / 100) * 14;
   const vibAmp = 14 - (damping / 100) * 12;
@@ -600,28 +591,24 @@ function SkiLab() {
         <div>
           <div className="diagram-stage">
             <svg viewBox="0 0 600 260" role="img" aria-label="Sezione esplosa illustrativa degli strati di uno sci">
-              {/* Strato 1: Rinforzi superiori */}
               <polygon
                 points="110,45 490,45 530,72 70,72"
                 fill={part === 'rinforzi' ? 'rgba(0, 229, 255, 0.45)' : 'rgba(148, 163, 184, 0.25)'}
                 stroke={part === 'rinforzi' ? '#00e5ff' : 'rgba(255,255,255,0.25)'}
                 strokeWidth="2"
               />
-              {/* Strato 2: Smorzamento */}
               <polygon
                 points="110,84 490,84 530,111 70,111"
                 fill={part === 'smorzamento' ? 'rgba(255, 204, 0, 0.45)' : 'rgba(255, 204, 0, 0.14)'}
                 stroke={part === 'smorzamento' ? '#ffcc00' : 'rgba(255,204,0,0.35)'}
                 strokeWidth="2"
               />
-              {/* Strato 3: Anima */}
               <polygon
                 points="100,124 500,124 542,155 58,155"
                 fill={part === 'anima' ? 'rgba(0, 229, 255, 0.55)' : 'rgba(56, 189, 248, 0.22)'}
                 stroke={part === 'anima' ? '#ffffff' : 'rgba(255,255,255,0.3)'}
                 strokeWidth="2"
               />
-              {/* Strato 4: Lamine laterali */}
               <rect
                 x="56"
                 y="168"
@@ -632,7 +619,6 @@ function SkiLab() {
                 stroke={part === 'lamine' ? '#ffffff' : 'none'}
                 strokeWidth="1.5"
               />
-              {/* Strato 5: Soletta */}
               <polygon
                 points="96,192 504,192 544,220 56,220"
                 fill={part === 'soletta' ? 'rgba(0, 229, 255, 0.5)' : 'rgba(15, 23, 42, 0.9)'}
@@ -646,7 +632,7 @@ function SkiLab() {
               <text x="24" y="210" fill="#00e5ff" fontSize="12">Soletta</text>
             </svg>
             <p className="diagram-caption">
-              Esempio illustrativo di sezione esplosa: materiali e disposizione degli strati cambiano tra prodotti e discipline.
+              Esempio illustrativo di sezione esplosa: materiali e disposizione cambiano in base alla casa costruttrice e alla destinazione d'uso.
             </p>
           </div>
 
@@ -684,7 +670,6 @@ function SkiLab() {
           <div className="sim-box">
             <div className="diagram-stage" style={{ marginBottom: '14px' }}>
               <svg viewBox="0 0 560 150" role="img" aria-label="Simulazione qualitativa di flessione, torsione e vibrazioni dello sci">
-                {/* Arco flessione longitudinale */}
                 <path
                   d={`M 40 50 Q 280 ${50 + arcDepth} 520 50`}
                   stroke="#00e5ff"
@@ -692,7 +677,6 @@ function SkiLab() {
                   strokeLinecap="round"
                   fill="none"
                 />
-                {/* Torsione */}
                 <ellipse
                   cx="280"
                   cy="50"
@@ -703,7 +687,6 @@ function SkiLab() {
                   strokeWidth="2"
                   fill="rgba(255,204,0,0.12)"
                 />
-                {/* Onda vibrazioni residue */}
                 <path
                   d={`M 60 120 Q 115 ${120 - vibAmp} 170 120 T 280 120 T 390 120 T 500 120`}
                   stroke="rgba(255,255,255,0.7)"
@@ -742,23 +725,23 @@ function SkiLab() {
           </div>
 
           <div className="lab-card" style={{ marginBottom: '16px' }}>
-            <h5>Compromesso dinamico</h5>
+            <h5>Compromesso dinamico in pista</h5>
             <p>
               {flexLong > 70
-                ? 'Una flessione rigida offre sostegno ad alta velocità, ma richiede più forza e centralità per deformare lo sci a basse andature. '
-                : 'Una flessione più morbida facilita l’ingresso curva a velocità moderata, ma tende a cedere se spinta al limite sul ripido. '}
+                ? 'Una flessione rigida offre sostegno ad alta velocità, ma richiede più forza e centralità per deformare lo sci a basse andature (ideale per esperti L6+). '
+                : 'Una flessione più morbida facilita l’ingresso curva a velocità moderata, ma tende a cedere se spinta al limite sul ripido (ideale per livelli L3-L5). '}
               {torsion > 70
-                ? 'L’alta rigidità torsionale massimizza la presa di spigolo sul ghiaccio, riducendo però la tolleranza agli errori di inclinazione. '
+                ? 'L’alta rigidità torsionale massimizza la presa di spigolo sul ghiaccio, riducendo però la tolleranza agli errori. '
                 : 'Una torsione più docile perdona le sbavature, ma perde precisione sul terreno ghiacciato. '}
               {damping > 70
-                ? 'Un forte smorzamento rende la sciata silenziosa e fluida, attenuando però parte del feedback diretto della neve.'
-                : 'Uno smorzamento contenuto mantiene lo sci reattivo e rapido nei cambi, trasmettendo più vibrazioni.'}
+                ? 'Un forte smorzamento rende la sciata silenziosa e fluida, ideale sulle piste rovinate di fine giornata.'
+                : 'Uno smorzamento contenuto mantiene lo sci reattivo e rapido nei cambi, trasmettendo vibrazioni dirette.'}
             </p>
           </div>
 
           <div className="sim-box" style={{ marginBottom: 0 }}>
             <h5 style={{ fontFamily: 'Syne, sans-serif', fontSize: '0.98rem', color: 'var(--accent-gold)', marginBottom: '10px' }}>
-              Consigliatore orientativo · Gamma Nordica
+              Consigliatore: Trova la categoria adatta
             </h5>
             <div className="choice-grid-3" style={{ marginBottom: '10px' }}>
               <button type="button" className={`choice-card ${terrain === 'pista' ? 'active' : ''}`} onClick={() => setTerrain('pista')}>
@@ -803,7 +786,7 @@ function SkiLab() {
               </button>
             </div>
             <p style={{ fontSize: '0.86rem', color: '#ffffff', lineHeight: 1.5 }}>
-              {nordicaRecs[terrain][level][budget]}
+              {generalRecs[terrain][level][budget]}
             </p>
           </div>
         </div>
@@ -813,8 +796,8 @@ function SkiLab() {
 
       <LabFooter
         sources={[
-          { label: 'Nordica Skis', url: 'https://www.nordica.com' },
-          { label: 'HEAD EMC', url: 'https://www.head.com' },
+          { label: 'HEAD Ski Technology', url: 'https://www.head.com' },
+          { label: 'Salomon Alpine Tech', url: 'https://www.salomon.com' },
           { label: 'ORIGINAL+ Custom', url: 'https://www.original.plus' }
         ]}
       />
@@ -833,7 +816,7 @@ function BootLab() {
   const bootParts = {
     scafo: {
       title: 'Scafo inferiore (Shell)',
-      copy: 'Avvolge il piede e costituisce la base rigida che trasmette gli impulsi laterali direttamente alla piastra e allo sci.'
+      copy: 'Avvolge il piede e costituisce la base rigida che trasmette gli impulsi laterali direttamente alla piastra e allo sci. Determina i volumi interni (Last).'
     },
     gambetto: {
       title: 'Gambetto (Cuff)',
@@ -841,7 +824,7 @@ function BootLab() {
     },
     scarpetta: {
       title: 'Scarpetta interna (Liner)',
-      copy: 'Elemento imbottito e termoformabile che isola termicamente il piede e riempie gli spazi tra anatomia e plastica.'
+      copy: 'Elemento imbottito e termoformabile. Isola termicamente il piede e riempie in modo personalizzato gli spazi tra anatomia e plastica.'
     },
     linguetta: {
       title: 'Linguetta',
@@ -849,94 +832,94 @@ function BootLab() {
     },
     plantare: {
       title: 'Plantare (Footbed)',
-      copy: 'Sostiene l’arco plantare, stabilizza il tallone nella sua sede e migliora la sensibilità propriocettiva sotto la pianta.'
+      copy: 'Sostiene l’arco plantare, stabilizza il tallone nella sua sede per non farlo sollevare e migliora la sensibilità propriocettiva.'
     },
     chiusure: {
       title: 'Chiusure (Ganci micrometrici / BOA)',
-      copy: 'Regolano la tensione di chiusura durante la giornata. Il sistema BOA avvolge lo scafo inferiore con un cavo uniforme.'
+      copy: 'Regolano la tensione di chiusura durante la giornata. I ganci tirano in punti specifici, il BOA avvolge lo scafo inferiore uniformemente.'
     },
     suola: {
       title: 'Suola (ISO 5355 / GripWalk / Touring)',
-      copy: 'Interfaccia meccanica con puntale e talloniera dell’attacco: deve essere certificata compatibile con il sistema di sgancio.'
+      copy: 'Interfaccia meccanica con puntale e talloniera dell’attacco: deve essere certificata compatibile con il sistema di sgancio (es. pad GripWalk in gomma).'
     }
   };
 
   const techItems = [
     {
-      badge: 'Misura',
+      badge: 'Misura (Lunghezza)',
       title: 'Mondopoint (MP)',
       subtitle: 'Lunghezza reale del piede in cm/mm.',
-      body: 'Corrisponde alla lunghezza interna dello scafo (es. 26.5 = 26,5 cm). È il punto di partenza reale prima di valutare qualsiasi imbottitura.'
+      body: 'Corrisponde alla lunghezza interna dello scafo (es. 26.5 = 26,5 cm). È il punto di partenza reale: un principiante non dovrebbe mai prendere "una taglia in più" per stare comodo, ma scegliere un volume corretto.'
     },
     {
       badge: 'Larghezza',
       title: 'Last (Pianta dell’avampiede)',
       subtitle: 'Larghezza interna in millimetri (92–104 mm).',
-      body: 'Indica lo spazio trasversale sull’avampiede (riferito alla misura campione 26.5 e proporzionato sulle altre taglie).'
+      body: 'Indica lo spazio trasversale sull’avampiede (riferito alla misura campione 26.5 e proporzionato sulle altre taglie). 96mm è stretto (Low Volume), 100mm medio (Mid Volume), 102+mm largo (High Volume).'
     },
     {
       badge: 'Rigidità',
       title: 'Indice di Flex',
       subtitle: 'Resistenza al piegamento anteriore.',
-      body: 'Esprime quanto il gambetto oppone resistenza alla flessione. Non esiste uno standard unico tra marchi: un 110 di un brand può differire da un 110 di un altro.'
+      body: 'Esprime quanto il gambetto oppone resistenza alla flessione. Non esiste uno standard unico tra marchi: un 110 di un brand può differire da un 110 di un altro. Inoltre, il flex varia molto in base alla temperatura esterna (le plastiche si irrigidiscono al gelo).'
     },
     {
-      badge: 'Chiusura vs Modellazione',
-      title: 'BOA Fit vs Termoformatura',
+      badge: 'Personalizzazione Estrema',
+      title: 'BOA Fit vs Termoformatura (Scansione 3D)',
       subtitle: 'Due funzioni complementari ma distinte.',
-      body: 'La chiusura BOA regola la tensione esterna di avvolgimento; la termoformatura (Infrared, Custom Shell, Memory Fit) modella a caldo scarpetta e scafo sull’anatomia.'
+      body: 'La chiusura BOA regola l’avvolgimento temporaneo. La termoformatura (Infrared, Custom Shell, Memory Fit) avviene invece in laboratorio, spesso preceduta da una scansione 3D del piede (es. Wintersteiger ER_WIN), per dilatare a caldo in modo permanente le plastiche nei punti di attrito anatomici (malleoli, osso navicolare).'
     }
   ];
 
   const footZones = {
     avampiede: {
       title: 'Avampiede e testa dei metatarsi',
-      copy: 'Con un bootfitter si valuta se la larghezza interna (last) consente alle dita di distendersi senza compressione laterale né intorpidimento, mantenendo comunque controllo.'
+      copy: 'Con un bootfitter si valuta se la larghezza interna (Last) consente alle dita di distendersi senza compressione laterale né intorpidimento. Se i metatarsi sono larghi (es. alluce valgo), si termoforma o fresa la plastica in quel punto specifico.'
     },
     collo: {
       title: 'Collo del piede (Instep)',
-      copy: 'Un collo del piede alto può subire compressione sotto lo scafo inferiore o la linguetta, riducendo la circolazione. Si valuta il volume verticale dello scafo e il posizionamento delle chiusure.'
+      copy: 'Un collo del piede alto può subire compressione sotto lo scafo inferiore o la linguetta, addormentando il piede per blocco circolatorio. Si valuta il volume verticale dello scafo.'
     },
     tallone: {
       title: 'Tallone e retropiede',
-      copy: 'Il tallone deve restare bloccato nella tasca posteriore quando si piega la caviglia in avanti: se si solleva, si perde precisione nella trasmissione dello spigolo.'
+      copy: 'Il tallone deve restare perfettamente bloccato nella tasca posteriore quando si piega la caviglia in avanti. Se si solleva (heel lift), si perde gran parte della precisione nella trasmissione dello spigolo.'
     },
     malleoli: {
       title: 'Malleoli (interno ed esterno)',
-      copy: 'Sono le sporgenze ossee più esposte al contatto con lo scafo. In laboratorio si valuta l’allineamento rispetto alle sedi preformate o la necessità di termoformatura mirata.'
+      copy: 'Sono le sporgenze ossee più esposte al contatto con lo scafo rigido. In laboratorio si valuta l’allineamento rispetto alle sedi preformate; se causano dolore (borsite), la termoformatura crea una "bolla" di spazio extra nella plastica.'
     }
   };
 
   const quiz = [
     {
-      question: 'Il sistema BOA permette di compensare qualsiasi errore di taglia dello scarpone?',
+      question: 'Il sistema BOA o stringere forte i ganci permette di compensare l\'acquisto di uno scarpone di 2 taglie più grande?',
       answers: [
-        'Sì, basta stringere di più la rotella per colmare due misure in eccesso.',
-        'No, regola l’avvolgimento della chiusura ma non sostituisce una taglia e un volume corretti.',
-        'Sì, perché accorcia fisicamente la lunghezza dello scafo.'
+        'Sì, basta stringere molto forte per bloccare il piede.',
+        'No: le chiusure regolano la tensione, ma non sostituiscono una lunghezza (Mondopoint) e un volume (Last) corretti.',
+        'Sì, perché il cavo in acciaio accorcia fisicamente la lunghezza dello scafo.'
       ],
       correct: 1,
-      explanation: 'BOA migliora l’uniformità della chiusura, ma lo scarpone deve prima corrispondere a lunghezza (Mondopoint) e volumi del piede.'
+      explanation: 'Comprare scarponi grandi "per stare comodi" costringe a stringerli troppo, bloccando la circolazione sanguigna (i piedi si gelano) senza comunque avere precisione sugli sci.'
     },
     {
-      question: 'Due scarponi di marchi diversi con lo stesso flex dichiarato (es. 110) si comportano in modo identico?',
+      question: 'Due scarponi di marchi diversi con lo stesso flex dichiarato (es. Flex 110) si comportano in modo identico?',
       answers: [
-        'No, il flex non è uno standard universale e varia per geometria, plastiche e temperatura.',
-        'Sì, è un valore certificato identico per tutti i produttori.',
-        'Sì, ma solo se hanno lo stesso colore.'
+        'No, il flex non è uno standard universale e varia per geometrie, miscele di plastiche e temperatura esterna.',
+        'Sì, è un valore ISO certificato uguale per tutti i produttori al mondo.',
+        'Sì, ma solo se usati su piste nere.'
       ],
       correct: 0,
-      explanation: 'Ogni azienda misura la resistenza alla flessione con criteri propri: il flex serve per confrontare modelli della stessa linea.'
+      explanation: 'Ogni azienda ha i propri parametri di misurazione. Il Flex è utile per confrontare scarponi all\'interno dello stesso catalogo aziendale.'
     },
     {
-      question: 'Termoformatura e serraggio delle chiusure sono la stessa operazione?',
+      question: 'La termoformatura e il serraggio dei ganci sulla neve sono la stessa operazione?',
       answers: [
-        'Sì, stringere i ganci a freddo equivale a termoformare.',
-        'No: la termoformatura modella a caldo i materiali sull’anatomia, mentre le chiusure regolano la tensione d’uso.',
-        'La termoformatura riguarda solo i bastoni.'
+        'Sì, stringere i ganci a freddo in pista equivale a termoformare.',
+        'No: la termoformatura modella permanentemente a caldo le plastiche in laboratorio per adattarle alle ossa (bootfitting); i ganci regolano solo la tensione giornaliera.',
+        'La termoformatura riguarda solo le lamine.'
       ],
       correct: 1,
-      explanation: 'Sono operazioni distinte: la modellazione termica adatta i volumi interni, le chiusure mantengono il piede in sede.'
+      explanation: 'La personalizzazione estrema richiede forni, lampade a infrarossi e dime per modificare fisicamente la forma (Shell) o la scarpetta (Liner).'
     }
   ];
 
@@ -955,21 +938,18 @@ function BootLab() {
         <div>
           <div className="diagram-stage">
             <svg viewBox="0 0 560 290" role="img" aria-label="Schema anatomico di uno scarpone da sci">
-              {/* Gambetto */}
               <path
                 d="M210 35 L310 35 L335 165 L195 165 Z"
                 fill={bootPart === 'gambetto' ? 'rgba(0,229,255,0.42)' : 'rgba(51,65,85,0.55)'}
                 stroke={bootPart === 'gambetto' ? '#00e5ff' : 'rgba(255,255,255,0.25)'}
                 strokeWidth="2"
               />
-              {/* Scarpetta */}
               <path
                 d="M222 20 L298 20 L318 175 L410 198 L405 225 L205 225 Z"
                 fill={bootPart === 'scarpetta' ? 'rgba(255,204,0,0.38)' : 'rgba(148,163,184,0.2)'}
                 stroke={bootPart === 'scarpetta' ? '#ffcc00' : 'rgba(255,255,255,0.2)'}
                 strokeWidth="1.8"
               />
-              {/* Linguetta */}
               <path
                 d="M296 32 Q325 100 326 168"
                 stroke={bootPart === 'linguetta' ? '#00e5ff' : '#94a3b8'}
@@ -977,14 +957,12 @@ function BootLab() {
                 strokeLinecap="round"
                 fill="none"
               />
-              {/* Scafo */}
               <path
                 d="M192 162 L336 162 L442 196 Q455 212 445 235 L182 235 Q172 200 192 162 Z"
                 fill={bootPart === 'scafo' ? 'rgba(0,229,255,0.42)' : 'rgba(30,41,59,0.75)'}
                 stroke={bootPart === 'scafo' ? '#ffffff' : 'rgba(255,255,255,0.3)'}
                 strokeWidth="2"
               />
-              {/* Plantare */}
               <line
                 x1="205"
                 y1="224"
@@ -993,7 +971,6 @@ function BootLab() {
                 stroke={bootPart === 'plantare' ? '#ffcc00' : 'rgba(255,255,255,0.35)'}
                 strokeWidth={bootPart === 'plantare' ? '6' : '3'}
               />
-              {/* Chiusure / BOA */}
               <circle
                 cx="358"
                 cy="176"
@@ -1003,7 +980,6 @@ function BootLab() {
                 strokeWidth="2"
               />
               <line x1="315" y1="168" x2="395" y2="192" stroke="#00e5ff" strokeWidth="2" strokeDasharray="4 3" />
-              {/* Suola */}
               <rect
                 x="178"
                 y="237"
@@ -1055,10 +1031,10 @@ function BootLab() {
           <TechAccordionList items={techItems} />
           <div className="boot-brand-grid">
             {[
-              { name: 'Nordica', tech: 'Infrared + BOA', desc: 'Termoformatura mirata a infrarossi e avvolgimento BOA Speedmachine.', url: 'https://www.nordica.com' },
-              { name: 'Salomon', tech: 'Custom Shell HD', desc: 'Scafo in Kaprolene modellabile in ~10 minuti.', url: 'https://www.salomon.com' },
-              { name: 'Atomic', tech: 'Memory Fit + Mimic', desc: 'Adattamento termico di scafo, gambetto e scarpetta.', url: 'https://www.atomic.com' },
-              { name: 'Tecnica', tech: 'C.A.S. System', desc: 'Custom Adaptive Shape su scarpetta e scafo anatomico.', url: 'https://www.blizzard-tecnica.com' }
+              { name: 'Scansione 3D', tech: 'Wintersteiger ER_WIN', desc: 'Acquisizione biomeccanica 3D del piede in negozio prima della scelta.', url: 'https://www.wintersteiger.com' },
+              { name: 'Nordica', tech: 'Infrared Technology', desc: 'Riscaldamento mirato e preciso a lampada a infrarossi per creare spazio vitale.', url: 'https://www.nordica.com' },
+              { name: 'Salomon', tech: 'Custom Shell HD', desc: 'Scafo in Kaprolene (PU) interamente modellabile in forno in 10 minuti.', url: 'https://www.salomon.com' },
+              { name: 'Tecnica', tech: 'C.A.S. System', desc: 'Custom Adaptive Shape: plastiche e scarpette preformate per essere termoformate e fresate.', url: 'https://www.blizzard-tecnica.com' }
             ].map((b) => (
               <a key={b.name} href={b.url} target="_blank" rel="noreferrer" className="boot-brand-card">
                 <div>
@@ -1079,14 +1055,12 @@ function BootLab() {
         <div>
           <div className="diagram-stage">
             <svg viewBox="0 0 540 200" role="img" aria-label="Piede schematico con zone di valutazione bootfitting">
-              {/* Profilo piede stilizzato */}
               <path
                 d="M120 145 Q115 95 145 75 Q175 65 210 92 Q265 112 365 118 Q425 122 435 145 Q432 165 375 166 L145 166 Q122 162 120 145 Z"
                 fill="rgba(255,255,255,0.06)"
                 stroke="rgba(255,255,255,0.3)"
                 strokeWidth="2"
               />
-              {/* Zone cliccabili */}
               <circle
                 cx="148"
                 cy="132"
@@ -1127,15 +1101,15 @@ function BootLab() {
               <text x="355" y="185" fill="#ffcc00" fontSize="11">Avampiede</text>
             </svg>
             <p className="diagram-caption">
-              Mappa didattica per la prova in negozio: non sostituisce una valutazione individuale da parte di un bootfitter.
+              Mappa didattica: evidenzia le zone sensibili da analizzare durante la fase di acquisto e bootfitting specializzato. Non è uno strumento medico.
             </p>
           </div>
 
           <div className="part-pills">
             {[
-              { id: 'avampiede', label: 'Avampiede', color: '#ffcc00' },
-              { id: 'collo', label: 'Collo del piede', color: '#00e5ff' },
-              { id: 'tallone', label: 'Tallone', color: '#00e5ff' },
+              { id: 'avampiede', label: 'Avampiede (Last)', color: '#ffcc00' },
+              { id: 'collo', label: 'Collo (Instep)', color: '#00e5ff' },
+              { id: 'tallone', label: 'Tallone (Heel)', color: '#00e5ff' },
               { id: 'malleoli', label: 'Malleoli', color: '#ffcc00' }
             ].map((z) => (
               <button
@@ -1161,9 +1135,8 @@ function BootLab() {
 
       <LabFooter
         sources={[
-          { label: 'BOA Fit System', url: 'https://www.boafit.com' },
-          { label: 'Nordica Boots', url: 'https://www.nordica.com' },
-          { label: 'Atomic Memory Fit', url: 'https://www.atomic.com' }
+          { label: 'Wintersteiger Bootfitting', url: 'https://www.wintersteiger.com' },
+          { label: 'BOA Fit System', url: 'https://www.boafit.com' }
         ]}
       />
     </div>
@@ -1183,45 +1156,45 @@ function BindingLab() {
 
   const parts = {
     puntale: {
-      title: 'Puntale (Toe piece)',
-      copy: 'Trattiene la punta dello scarpone e gestisce lo sgancio laterale anteriore mediante alette molleggiate con ritorno elastico.'
+      title: 'Puntale (Toe peice)',
+      copy: 'Trattiene la punta dello scarpone e gestisce lo sgancio laterale anteriore (tipico nelle cadute in torsione avanti) mediante alette con ritorno elastico.'
     },
     talloniera: {
       title: 'Talloniera (Heel piece)',
-      copy: 'Blocca il tallone, applica la spinta longitudinale contro il puntale e gestisce lo sgancio verticale (e laterale nei sistemi come Tyrolia Protector).'
+      copy: 'Blocca il tallone verso il basso, applica la spinta longitudinale contro il puntale (precarico) e gestisce lo sgancio verticale nelle classiche cadute in avanti.'
     },
     skistopper: {
       title: 'Skistopper (Freno sci)',
-      copy: 'Bracci metallici tenuti sollevati dalla pressione della suola: appena lo scarpone si sgancia, scendono nella neve frenando lo sci.'
+      copy: 'Bracci metallici tenuti sollevati dalla pressione della suola: appena lo scarpone si sgancia, la molla li fa scendere nella neve per frenare lo sci ed evitare infortuni a terzi.'
     },
     scarpone: {
-      title: 'Scarpone inserito (Precarico)',
-      copy: 'Lo scarpone lavora compresso tra puntale e talloniera entro una finestra di spinta precisa per garantire sia trasmissione sia sgancio regolare.'
+      title: 'Scarpone inserito (Precarico longitudinale)',
+      copy: 'Lo scarpone lavora "compresso" tra puntale e talloniera. La finestra di spinta deve essere tarata al millimetro dal tecnico per garantire flessione dello sci e sgancio puntuale.'
     },
     contatto: {
-      title: 'Zone di contatto & Piastra AFD',
-      copy: 'La piastra antifrizione (AFD) sotto l’avampiede riduce l’attrito tra suola e puntale per consentire lo scorrimento laterale anche sotto carico.'
+      title: 'Piastra Antifrizione (AFD)',
+      copy: 'Teflon o rullo mobile posto sotto l’avampiede. Riduce drasticamente l’attrito meccanico tra la suola (soprattutto in gomma) e l\'attacco, garantendo uno scivolamento laterale pulito in fase di sgancio.'
     }
   };
 
   const techItems = [
     {
-      badge: 'Principio meccanico',
-      title: 'Ritenzione, Elasticità e Sgancio',
-      subtitle: 'L’equilibrio centrale della sicurezza.',
-      body: 'L’elasticità permette allo scarpone di muoversi di qualche millimetro durante gli urti e rientrare in sede senza sganci involontari; lo sgancio interviene quando la forza supera la taratura.'
+      badge: 'Principio meccanico base',
+      title: 'Ritenzione elastica vs Sgancio',
+      subtitle: 'Il vero equilibrio di un attacco da sci.',
+      body: 'L’attacco non deve "aprirsi sempre". L’elasticità (elastic travel) permette allo scarpone di assorbire i colpi violenti della sciata (vibrazioni, impatti sul ghiaccio) spostandosi di 1-2 cm e rientrando in sede senza aprirsi. Lo sgancio avviene SOLO quando la forza torsionale/verticale prolungata minaccia le ossa o i legamenti.'
     },
     {
       badge: 'Confronto direzioni di sgancio',
       title: 'Attacco Tradizionale vs Tyrolia Protector',
-      subtitle: 'Sgancio laterale anche al tallone.',
-      body: 'Un attacco alpino tradizionale sgancia lateralmente al puntale e verticalmente alla talloniera. Tyrolia Protector introduce una talloniera capace di ruotare anche lateralmente nelle cadute torsionali all’indietro.'
+      subtitle: 'Sgancio laterale posteriore a protezione dell\'LCA.',
+      body: 'Un attacco alpino classico sgancia lateralmente davanti (Puntale) e verticalmente dietro (Talloniera). In una caduta torsionale all\'indietro, il tallone resta incastrato ruotando il ginocchio. Il sistema Tyrolia Protector introduce una talloniera posta su una piastra capace di ruotare di 30° anche lateralmente, scaricando il legamento crociato anteriore.'
     },
     {
-      badge: 'Norme ISO',
-      title: 'Compatibilità Suola–Attacco',
-      subtitle: 'ISO 5355 · GripWalk (ISO 23223) · Touring (ISO 9523).',
-      body: 'Le suole hanno geometrie e attriti diversi: un attacco solo ISO 5355 non è compatibile con suole GripWalk o Touring, che richiedono attacchi marcati GripWalk o Multi-Norm (MNC).'
+      badge: 'Norme ISO Compatibilità',
+      title: 'Suole Alpina (ISO 5355) vs GripWalk (ISO 23223)',
+      subtitle: 'La giungla delle suole moderne.',
+      body: 'La classica suola in plastica liscia (Alpina ISO 5355) scivola perfettamente su ogni attacco. La nuova suola GripWalk ha pad in gomma curvi per camminare meglio, ma genera un enorme attrito in fase di sgancio e ha un’altezza diversa. Una suola GripWalk DEVE essere abbinata a un attacco che riporta il logo "GripWalk" (o MNC) e ha una piastra AFD adatta.'
     }
   ];
 
@@ -1235,30 +1208,30 @@ function BindingLab() {
     if (soleNorm === 'alpine') {
       return {
         ok: true,
-        text: 'Compatibile: la suola alpina piatta ISO 5355 è accettata da attacchi alpini standard, GripWalk e Multi-Norm (MNC), previa regolazione altezza puntale/spinta.'
+        text: 'COMPATIBILITÀ OK: La suola alpina piatta e liscia (ISO 5355) è lo standard storico accettato da tutti gli attacchi alpini, GripWalk e Multi-Norm (MNC), previa normale regolazione della spinta.'
       };
     }
     if (soleNorm === 'gw') {
       if (bindingNorm === 'alpine') {
         return {
           ok: false,
-          text: 'Non compatibile: anche se lo scarpone può entrare fisicamente, una suola GripWalk (ISO 23223) su attacco solo ISO 5355 altera altezza e attrito sull’AFD.'
+          text: 'PERICOLO: Incastrare uno scarpone GripWalk (gomma spessa curva) in un vecchio attacco (solo Alpino) altera l\'altezza del puntale e causa un attrito bloccante sulla piastra. L\'attacco non sgancerà lateralmente!'
         };
       }
       return {
         ok: true,
-        text: 'Compatibile: attacchi marcati GripWalk o Multi-Norm (MNC) sono progettati per il profilo rocker e i pad della suola ISO 23223.'
+        text: 'COMPATIBILITÀ OK: Gli attacchi marcati "GripWalk" o "Multi-Norm (MNC)" possiedono altezze e piastre AFD scorrevoli appositamente progettate per la gomma ISO 23223.'
       };
     }
     if (bindingNorm === 'mnc') {
       return {
         ok: true,
-        text: 'Compatibile (con verifica): gli attacchi Multi-Norm (MNC) accettano suole ISO 9523 Touring regolando l’altezza della piastra AFD.'
+        text: 'COMPATIBILITÀ OK: L\'attacco Multi-Norm (MNC/Sole.ID) ha una piastra AFD regolabile manualmente in altezza per accettare le altissime suole da scialpinismo (ISO 9523 Touring).'
       };
     }
     return {
       ok: false,
-      text: 'Non compatibile: le suole Touring ISO 9523 richiedono attacchi certificati MNC o specifici da scialpinismo.'
+      text: 'PERICOLO: Le spesse suole in gomma sagomata da Touring (ISO 9523) restano incastrate nei normali attacchi da discesa. Richiedono attacchi tecnici a pin o MNC.'
     };
   };
 
@@ -1266,34 +1239,34 @@ function BindingLab() {
 
   const quiz = [
     {
-      question: 'Quale compromesso deve gestire un attacco da sci?',
+      question: 'Qual è il compromesso meccanico principale che deve gestire un attacco da sci?',
       answers: [
-        'Bloccare per sempre lo scarpone senza mai aprirsi.',
-        'Bilanciare ritenzione elastica durante la sciata e sgancio controllato in caso di sovraccarico.',
-        'Sganciarsi ad ogni cambio di spigolo.'
+        'Bloccare per sempre lo scarpone, indipendentemente dalle forze applicate.',
+        'Bilanciare la ritenzione elastica (per sciare e assorbire i colpi) con lo sgancio tempestivo (quando le forze minacciano l\'articolazione).',
+        'Sganciarsi preventivamente a ogni cambio di spigolo rapido.'
       ],
       correct: 1,
-      explanation: 'L’attacco deve assorbire le sollecitazioni sciistiche tramite ritorno elastico e liberare lo scarpone solo oltre soglia.'
+      explanation: 'Senza ritenzione elastica perderemmo gli sci alla prima vibrazione sul ghiaccio. L\'attacco deve essere "sospensione" e "sicura" allo stesso tempo.'
     },
     {
-      question: 'Se uno scarpone entra fisicamente nell’attacco, significa che è automaticamente compatibile?',
+      question: 'Se uno scarpone moderno con suola in gomma GripWalk entra fisicamente a "scatto" dentro a un attacco tradizionale di 10 anni fa, significa che è sicuro?',
       answers: [
-        'No, occorre verificare la compatibilità certificata tra norma della suola (es. GripWalk, Touring) e puntale/AFD.',
-        'Sì, se si sente il clic della talloniera è sempre sicuro.',
-        'Sì, tutte le suole hanno identica altezza e attrito.'
+        'No: il clic non prova la sicurezza. Il maggior spessore e la gomma bloccheranno lo scivolamento laterale sulla piastra AFD durante una caduta, rischiando infortuni gravi al ginocchio.',
+        'Sì, la molla si occupa di tutto da sola.',
+        'Sì, le suole degli scarponi sono tutte universali dal 1990.'
       ],
       correct: 0,
-      explanation: 'Altezza del puntale e coefficiente di attrito dell’AFD cambiano tra ISO 5355, GripWalk e ISO 9523.'
+      explanation: 'Compatibilità geometrica non significa compatibilità dinamica. Suola GripWalk (ISO 23223) richiede un attacco GripWalk compatibile.'
     },
     {
-      question: 'Un’animazione didattica del meccanismo può prevedere l’esito di una caduta reale?',
+      question: 'Un’animazione didattica del meccanismo di un attacco (come quella in questa app) garantisce che in pista lo sci si sgancerà sempre?',
       answers: [
-        'Sì, garantisce al 100% lo sgancio in ogni situazione.',
-        'No, illustra le direzioni di funzionamento del sistema ma non può prevedere tutte le variabili di una caduta reale.',
-        'Sì, sostituisce la taratura in laboratorio.'
+        'Sì, assicura il 100% di protezione da qualsiasi infortunio.',
+        'No, le illustrazioni mostrano il principio di progettazione (cinematica ideale). In pista, neve, velocità e forze vettoriali complesse rendono l\'esito di una caduta imprevedibile.',
+        'Sì, sostituisce le macchine taratrici dei laboratori specializzati.'
       ],
       correct: 1,
-      explanation: 'Le animazioni mostrano la cinematica del meccanismo, mentre in pista intervengono velocità, angoli e forze imprevedibili.'
+      explanation: 'I simulatori spiegano il concetto, ma la taratura ISO sul macchinario (con i veri parametri di peso, età, e misura scafo) in negozio è l\'unica procedura di sicurezza valida.'
     }
   ];
 
@@ -1316,9 +1289,7 @@ function BindingLab() {
         <div>
           <div className="diagram-stage">
             <svg viewBox="0 0 560 220" role="img" aria-label="Schema dei componenti principali di un attacco da sci">
-              {/* Sci */}
               <rect x="40" y="166" width="480" height="12" rx="4" fill="rgba(148,163,184,0.3)" />
-              {/* Piastra AFD */}
               <rect
                 x="145"
                 y="156"
@@ -1327,28 +1298,24 @@ function BindingLab() {
                 rx="2"
                 fill={part === 'contatto' ? '#ffcc00' : 'rgba(255,255,255,0.3)'}
               />
-              {/* Puntale */}
               <path
                 d="M115 165 L165 165 L155 122 L120 132 Z"
                 fill={part === 'puntale' ? 'rgba(0,229,255,0.55)' : 'rgba(51,65,85,0.85)'}
                 stroke={part === 'puntale' ? '#ffffff' : '#00e5ff'}
                 strokeWidth="2"
               />
-              {/* Talloniera */}
               <path
                 d="M365 165 L435 165 L425 106 L372 118 Z"
                 fill={part === 'talloniera' ? 'rgba(0,229,255,0.55)' : 'rgba(51,65,85,0.85)'}
                 stroke={part === 'talloniera' ? '#ffffff' : '#00e5ff'}
                 strokeWidth="2"
               />
-              {/* Skistopper */}
               <path
                 d="M352 162 L305 148"
                 stroke={part === 'skistopper' ? '#ffcc00' : '#94a3b8'}
                 strokeWidth={part === 'skistopper' ? '5' : '3'}
                 strokeLinecap="round"
               />
-              {/* Scarpone inserito */}
               <path
                 d="M162 154 L368 154 L362 72 L285 72 L272 116 L166 130 Z"
                 fill={part === 'scarpone' ? 'rgba(255,204,0,0.35)' : 'rgba(255,255,255,0.08)'}
@@ -1359,7 +1326,7 @@ function BindingLab() {
               <text x="235" y="60" fill="#ffcc00" fontSize="12">Scarpone inserito</text>
               <text x="380" y="96" fill="#00e5ff" fontSize="12">Talloniera</text>
               <text x="275" y="140" fill="#cbd5e1" fontSize="11">Skistopper</text>
-              <text x="135" y="198" fill="#ffcc00" fontSize="11">Zone contatto &amp; AFD</text>
+              <text x="135" y="198" fill="#ffcc00" fontSize="11">Zone contatto (AFD)</text>
             </svg>
           </div>
 
@@ -1368,8 +1335,8 @@ function BindingLab() {
               { id: 'puntale', label: 'Puntale', color: '#00e5ff' },
               { id: 'talloniera', label: 'Talloniera', color: '#00e5ff' },
               { id: 'skistopper', label: 'Skistopper', color: '#94a3b8' },
-              { id: 'scarpone', label: 'Scarpone inserito', color: '#ffcc00' },
-              { id: 'contatto', label: 'Contatto suola / AFD', color: '#ffcc00' }
+              { id: 'scarpone', label: 'Scarpone / Precarico', color: '#ffcc00' },
+              { id: 'contatto', label: 'Piastra (AFD)', color: '#ffcc00' }
             ].map((p) => (
               <button
                 key={p.id}
@@ -1397,10 +1364,10 @@ function BindingLab() {
           <div className="sim-box">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <span style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-secondary)' }}>
-                Scenario di sollecitazione
+                Simulatore Didattico di Sgancio (A Rallentatore)
               </span>
               <button type="button" className="action-btn secondary" onClick={() => triggerAnimation(scenario)}>
-                ↻ Riavvia animazione
+                ↻ Riavvia Animazione
               </button>
             </div>
 
@@ -1410,42 +1377,39 @@ function BindingLab() {
                 className={`choice-card ${scenario === 'elastic' ? 'active' : ''}`}
                 onClick={() => triggerAnimation('elastic')}
               >
-                <strong>Urto lieve</strong>
-                <small>Ritorno elastico</small>
+                <strong>Sciata Aggressiva</strong>
+                <small>Assorbimento Elastico</small>
               </button>
               <button
                 type="button"
                 className={`choice-card ${scenario === 'front' ? 'active' : ''}`}
                 onClick={() => triggerAnimation('front')}
               >
-                <strong>Caduta frontale</strong>
-                <small>Sgancio verticale</small>
+                <strong>Caduta Frontale</strong>
+                <small>Sgancio Verticale</small>
               </button>
               <button
                 type="button"
                 className={`choice-card ${scenario === 'backtwist' ? 'active' : ''}`}
                 onClick={() => triggerAnimation('backtwist')}
               >
-                <strong>Torsione indietro</strong>
-                <small>Protector laterale</small>
+                <strong>Torsione Indietro</strong>
+                <small>Sistema Protector</small>
               </button>
             </div>
 
             <div className="diagram-stage" style={{ marginBottom: '10px' }}>
               <svg viewBox="0 0 540 190" role="img" aria-label="Animazione didattica del comportamento puntale e talloniera">
                 <rect x="40" y="146" width="460" height="10" rx="3" fill="rgba(148,163,184,0.3)" />
-                {/* Puntale */}
                 <path d="M115 145 L160 145 L150 108 L120 116 Z" fill="rgba(0,229,255,0.45)" stroke="#00e5ff" strokeWidth="2" />
-                {/* Talloniera con eventuale rotazione Protector */}
-                <g style={{ transform: `rotate(${heelRot}deg)`, transformOrigin: '390px 145px', transition: 'transform 0.9s ease' }}>
+                <g style={{ transform: `rotate(${heelRot}deg)`, transformOrigin: '390px 145px', transition: 'transform 1.2s ease' }}>
                   <path d="M360 145 L425 145 L415 92 L368 102 Z" fill="rgba(255,204,0,0.45)" stroke="#ffcc00" strokeWidth="2" />
                 </g>
-                {/* Scarpone animato */}
                 <g
                   style={{
-                    transform: `translate(${bootOffsetX}px, ${animStep === 1 && scenario !== 'elastic' ? -14 : 0}px) rotate(${bootRot}deg)`,
+                    transform: `translate(${bootOffsetX}px, ${animStep === 1 && scenario !== 'elastic' ? -16 : 0}px) rotate(${bootRot}deg)`,
                     transformOrigin: '260px 135px',
-                    transition: 'transform 0.9s ease'
+                    transition: 'transform 1.2s ease'
                   }}
                 >
                   <path
@@ -1455,51 +1419,50 @@ function BindingLab() {
                     strokeWidth="2"
                   />
                 </g>
-                <text x="115" y="34" fill="#00e5ff" fontSize="11">
+                <text x="65" y="34" fill="#00e5ff" fontSize="11" fontWeight="600">
                   {scenario === 'elastic'
-                    ? 'Elasticità: micro-spostamento e rientro in sede senza sgancio'
+                    ? 'Fase 1: Urti duri sulla pista. La molla arretra leggermente e riposiziona lo scarpone, zero sgancio.'
                     : scenario === 'front'
-                    ? 'Caduta in avanti: la talloniera si apre verso l’alto'
-                    : 'Tyrolia Protector: la talloniera ruota anche lateralmente nelle torsioni'}
+                    ? 'Fase 2: Volo in avanti (Forza in Z). La talloniera cede in verticale e sputa lo scarpone.'
+                    : 'Fase 3: Sedere a terra e torsione. La base Protector ruota laterlmente salvando i legamenti.'}
                 </text>
               </svg>
               <p className="diagram-caption">
-                Lo schema descrive il principio meccanico del sistema e non prevede l’esito di una caduta reale.
+                <strong>Attenzione Maestro:</strong> Questo schema vettoriale serve per spiegare la meccanica in aula. Non prevede in alcun modo la cinematica complessa di una caduta reale su pista!
               </p>
             </div>
           </div>
 
-          {/* Percorso compatibilità suola / attacco */}
           <div className="sim-box" style={{ marginBottom: 0 }}>
             <h5 style={{ fontFamily: 'Syne, sans-serif', fontSize: '0.96rem', color: 'var(--accent-gold)', marginBottom: '10px' }}>
-              Verifica compatibilità suola ↔ attacco
+              Test Interattivo: Compatibilità Suola ↔ Attacco
             </h5>
             <div className="choice-grid-3" style={{ marginBottom: '10px' }}>
               <button type="button" className={`choice-card ${soleNorm === 'alpine' ? 'active' : ''}`} onClick={() => setSoleNorm('alpine')}>
-                <strong>ISO 5355</strong>
-                <small>Suola Alpina</small>
+                <strong>Plastica Piatta</strong>
+                <small>ISO 5355 Alpina</small>
               </button>
               <button type="button" className={`choice-card ${soleNorm === 'gw' ? 'active' : ''}`} onClick={() => setSoleNorm('gw')}>
-                <strong>GripWalk</strong>
-                <small>ISO 23223</small>
+                <strong>Gomma Curva</strong>
+                <small>ISO 23223 (GripWalk)</small>
               </button>
               <button type="button" className={`choice-card ${soleNorm === 'tour' ? 'active' : ''}`} onClick={() => setSoleNorm('tour')}>
-                <strong>Touring</strong>
-                <small>ISO 9523</small>
+                <strong>Gomma Vibram Alta</strong>
+                <small>ISO 9523 (Touring)</small>
               </button>
             </div>
             <div className="choice-grid-3" style={{ marginBottom: '12px' }}>
               <button type="button" className={`choice-card ${bindingNorm === 'alpine' ? 'active' : ''}`} onClick={() => setBindingNorm('alpine')}>
-                <strong>Solo Alpino</strong>
-                <small>ISO 5355</small>
+                <strong>Vecchio Attacco</strong>
+                <small>Solo ISO 5355</small>
               </button>
               <button type="button" className={`choice-card ${bindingNorm === 'gw' ? 'active' : ''}`} onClick={() => setBindingNorm('gw')}>
-                <strong>GripWalk</strong>
-                <small>GW Ready</small>
+                <strong>Attacco Moderno</strong>
+                <small>Logo GripWalk (GW)</small>
               </button>
               <button type="button" className={`choice-card ${bindingNorm === 'mnc' ? 'active' : ''}`} onClick={() => setBindingNorm('mnc')}>
-                <strong>Multi-Norm</strong>
-                <small>MNC</small>
+                <strong>Attacco Regolabile</strong>
+                <small>Multi-Norm (MNC)</small>
               </button>
             </div>
             <p style={{ fontSize: '0.85rem', lineHeight: 1.5, color: compRes.ok ? 'var(--accent-green)' : 'var(--accent-red)' }}>
@@ -1513,8 +1476,8 @@ function BindingLab() {
 
       <LabFooter
         sources={[
-          { label: 'Tyrolia Protector', url: 'https://www.tyrolia.com' },
-          { label: 'Marker GripWalk / MNC', url: 'https://www.marker.net' }
+          { label: 'Tecnologia Tyrolia Protector', url: 'https://www.tyrolia.com/protector' },
+          { label: 'Compatibilità Suole Marker (GripWalk/MNC)', url: 'https://www.marker.net' }
         ]}
       />
     </div>
@@ -1535,83 +1498,83 @@ function PoleLab() {
   const parts = {
     impugnatura: {
       title: 'Impugnatura (Grip)',
-      copy: 'Guida l’angolazione del polso e trasmette la spinta nell’appoggio. Nei modelli tecnici presenta profili ergonomici per le dita.'
+      copy: 'Guida l’angolazione del polso e trasmette la spinta nell’appoggio. Nei modelli tecnici (es. Leki Trigger 3D) è progettata ergonomicamente per favorire l\'angolo naturale d\'appoggio.'
     },
     lacciolo: {
-      title: 'Lacciolo / Collegamento sganciabile',
-      copy: 'Collega la mano al bastone: può essere una fettuccia chiusa tradizionale oppure un sistema sganciabile integrato tra guanto e impugnatura.'
+      title: 'Lacciolo tradizionale / Loop Sganciabile',
+      copy: 'La fettuccia chiusa tradizionale lega la mano (ma non si apre da sola in caduta!). I moderni sistemi di ritenzione (Trigger) spostano il lacciolo direttamente sul guanto per agganciarsi a un perno meccanico.'
     },
     asta: {
-      title: 'Asta (Tubo)',
-      copy: 'Determina inerzia, bilanciamento e resistenza meccanica. Un bilanciamento spostato verso l’alto rende il movimento del polso più rapido.'
+      title: 'Asta (Tubo in Alu o Carbonio)',
+      copy: 'Determina l\'inerzia ("Swing weight"). Un bastone leggero in punta, ben bilanciato, si lascia muovere di polso molto più velocemente durante una sciata a cortoraggio.'
     },
     rondella: {
       title: 'Rondella (Basket)',
-      copy: 'Impedisce al bastone di affondare eccessivamente nella neve: compatta per pista battuta, più larga per neve fresca.'
+      copy: 'Ha una funzione pratica essenziale: impedisce al bastone di affondare per intero nella neve, rovinando l\'appoggio.'
     },
     puntale: {
-      title: 'Puntale in acciaio / carburo',
-      copy: 'Assicura l’ancoraggio anche su neve ghiacciata o compatta durante la puntatura.'
+      title: 'Puntale (Acciaio / Carburo di Tungsteno)',
+      copy: 'Incide la crosta o il ghiaccio vivo, fornendo trazione meccanica.'
     }
   };
 
   const techItems = [
     {
       badge: 'Materiali asta',
-      title: 'Alluminio vs Carbonio vs Misti',
-      subtitle: 'Resistenza agli urti contro leggerezza e bilanciamento.',
-      body: 'L’alluminio (es. 7075) resiste bene agli urti laterali piegandosi senza spezzarsi; il carbonio riduce peso e inerzia in punta; i tubi misti combinano leggerezza superiore e robustezza inferiore.'
+      title: 'Alluminio vs Carbonio Alto Modulo',
+      subtitle: 'Resistenza agli urti da taglio contro leggerezza assoluta.',
+      body: 'L’alluminio (lega 7075) è più resistente ai colpi netti contro le lamine (si piega ma non si spezza di colpo). Il carbonio è rigidissimo e leggerissimo in punta, garantendo uno swing weight imbattibile per i maestri.'
     },
     {
-      badge: 'Collegamento mano-bastone',
-      title: 'Lacciolo tradizionale vs LEKI Trigger',
-      subtitle: 'Serraggio continuo contro aggancio dedicato.',
-      body: 'Il lacciolo classico avvolge il polso restando chiuso; sistemi come LEKI Trigger collegano un anello del guanto direttamente all’impugnatura con sgancio rapido superiore.'
+      badge: 'Sistema di connessione e rilascio',
+      title: 'Fettuccia standard vs Meccanismo LEKI Trigger',
+      subtitle: 'Nessun lacciolo tradizionale si apre in automatico.',
+      body: 'Molti incidenti al pollice o alla spalla dello sciatore (Skier\'s thumb) sono causati dal bastone che resta impigliato. Il lacciolo cucito NON cede. Sistemi come il LEKI Trigger utilizzano una molla tarata: sotto carichi violenti verso l\'alto sganciano l\'anello del guanto per liberare la mano.'
     },
     {
-      badge: 'Consigliatore per disciplina',
-      title: 'Pista vs Gara vs Neve Fresca',
-      subtitle: 'Come cambiano asta, impugnatura e rondella.',
-      body: 'Pista: asta dritta, rondella media (50–55 mm). Gara SL/GS: tubo sagomato aerodinamico, paramani in slalom, rondella conica piccola. Neve fresca: impugnatura prolungata per prese variabili e rondella larga (85–95 mm).'
+      badge: 'Geometrie specialistiche',
+      title: 'Da Pista vs Da Gigante vs Freeride',
+      subtitle: 'La forma segue la funzione.',
+      body: 'Pista All-Round: asta perfettamente dritta, rondella piccola (50mm). Gara (GS/SG): asta curvata a "banana" per adagiarsi sui fianchi in posizione a uovo aerodinamica. Freeride: impugnatura in foam prolungata sul tubo per spostare le mani nei traversi in salita e rondella enorme (90+ mm).'
     }
   ];
 
   const discNotes = {
-    pista: 'Pista: asta dritta in alluminio o composito, impugnatura ergonomica standard e rondella media (50–55 mm) per neve compatta.',
-    gara: 'Gara (SL / GS): asta curvata per aerodinamica in posizione a uovo, paramani chiusi in slalom e rondella aerodinamica piccola.',
-    freeride: 'Neve fresca: impugnatura allungata in schiuma per impugnare più in basso nei traversi e rondella larga (85–95 mm) per non affondare.'
+    pista: 'Asta dritta e rigida in Alluminio 7075 o Carbonio, impugnatura ergonomica standard in gomma bimateriale e rondella media (50–55 mm).',
+    gara: 'Tubo curvato per seguire l\'aerodinamica del corpo, protezione (paramani) in slalom speciale, e rondella conica minuscola per non impigliare i pali.',
+    freeride: 'Impugnatura molto lunga (Touring grip) in schiuma isolante per cambiare presa sui pendii inclinati, e rondella molto larga (85–100 mm) stile racchetta da neve.'
   };
 
   const quiz = [
     {
-      question: 'Qual è la funzione pratica della rondella sul bastone da sci?',
+      question: 'Qual è l’utilità meccanica concreta della rondella alla fine del bastone?',
       answers: [
-        'Serve solo come decorazione colorata.',
-        'Impedisce al bastone di affondare eccessivamente nella neve, adattandosi alla consistenza del manto.',
-        'Aumenta la velocità massima in discesa libera.'
+        'Serve solo a determinare il colore e la sponsorizzazione.',
+        'Impedisce che la forza spinga il bastone completamente dentro il manto nevoso morbido, garantendo il rimbalzo d\'appoggio.',
+        'Aumenta la precisione dei salti freestyle.'
       ],
       correct: 1,
-      explanation: 'La superficie della rondella distribuisce il carico dell’appoggio evitando che l’asta sprofondi.'
+      explanation: 'Senza rondella, appoggiando il bastone nella neve non battuta, l\'asta sprofonderebbe di decine di centimetri facendoti sbilanciare.'
     },
     {
-      question: 'Tutti i laccioli dei bastoni prevedono uno sgancio automatico?',
+      question: 'Se compro un bastoncino con un normale lacciolo cucito (fettuccia in nylon), posso stare tranquillo che si aprirà sempre da solo in caso di caduta?',
       answers: [
-        'Sì, per legge ogni lacciolo si apre da solo.',
-        'No, i laccioli tradizionali restano chiusi sul polso e non hanno meccanismi di sgancio.',
-        'Sì, tutti i bastoni usano magneti.'
+        'Sì, le normative impongono sganci automatici su ogni prodotto.',
+        'Assolutamente No. I laccioli tradizionali restano ancorati saldamente al polso. Se la rotella si impiglia, il bastone torce la spalla o il pollice.',
+        'Sì, tutti i bastoni sono tenuti insieme con lo strappo in velcro.'
       ],
       correct: 1,
-      explanation: 'Solo specifici sistemi integrati prevedono meccanismi di sgancio; le fettucce classiche vanno sfilate manualmente.'
+      explanation: 'Solo i sistemi di bloccaggio integrati (come Trigger, o altri brevetti meccanici a molla) possiedono una via di fuga di sicurezza certificata. La fettuccia va sempre infilata correttamente dal basso verso l\'alto.'
     },
     {
-      question: 'Sgancio manuale e rilascio sotto sollecitazione sono la stessa cosa?',
+      question: 'Sgancio "manuale" volontario (tramite pulsante) e rilascio "sotto sollecitazione" (in caduta) sono garantiti nello stesso modo?',
       answers: [
-        'No: lo sgancio manuale è azionato volontariamente dall’utente, mentre il rilascio sotto sollecitazione avviene solo in determinate condizioni di carico.',
-        'Sì, indicano entrambi il pulsante superiore.',
-        'Sì, garantiscono lo sgancio istantaneo in ogni caduta.'
+        'No: il bottone si apre quando lo pigi col dito in seggiovia. Il rilascio di emergenza interviene SOLO per specifiche traiettorie di forza previste dalla molla, non in ogni singola torsione umana.',
+        'Sì, indicano lo stesso pulsante magico.',
+        'Sì, si chiama intelligenza artificiale del bastone.'
       ],
       correct: 0,
-      explanation: 'È importante distinguere l’apertura volontaria (es. in seggiovia) dal rilascio meccanico che può intervenire solo sotto specifiche direzioni e intensità di carico.'
+      explanation: 'Un meccanismo a molla è puramente meccanico e tarato per rilasci verticali (o 3D in alcuni casi), ma non può leggere le dinamiche folli di un ruzzolone a 80 km/h in ogni asse.'
     }
   ];
 
@@ -1633,7 +1596,6 @@ function PoleLab() {
         <div>
           <div className="diagram-stage">
             <svg viewBox="0 0 560 220" role="img" aria-label="Componenti di un bastone da sci">
-              {/* Asta */}
               <rect
                 x="110"
                 y="104"
@@ -1642,7 +1604,6 @@ function PoleLab() {
                 rx="4"
                 fill={part === 'asta' ? '#00e5ff' : 'rgba(148,163,184,0.45)'}
               />
-              {/* Impugnatura */}
               <rect
                 x="62"
                 y="97"
@@ -1653,14 +1614,12 @@ function PoleLab() {
                 stroke="#ffffff"
                 strokeWidth="1.5"
               />
-              {/* Lacciolo */}
               <path
                 d="M84 97 Q60 55 112 68 Q130 82 105 97"
                 fill="none"
                 stroke={part === 'lacciolo' ? '#ffcc00' : '#94a3b8'}
                 strokeWidth={part === 'lacciolo' ? '5' : '3'}
               />
-              {/* Rondella */}
               <ellipse
                 cx="435"
                 cy="109"
@@ -1670,14 +1629,13 @@ function PoleLab() {
                 stroke={part === 'rondella' ? '#ffcc00' : 'rgba(255,255,255,0.4)'}
                 strokeWidth="2"
               />
-              {/* Puntale */}
               <polygon
                 points="443,105 492,109 443,113"
                 fill={part === 'puntale' ? '#00e5ff' : '#cbd5e1'}
               />
               <text x="54" y="145" fill="#00e5ff" fontSize="11">Impugnatura</text>
-              <text x="72" y="46" fill="#ffcc00" fontSize="11">Lacciolo</text>
-              <text x="255" y="92" fill="#ffffff" fontSize="11">Asta</text>
+              <text x="72" y="46" fill="#ffcc00" fontSize="11">Lacciolo / Trigger</text>
+              <text x="255" y="92" fill="#ffffff" fontSize="11">Asta (Swing weight)</text>
               <text x="405" y="154" fill="#ffcc00" fontSize="11">Rondella</text>
               <text x="462" y="94" fill="#00e5ff" fontSize="11">Puntale</text>
             </svg>
@@ -1714,10 +1672,9 @@ function PoleLab() {
 
       {tab === 'try' && (
         <div>
-          {/* Dimostrazione LEKI Trigger */}
           <div className="sim-box">
             <h5 style={{ fontFamily: 'Syne, sans-serif', fontSize: '0.96rem', color: 'var(--accent-cyan)', marginBottom: '10px' }}>
-              Esempio sistema sganciabile: LEKI Trigger
+              Rilascio meccanico (Es. LEKI Trigger)
             </h5>
             <div className="choice-grid-3" style={{ marginBottom: '12px' }}>
               <button
@@ -1725,8 +1682,8 @@ function PoleLab() {
                 className={`choice-card ${triggerMode === 'attached' ? 'active' : ''}`}
                 onClick={() => setTriggerMode('attached')}
               >
-                <strong>1. Aggancio</strong>
-                <small>In uso</small>
+                <strong>1. Fissato</strong>
+                <small>In pista</small>
               </button>
               <button
                 type="button"
@@ -1734,15 +1691,15 @@ function PoleLab() {
                 onClick={() => setTriggerMode('manual')}
               >
                 <strong>2. Manuale</strong>
-                <small>Pulsante top</small>
+                <small>Uso Seggiovia</small>
               </button>
               <button
                 type="button"
                 className={`choice-card ${triggerMode === 'load' ? 'active' : ''}`}
                 onClick={() => setTriggerMode('load')}
               >
-                <strong>3. Sollecitazione</strong>
-                <small>Rilascio molla</small>
+                <strong>3. Sgancio d'Urto</strong>
+                <small>Molla di sicurezza</small>
               </button>
             </div>
 
@@ -1759,22 +1716,24 @@ function PoleLab() {
                   strokeWidth="3"
                   style={{ transition: 'all 0.45s ease' }}
                 />
-                <text x="275" y="65" fill="#ffffff" fontSize="12">
+                <text x="275" y="65" fill="#ffffff" fontSize="11" fontWeight="500">
                   {triggerMode === 'attached'
-                    ? 'Anello del guanto agganciato al perno interno.'
+                    ? 'Normale utilizzo: il cordino del guanto è bloccato per tirare a valle.'
                     : triggerMode === 'manual'
-                    ? 'Pressione volontaria del pulsante superiore (es. seggiovia).'
-                    : 'Possibile rilascio della molla sotto specifiche trazioni verso l’alto.'}
+                    ? 'Bottone premuto col pollice: sgancio per prendere impianti, skilift o telefono.'
+                    : 'Carico eccessivo verso l\'alto: la molla cede e sputa il loop. La mano è libera!'}
                 </text>
               </svg>
               <p className="diagram-caption">
-                Nota didattica: il rilascio dipende da direzione e intensità del carico; non garantisce uno sgancio automatico in ogni caduta.
+                <strong>Attenzione:</strong> Le soglie di forza non sono personalizzabili come per gli attacchi da sci. Serve a mitigare danni grossolani.
               </p>
             </div>
           </div>
 
-          {/* Consigliatore disciplina + Calcolatore altezza */}
           <div className="sim-box" style={{ marginBottom: 0 }}>
+            <h5 style={{ fontFamily: 'Syne, sans-serif', fontSize: '0.96rem', color: 'var(--accent-gold)', marginBottom: '10px' }}>
+              Consigliatore: Specialità & Taglio
+            </h5>
             <div className="choice-grid-3" style={{ marginBottom: '10px' }}>
               <button type="button" className={`choice-card ${discipline === 'pista' ? 'active' : ''}`} onClick={() => setDiscipline('pista')}>
                 <strong>Pista</strong>
@@ -1786,7 +1745,7 @@ function PoleLab() {
               </button>
               <button type="button" className={`choice-card ${discipline === 'freeride' ? 'active' : ''}`} onClick={() => setDiscipline('freeride')}>
                 <strong>Fresca</strong>
-                <small>Freeride</small>
+                <small>Powder</small>
               </button>
             </div>
             <p style={{ fontSize: '0.84rem', color: 'rgba(255,255,255,0.84)', lineHeight: 1.5, marginBottom: '14px' }}>
@@ -1795,23 +1754,24 @@ function PoleLab() {
 
             <div className="sim-row">
               <div className="sim-row-head">
-                <label>Altezza sciatore (cm)</label>
+                <label>Altezza Sciatore (Statura in cm)</label>
                 <span>{height} cm</span>
               </div>
               <input type="range" min="145" max="205" value={height} onChange={(e) => setHeight(Number(e.target.value))} />
             </div>
             <div className="choice-grid-2">
               <button type="button" className={`choice-card ${skierLvl === 'l1' ? 'active' : ''}`} onClick={() => setSkierLvl('l1')}>
-                <strong>Fino a L5</strong>
-                <small>Altezza / 1,50</small>
+                <strong>Sciata Tradizionale</strong>
+                <small>Livelli 1-5 (Formula: H / 1,50)</small>
               </button>
               <button type="button" className={`choice-card ${skierLvl === 'l6' ? 'active' : ''}`} onClick={() => setSkierLvl('l6')}>
-                <strong>L6 – Pro</strong>
-                <small>Altezza / 1,53</small>
+                <strong>Assetto "Moderno"</strong>
+                <small>Livelli 6-7+ (Formula: H / 1,53)</small>
               </button>
             </div>
             <p style={{ marginTop: '12px', textAlign: 'center', fontFamily: 'Syne, sans-serif', fontSize: '1.35rem', color: 'var(--accent-gold)' }}>
-              Misura indicativa: {exactPole} cm (taglio {commPole} cm)
+              Misura Matematica: {exactPole} cm <br/>
+              <small style={{ fontSize: '0.85rem', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Taglio Acquisto: {commPole} cm</small>
             </p>
           </div>
         </div>
@@ -1821,8 +1781,8 @@ function PoleLab() {
 
       <LabFooter
         sources={[
-          { label: 'LEKI Trigger System', url: 'https://www.leki.com' },
-          { label: 'Komperdell Poles', url: 'https://www.komperdell.com' }
+          { label: 'Sistemi Sgancio LEKI (Trigger)', url: 'https://www.leki.com' },
+          { label: 'Scuola Sci Italiana', url: 'https://www.amsi.it' }
         ]}
       />
     </div>
@@ -1834,12 +1794,13 @@ function PoleLab() {
    ============================================================================ */
 function ThermoLab() {
   const [tab, setTab] = useState('anatomy');
-  const [selectedLayer, setSelectedLayer] = useState('outer');
+  const [selectedLayer, setSelectedLayer] = useState('mid');
+  const [fabricType, setFabricType] = useState('heatsphere');
   const [showBase, setShowBase] = useState(true);
   const [showMid, setShowMid] = useState(true);
   const [showOuter, setShowOuter] = useState(true);
 
-  // Simulatore condizioni
+  const [userRole, setUserRole] = useState('maestro');
   const [tempCat, setTempCat] = useState('fredda');
   const [windCat, setWindCat] = useState('moderato');
   const [precipCat, setPrecipCat] = useState('asciutta');
@@ -1848,45 +1809,71 @@ function ThermoLab() {
 
   const layerDetails = {
     base: {
-      title: '1° Strato — Intimo traspirante (Base Layer)',
-      copy: 'A contatto con la pelle, allontana il sudore liquido verso l’esterno (lana Merino o fibre sintetiche idrofobe), evitando che il raffreddamento da evaporazione geli il corpo.'
+      title: '1° Strato — Intimo Traspirante (Base Layer)',
+      copy: 'Messo a contatto diretto con la pelle (lana Merino per la termica o microfibre sintetiche forate). Non serve a scaldare, ma a ciucciare via il sudore liquido: se la schiena resta bagnata, durante la sosta in seggiovia l’evaporazione gelerà il corpo.'
     },
     mid: {
-      title: '2° Strato — Isolamento termico (Mid Layer)',
-      copy: 'Trattiene aria ferma intorno al corpo (pile, piuma, ovatte tecniche o Aerogel) oppure fornisce calore attivo tramite resistenze elettriche (es. Heat Sphere).'
+      title: '2° Strato — Isolamento Termico',
+      copy: 'Il suo lavoro è intrappolare un cuscino d\'aria calda. Tecnologie passive come PrimaLoft o piumino bloccano il calore per l\'uso statico estremo. Tecnologie "Active" come Polartec Alpha usano maglie a griglia larga per buttare fuori il vapore (ideale nei continui stop&go o risalite con le pelli).'
     },
     outer: {
-      title: '3° Strato — Protezione esterna (Shell / Giacca)',
-      copy: 'Blocca vento, neve e acqua grazie alla membrana impermeabile-traspirante, alle cuciture nastrate e al trattamento idrorepellente DWR.'
+      title: '3° Strato — Protezione Esterna (Shell / Guscio 20.000+ mm)',
+      copy: 'La barriera vera e propria. Usa una Membrana microporosa (es. Gore-Tex) supportata da nastri termosaldati e trattamento chimico superficiale (DWR). Non produce calore, ma ferma il vento gelido e le bufere umide.'
+    }
+  };
+
+  const fabricSpecs = {
+    heatsphere: {
+      title: 'Isolamento Passivo: PrimaLoft® Heat Sphere (Termo-Riflettente)',
+      copy: 'Struttura a sandwich per il freddo fermo: due strati di ovatta sintetica (che non collassano con acqua come la piuma animale) racchiudono una barriera metallizzata flessibile. Oltre a trattenere l’aria, lo strato centrale specchia le radiazioni di calore corporeo verso l\'interno.'
+    },
+    polartec: {
+      title: 'Isolamento Attivo: Polartec® Alpha® (Maglia aperta)',
+      copy: 'Struttura a "Open Mesh Grid". Invece di rinchiudere l\'imbottitura in due tessuti cuciti, i ciuffi di pelo isolante sono ancorati a una retina larga nuda. Sotto sforzo, il sudore in vapore attraversa la rete istantaneamente, ma, se ci infili un antivento sopra da fermo, i ciuffi continuano a scaldare l\'aria intrappolata.'
     }
   };
 
   const techItems = [
     {
-      badge: 'Isolamento passivo vs attivo',
-      title: 'Aerogel vs Riscaldamento Elettrico (Heat Sphere)',
-      subtitle: 'Trattenere il calore contro generarlo.',
-      body: 'L’isolamento passivo (Aerogel, fibra cava) rallenta la dispersione del calore corporeo senza batterie. Il riscaldamento attivo integra resistenze alimentate da batteria per compensare fasi statiche prolungate.'
+      badge: 'Protezione Acqua e Vento',
+      title: 'Colonna d’Acqua (mm) vs Cuciture Nastrate (Taped Seams)',
+      subtitle: 'Come leggere davvero l\'impermeabilità.',
+      body: 'La Colonna d\'acqua (es. 20.000 mm) misura quanta pressione atmosferica regge il tessuto prima che la goccia passi. 10k bastano per neve farinosa. MA ATTENZIONE: se compri un giubbotto da 30.000 mm in cui l\'ago da cucito ha fatto mille buchi per assemblarlo e questi buchi non sono sigillati a caldo con i nastri termici (fully taped), l\'acqua piovana o della seggiovia colerà dai tagli entro 5 minuti!'
     },
     {
-      badge: 'Impermeabilità',
-      title: 'Membrana & Colonna d’Acqua (10.000 vs 20.000+ mm)',
-      subtitle: 'Resistenza alla pressione dell’acqua.',
-      body: '10.000 mm proteggono da neve asciutta e brevi precipitazioni; oltre 20.000 mm assicurano tenuta sotto neve bagnata, pioggia mista o contatto prolungato con seggiovie umide.'
+      badge: 'Isolamento Attivo (Traspirante)',
+      title: 'Polartec® Alpha® / Alpha Direct',
+      subtitle: 'Non spogliarsi in salita.',
+      body: 'Inventato per le forze speciali. Anziché svestirsi per non sudare e rimettere la giacca per non gelare, il vapore esce costantemente.'
     },
     {
-      badge: 'Superficie & Assemblaggio',
-      title: 'Trattamento DWR & Cuciture Nastrate',
-      subtitle: 'Due barriere indispensabili.',
-      body: 'Il DWR (Durable Water Repellent) fa scivolare le gocce sul tessuto esterno evitando che si inzuppi; le cuciture termonastrate sigillano i micro-fori dell’ago.'
+      badge: 'Respingere le gocce',
+      title: 'Il trattamento esterno DWR (Durable Water Repellent)',
+      subtitle: 'Il vero responsabile del "Water Beading".',
+      body: 'Avete presente le palline d\'acqua che scivolano via dalle giacche nuove? Non è merito della membrana interna (Gore-Tex), ma del trattamento chimico spalmatore DWR sul nylon. Se si consuma per sfregamento o sporco, il tessuto esterno "beve" l\'acqua (Wetting out), diventa freddo, pesante, e blocca la traspirabilità della membrana interna.'
     },
     {
-      badge: 'Gestione umidità interna',
-      title: 'Traspirabilità (g/m²/24h)',
-      subtitle: 'Evacuazione del vapore corporeo.',
-      body: 'Misura quanto vapore acqueo attraversa il tessuto in 24 ore. Un’alta traspirabilità evita la condensa interna durante le discese intense.'
+      badge: 'Calore Attivo',
+      title: 'Sistemi Elettrici a Batteria',
+      subtitle: 'Calzini o gilet cablati.',
+      body: 'Quando stai fermo 3 ore a -15° (es. maestro sul campetto), il corpo va in ibernazione e chiude il sangue ai piedi e mani per salvare gli organi vitali. Le resistenze a batteria forzano il calore periferico dove il corpo non ce la fa più da solo.'
     }
   ];
+
+  const roleGuidance = {
+    maestro: {
+      title: 'Armatura da Lavoro per Maestro (6–8 ore in pista fisse)',
+      copy: 'L\'ibridazione è tutto. Polartec Alpha o Microfleece come intimo (non sudi mentre mostri serpentina), abbinato a PrimaLoft Heat Sphere (nella giacca di Divisa Scuola) + Calzini Riscaldati a batteria. Il Maestro sta tantissimo fermo a prendere vento in seggiovia, serve il MASSIMO del calore statico ma che asciughi in 10 minuti in baita se nevica a vento.'
+    },
+    direttore: {
+      title: 'Scelte per Direttori di Scuola Sci (Fornitura Divise Triennali)',
+      copy: 'Eliminare il piumino d\'oca animale per le divise dei dipendenti! I maestri si scambiano calore/freddo ogni minuto, e lavano la giacca in lavatrice continuamente. Le nuove imbottiture termiche a Cluster (sfere sintetiche) non si afflosciano (zero clumping) da bagnate e non servono asciugatrici speciali con palline da tennis.'
+    },
+    cliente: {
+      title: 'Come consigliare l\'Allievo/Turista Normale',
+      copy: 'L\'allievo Principiante / Intermedio scia piano, a bassa intensità cardiaca, sta in coda molto e cade sulla neve sedendosi. Serve Calore Passivo pesante e colonna d\'acqua di 10k-15k per le cadute. L\'allievo Esperto / Freerider fatica in conduzione muscolare: deve alleggerire! Per lui Guscio 3L puro 20.000mm con isolamento attivo (zero ovatta chiusa!).'
+    }
+  };
 
   const applyRecommended = (t, w, p, a) => {
     setTempCat(t);
@@ -1901,44 +1888,44 @@ function ThermoLab() {
   const getSimAdvice = () => {
     const activeCount = [manualOverride.base, manualOverride.mid, manualOverride.outer].filter(Boolean).length;
     if (activeCount === 1) {
-      return 'Configurazione molto leggera: ottimo smaltimento del calore durante sforzi intensi, ma protezione ridotta da vento e sbalzi termici.';
+      return 'ALLARME TERMICO: Perfetto solo per salire con le pelli da scialpinismo in pieno sole. Altrimenti, primo colpo di vento in discesa e muori di freddo (Ipotermia).';
     }
     if (activeCount === 2) {
-      return 'Equilibrio intermedio: buona libertà di movimento e dispersione del sudore; adatto a giornate miti o sciata dinamica continua.';
+      return 'EQUILIBRIO AEROBICO SPORTIVO: Buona termica ma manca lo strato o barriera antivento/20k. Perfetto per "Spring Skiing" di Marzo col sole o allenamenti dinamici dove non smetti di muoverti.';
     }
-    return 'Sistema completo a 3 strati: massima barriera contro vento, umidità e dispersione termica durante soste o freddo intenso; apri le zip ascellari se aumenta lo sforzo.';
+    return 'SCUDO INVERNALE 3 STRATI: Intimo (tira via sudore) + Isolante Passivo o Attivo (ti scalda) + Guscio DWR 20k mm nastrato (ferma bufera). In questa modalità sei protetto anche a Gennaio fermo sulla neve.';
   };
 
   const quiz = [
     {
-      question: 'Trattamento DWR e membrana impermeabile svolgono la stessa funzione?',
+      question: 'Trattamento idrorepellente esterno (DWR - le gocce che scivolano via) e Membrana microporosa interna (impermeabilità in mm) sono esattamente la stessa cosa?',
       answers: [
-        'Sì, sono due nomi commerciali per la cerniera lampo.',
-        'No: il DWR fa scivolare l’acqua sulla superficie esterna, mentre la membrana blocca l’acqua lasciando uscire il vapore.',
-        'Sì, entrambi servono solo a scaldare.'
+        'Sì, indicano l\'etichetta Gore-Tex.',
+        'Assolutamente NO: il DWR scivola le gocce sul tessuto. Se si consuma per sporco o graffi, il tessuto esterno "beve" l\'acqua, diventa gelido e pesante, anche se la membrana interna fa il suo lavoro e ti tiene asciutto.',
+        'Sì, basta usare uno spray magico per riparare i buchi enormi nei pantaloni.'
       ],
       correct: 1,
-      explanation: 'Il DWR evita l’inzuppamento del tessuto esterno, mentre la membrana garantisce la tenuta idrostatica.'
+      explanation: 'Una giacca eccellente ha SEMPRE bisogno che il suo tessuto di nylon esterno venga trattato per far rimbalzare l\'acqua (Water beading).'
     },
     {
-      question: 'Un guscio molto impermeabile (es. 20.000 mm) è automaticamente anche molto caldo?',
+      question: 'Ho acquistato un "Guscio tecnico da Alpinismo 3L (3 Layers)" estremo da 700€, certificato 28.000 mm di impermeabilità totale. Ci andrò a sciare a Cortina a Dicembre con -15°: starò caldissimo?',
       answers: [
-        'Sì, più millimetri significa automaticamente più imbottitura.',
-        'No: impermeabilità (barriera da acqua/vento) e isolamento termico (trattenimento del calore) sono proprietà distinte.',
-        'Sì, elimina la necessità dello strato intermedio a -20°C.'
+        'Sì, più costa e più mm ha, più è un forno caldo automatico.',
+        'No, prenderai una polmonite. Un Guscio (Shell) puro è solo una barriera "kway" di lusso per vento e acqua. NON HA un grammo di imbottitura termica (pile o piumino). L\'isolamento ce lo devi mettere tu sotto (Midlayer).',
+        'Sì, se lo chiudi bene non serve niente sotto.'
       ],
       correct: 1,
-      explanation: 'Un guscio 3 strati può essere completamente impermeabile ma privo di imbottitura termica.'
+      explanation: 'Impermeabilità = Protezione dagli elementi fisici (Neve/Vento). Isolamento (G/m2 di Imbottitura) = Protezione del tuo calore. Sono due concetti indipendenti.'
     },
     {
-      question: 'La scelta degli strati dipende solo dalla temperatura dell’aria?',
+      question: 'Come sceglierà un Direttore Scuola Sci le divise da comprare per i suoi 60 Maestri quest\'anno?',
       answers: [
-        'No, dipende anche da vento, precipitazioni e livello di attività (attesa vs sciata intensa).',
-        'Sì, a parità di gradi ci si veste sempre allo stesso modo.',
-        'Dipende solo dal colore della giacca.'
+        'Guarderà le microstrutture resistenti all\'umidità (sintetici a cluster come PrimaLoft o Polartec) che tengono caldo anche se sporche, sudate e lavate ogni venerdì in lavatrici brutali.',
+        'Sceglierà solo per il colore fluo imposto dalle leggi.',
+        'Comprerà solo piuma d\'oca vera di altissima qualità da spedizione Himalayana perché è il più caldo in assoluto.'
       ],
       correct: 0,
-      explanation: 'Durante una sciata intensa il corpo produce molto più calore e sudore rispetto a una fase statica di attesa.'
+      explanation: 'La piuma d\'oca collassa se la sudi dopo una curva e costa una follia da gestire nei lavaggi per 60 persone in un locale tecnico. Il sintetico tecnico "Cipolla" vince nel noleggio e divise.'
     }
   ];
 
@@ -1946,8 +1933,8 @@ function ThermoLab() {
     <div className="lab-shell">
       <div className="lab-header">
         <div>
-          <span className="lab-eyebrow">Laboratorio interattivo</span>
-          <h4 className="lab-title">Vestirsi per sciare</h4>
+          <span className="lab-eyebrow">Laboratorio interattivo (Approfondimento Didattico)</span>
+          <h4 className="lab-title">Vestirsi per sciare (Layering)</h4>
         </div>
       </div>
 
@@ -1956,55 +1943,49 @@ function ThermoLab() {
       {tab === 'anatomy' && (
         <div>
           <div className="diagram-stage">
-            <svg viewBox="0 0 560 245" role="img" aria-label="Figura schematica con tre strati di abbigliamento e flussi termici">
-              {/* Busto base */}
-              <path d="M235 45 L325 45 L345 195 L215 195 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" />
-              {/* 1° Strato: Intimo */}
+            <svg viewBox="0 0 560 220" role="img" aria-label="Figura schematica con tre strati di abbigliamento e flussi termici">
+              <path d="M235 38 L325 38 L345 182 L215 182 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.2)" />
               {showBase && (
                 <path
-                  d="M240 50 L320 50 L336 190 L224 190 Z"
+                  d="M240 43 L320 43 L336 177 L224 177 Z"
                   fill={selectedLayer === 'base' ? 'rgba(0,229,255,0.45)' : 'rgba(56,189,248,0.22)'}
                   stroke="#00e5ff"
                   strokeWidth="2"
                 />
               )}
-              {/* 2° Strato: Isolamento */}
               {showMid && (
                 <path
-                  d="M230 44 L330 44 L348 194 L212 194 Z"
+                  d="M230 37 L330 37 L348 181 L212 181 Z"
                   fill={selectedLayer === 'mid' ? 'rgba(255,204,0,0.4)' : 'rgba(255,204,0,0.14)'}
                   stroke="#ffcc00"
                   strokeWidth="2"
                 />
               )}
-              {/* 3° Strato: Guscio esterno */}
               {showOuter && (
                 <path
-                  d="M220 38 L340 38 L360 198 L200 198 Z"
+                  d="M220 31 L340 31 L360 185 L200 185 Z"
                   fill={selectedLayer === 'outer' ? 'rgba(148,163,184,0.42)' : 'rgba(148,163,184,0.16)'}
                   stroke="#ffffff"
                   strokeWidth="2"
                 />
               )}
 
-              {/* Frecce Vento & Acqua (sinistra) */}
-              <path className="anim-pulse" d="M60 85 L185 85" stroke="#00e5ff" strokeWidth="2.5" strokeDasharray="6 4" />
-              <text x="58" y="75" fill="#00e5ff" fontSize="11">Vento &amp; Neve / Acqua</text>
-              <path className="anim-pulse" d="M60 135 L185 135" stroke="#38bdf8" strokeWidth="2.5" strokeDasharray="6 4" />
+              <path className="anim-pulse" d="M55 78 L185 78" stroke="#00e5ff" strokeWidth="2.5" strokeDasharray="6 4" />
+              <text x="54" y="68" fill="#00e5ff" fontSize="11" fontWeight="600">Vento Ghiacciato &amp; Neve (20k mm)</text>
+              <path className="anim-pulse" d="M55 128 L185 128" stroke="#38bdf8" strokeWidth="2.5" strokeDasharray="6 4" />
 
-              {/* Frecce Sudore & Dispersione (destra) */}
-              <path className="anim-pulse" d="M350 90 L485 90" stroke="#ffcc00" strokeWidth="2.5" strokeDasharray="5 4" />
-              <text x="368" y="78" fill="#ffcc00" fontSize="11">Vapore sudore</text>
-              <path className="anim-pulse" d="M350 145 L485 145" stroke="#f87171" strokeWidth="2.5" strokeDasharray="5 4" />
-              <text x="368" y="133" fill="#f87171" fontSize="11">Dispersione calore</text>
+              <path className="anim-pulse" d="M350 82 L490 82" stroke="#ffcc00" strokeWidth="2.5" strokeDasharray="5 4" />
+              <text x="368" y="70" fill="#ffcc00" fontSize="11">Vapore del sudore (Da evacuare)</text>
+              <path className="anim-pulse" d="M350 136 L490 136" stroke="#f87171" strokeWidth="2.5" strokeDasharray="5 4" />
+              <text x="368" y="124" fill="#f87171" fontSize="11" fontWeight="600">Fuga Calore Corporeo (Da Bloccare!)</text>
             </svg>
           </div>
 
           <div className="part-pills">
             {[
-              { id: 'base', label: '1° Intimo', active: showBase, toggle: () => setShowBase((v) => !v), color: '#00e5ff' },
-              { id: 'mid', label: '2° Isolamento', active: showMid, toggle: () => setShowMid((v) => !v), color: '#ffcc00' },
-              { id: 'outer', label: '3° Guscio', active: showOuter, toggle: () => setShowOuter((v) => !v), color: '#ffffff' }
+              { id: 'base', label: '1° Intimo (Traspirante)', active: showBase, toggle: () => setShowBase((v) => !v), color: '#00e5ff' },
+              { id: 'mid', label: '2° Isolamento Termico', active: showMid, toggle: () => setShowMid((v) => !v), color: '#ffcc00' },
+              { id: 'outer', label: '3° Guscio Barriera/Membrana', active: showOuter, toggle: () => setShowOuter((v) => !v), color: '#ffffff' }
             ].map((l) => (
               <button
                 key={l.id}
@@ -2025,6 +2006,86 @@ function ThermoLab() {
             <h5>{layerDetails[selectedLayer].title}</h5>
             <p>{layerDetails[selectedLayer].copy}</p>
           </div>
+
+          <div className="sim-box" style={{ marginBottom: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+              <span style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-gold)', fontWeight: 600 }}>
+                Analisi di Sezione Microscopica (Strato 2 Isolante)
+              </span>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button
+                  type="button"
+                  className={`part-pill ${fabricType === 'heatsphere' ? 'active' : ''}`}
+                  onClick={() => setFabricType('heatsphere')}
+                >
+                  PrimaLoft / Riflettente (Fermo)
+                </button>
+                <button
+                  type="button"
+                  className={`part-pill ${fabricType === 'polartec' ? 'active' : ''}`}
+                  onClick={() => setFabricType('polartec')}
+                >
+                  Polartec® Alpha® (Dinamico)
+                </button>
+              </div>
+            </div>
+
+            <div className="diagram-stage" style={{ marginBottom: '10px' }}>
+              {fabricType === 'heatsphere' ? (
+                <svg viewBox="0 0 540 165" role="img" aria-label="Struttura PrimaLoft Heat Sphere a tre strati">
+                  <path d="M 35 30 L 505 30 L 505 70 L 35 70 Z" fill="rgba(255, 204, 0, 0.15)" stroke="#ffcc00" strokeWidth="2" strokeDasharray="4 2" />
+                  <path d="M 45 40 Q 60 65 75 40 T 105 40 T 135 40 T 165 40 T 195 40 T 225 40 T 255 40 T 285 40 T 315 40 T 345 40 T 375 40 T 405 40 T 435 40 T 465 40 T 495 40" stroke="#ffcc00" strokeWidth="1.5" fill="none" opacity="0.6" />
+                  
+                  <line x1="35" y1="82" x2="505" y2="82" stroke="#00e5ff" strokeWidth="4" />
+                  <line x1="35" y1="82" x2="505" y2="82" stroke="#ffffff" strokeWidth="1.5" />
+                  
+                  <path className="anim-pulse" d="M 120 145 L 120 95 L 105 110 M 120 95 L 135 110" stroke="#f87171" strokeWidth="2" fill="none" />
+                  <path className="anim-pulse" d="M 270 145 L 270 95 L 255 110 M 270 95 L 285 110" stroke="#f87171" strokeWidth="2" fill="none" />
+                  <path className="anim-pulse" d="M 420 145 L 420 95 L 405 110 M 420 95 L 435 110" stroke="#f87171" strokeWidth="2" fill="none" />
+
+                  <path d="M 35 94 L 505 94 L 505 134 L 35 134 Z" fill="rgba(255, 204, 0, 0.15)" stroke="#ffcc00" strokeWidth="2" strokeDasharray="4 2" />
+                  <path d="M 45 104 Q 60 129 75 104 T 105 104 T 135 104 T 165 104 T 195 104 T 225 104 T 255 104 T 285 104 T 315 104 T 345 104 T 375 104 T 405 104 T 435 104 T 465 104 T 495 104" stroke="#ffcc00" strokeWidth="1.5" fill="none" opacity="0.6" />
+                  
+                  <text x="42" y="18" fill="#ffcc00" fontSize="11">1. Isolante sintetico passivo (Blocca il freddo esterno, non teme l'acqua)</text>
+                  <text x="42" y="77" fill="#00e5ff" fontSize="11">2. Core Termo-Riflettente a Film (Specchio Termico Ultra-Leggero)</text>
+                  <text x="42" y="155" fill="#f87171" fontSize="11">3. Le Frecce rosse del tuo calore emesso "rimbalzano" indietro verso il tuo corpo</text>
+                </svg>
+              ) : (
+                <svg viewBox="0 0 540 165" role="img" aria-label="Struttura microscopica Polartec Alpha a maglia aperta">
+                  <line x1="40" y1="118" x2="500" y2="118" stroke="#00e5ff" strokeWidth="3" strokeDasharray="14 8" />
+                  <line x1="40" y1="126" x2="500" y2="126" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="6 16" />
+                  {[70, 115, 160, 205, 250, 295, 340, 385, 430, 475].map((x, i) => (
+                    <g key={i}>
+                      <path
+                        d={`M ${x} 118 Q ${x - 10} 82 ${x - 4} 52 M ${x} 118 Q ${x + 2} 78 ${x + 6} 48 M ${x} 118 Q ${x + 12} 84 ${x + 14} 56`}
+                        stroke="#00e5ff"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        fill="none"
+                      />
+                    </g>
+                  ))}
+                  {[92, 182, 272, 362, 452].map((vx, i) => (
+                    <path
+                      key={i}
+                      className="anim-pulse"
+                      d={`M ${vx} 135 L ${vx} 26`}
+                      stroke="#ffcc00"
+                      strokeWidth="2"
+                      strokeDasharray="4 4"
+                    />
+                  ))}
+                  <text x="42" y="18" fill="#00e5ff" fontSize="11">Maglia "Open Grid": Fili ancorati (Trama scoperta e permeabile all'aria)</text>
+                  <text x="42" y="155" fill="#ffcc00" fontSize="10.5">Frecce Gialle: Non c'è un tessuto di chiusura, il vapore surriscaldato EVADE subito in conduzione</text>
+                </svg>
+              )}
+            </div>
+
+            <div className="lab-card gold" style={{ marginBottom: 0 }}>
+              <h5>{fabricSpecs[fabricType].title}</h5>
+              <p>{fabricSpecs[fabricType].copy}</p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -2033,56 +2094,83 @@ function ThermoLab() {
       {tab === 'try' && (
         <div>
           <div className="sim-box">
-            <label style={{ fontSize: '0.66rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Temperatura</label>
+            <label style={{ fontSize: '0.66rem', textTransform: 'uppercase', color: 'var(--accent-gold)', fontWeight: 600 }}>
+              Profili di Vestizione
+            </label>
+            <div className="choice-grid-3" style={{ marginBottom: '12px' }}>
+              <button type="button" className={`choice-card ${userRole === 'maestro' ? 'active' : ''}`} onClick={() => setUserRole('maestro')}>
+                <strong>Il Maestro</strong>
+                <small>Stagione Completa</small>
+              </button>
+              <button type="button" className={`choice-card ${userRole === 'direttore' ? 'active' : ''}`} onClick={() => setUserRole('direttore')}>
+                <strong>Il Direttore</strong>
+                <small>Gestione Forniture</small>
+              </button>
+              <button type="button" className={`choice-card ${userRole === 'cliente' ? 'active' : ''}`} onClick={() => setUserRole('cliente')}>
+                <strong>Sciatore Cliente</strong>
+                <small>Dal base al pro</small>
+              </button>
+            </div>
+            <div className="lab-card" style={{ marginBottom: 0 }}>
+              <h5>{roleGuidance[userRole].title}</h5>
+              <p>{roleGuidance[userRole].copy}</p>
+            </div>
+          </div>
+
+          <div className="sim-box">
+            <h5 style={{ fontFamily: 'Syne, sans-serif', fontSize: '0.98rem', color: 'var(--accent-cyan)', marginBottom: '10px' }}>
+              Simulatore Clinico di Stratificazione
+            </h5>
+            <label style={{ fontSize: '0.66rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Termometro Pista (Gradi Centigradi)</label>
             <div className="choice-grid-3" style={{ marginBottom: '10px' }}>
               <button type="button" className={`choice-card ${tempCat === 'mite' ? 'active' : ''}`} onClick={() => applyRecommended('mite', windCat, precipCat, activityCat)}>
-                <strong>Mite</strong>
-                <small>&gt; 0°C</small>
+                <strong>Ghiacciaio Sole</strong>
+                <small>&gt; 2°C / Marzo</small>
               </button>
               <button type="button" className={`choice-card ${tempCat === 'fredda' ? 'active' : ''}`} onClick={() => applyRecommended('fredda', windCat, precipCat, activityCat)}>
-                <strong>Fredda</strong>
+                <strong>Alta Stagione</strong>
                 <small>-10° / 0°C</small>
               </button>
               <button type="button" className={`choice-card ${tempCat === 'rigida' ? 'active' : ''}`} onClick={() => applyRecommended('rigida', windCat, precipCat, activityCat)}>
-                <strong>Rigida</strong>
-                <small>&lt; -10°C</small>
+                <strong>Siberia</strong>
+                <small>&lt; -15°C Muro</small>
               </button>
             </div>
 
-            <label style={{ fontSize: '0.66rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Vento &amp; Precipitazioni</label>
+            <label style={{ fontSize: '0.66rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Velocità Vento &amp; Bufere D'Acqua</label>
             <div className="choice-grid-3" style={{ marginBottom: '10px' }}>
               <button type="button" className={`choice-card ${windCat === 'calmo' ? 'active' : ''}`} onClick={() => applyRecommended(tempCat, 'calmo', 'assenti', activityCat)}>
-                <strong>Sereno</strong>
-                <small>Poco vento</small>
+                <strong>Visibilità Ok</strong>
+                <small>Neve compatta</small>
               </button>
               <button type="button" className={`choice-card ${windCat === 'moderato' ? 'active' : ''}`} onClick={() => applyRecommended(tempCat, 'moderato', 'asciutta', activityCat)}>
-                <strong>Variabile</strong>
-                <small>Vento / Neve</small>
+                <strong>Nuvole/Polvere</strong>
+                <small>Raffiche Leggere</small>
               </button>
               <button type="button" className={`choice-card ${windCat === 'forte' ? 'active' : ''}`} onClick={() => applyRecommended(tempCat, 'forte', 'umida', activityCat)}>
-                <strong>Bufera</strong>
-                <small>Neve umida</small>
+                <strong>Neve Bagnata</strong>
+                <small>Umidità / Vento %</small>
               </button>
             </div>
 
-            <label style={{ fontSize: '0.66rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Attività prevalente</label>
+            <label style={{ fontSize: '0.66rem', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>Biometria: Il tuo Sforzo Fisico</label>
             <div className="choice-grid-3" style={{ marginBottom: '14px' }}>
               <button type="button" className={`choice-card ${activityCat === 'attesa' ? 'active' : ''}`} onClick={() => applyRecommended(tempCat, windCat, precipCat, 'attesa')}>
-                <strong>Attesa</strong>
-                <small>Fermo / Impianti</small>
+                <strong>Fermo (Statica)</strong>
+                <small>Seggiovia / Spiegazioni</small>
               </button>
               <button type="button" className={`choice-card ${activityCat === 'lezione' ? 'active' : ''}`} onClick={() => applyRecommended(tempCat, windCat, precipCat, 'lezione')}>
-                <strong>Lezione</strong>
-                <small>Ritmo misto</small>
+                <strong>Ritmo Turistico</strong>
+                <small>Misto Stop / Vai</small>
               </button>
               <button type="button" className={`choice-card ${activityCat === 'intensa' ? 'active' : ''}`} onClick={() => applyRecommended(tempCat, windCat, precipCat, 'intensa')}>
-                <strong>Intensa</strong>
-                <small>Sciata continua</small>
+                <strong>Aerobica Pura</strong>
+                <small>Gara / Pelli Salita</small>
               </button>
             </div>
 
             <label style={{ fontSize: '0.66rem', textTransform: 'uppercase', color: 'var(--accent-gold)' }}>
-              Aggiungi / togli strati per testare l’equilibrio
+              Accendi / Spengi i 3 Livelli Base
             </label>
             <div className="choice-grid-3">
               <button
@@ -2090,30 +2178,30 @@ function ThermoLab() {
                 className={`choice-card ${manualOverride.base ? 'active' : ''}`}
                 onClick={() => setManualOverride((m) => ({ ...m, base: !m.base }))}
               >
-                <strong>Intimo</strong>
-                <small>{manualOverride.base ? 'Attivo' : 'Rimosso'}</small>
+                <strong>Intimo Forato</strong>
+                <small>{manualOverride.base ? 'Attivato' : 'Rimoss'}</small>
               </button>
               <button
                 type="button"
                 className={`choice-card ${manualOverride.mid ? 'active' : ''}`}
                 onClick={() => setManualOverride((m) => ({ ...m, mid: !m.mid }))}
               >
-                <strong>Isolamento</strong>
-                <small>{manualOverride.mid ? 'Attivo' : 'Rimosso'}</small>
+                <strong>Polartec / PrimaLoft</strong>
+                <small>{manualOverride.mid ? 'Attivato' : 'Rimoss'}</small>
               </button>
               <button
                 type="button"
                 className={`choice-card ${manualOverride.outer ? 'active' : ''}`}
                 onClick={() => setManualOverride((m) => ({ ...m, outer: !m.outer }))}
               >
-                <strong>Guscio 20k</strong>
-                <small>{manualOverride.outer ? 'Attivo' : 'Rimosso'}</small>
+                <strong>Scudo H2O (Guscio)</strong>
+                <small>{manualOverride.outer ? 'Attivato' : 'Rimoss'}</small>
               </button>
             </div>
           </div>
 
           <div className="lab-card gold" style={{ marginBottom: 0 }}>
-            <h5>Equilibrio protezione / smaltimento</h5>
+            <h5>Feedback: Il tuo equilibrio termico vitale</h5>
             <p>{getSimAdvice()}</p>
           </div>
         </div>
@@ -2123,8 +2211,9 @@ function ThermoLab() {
 
       <LabFooter
         sources={[
-          { label: 'ISPO Material Innovations', url: 'https://www.ispo.com' },
-          { label: 'Gore-Tex Membrane Guide', url: 'https://www.gore-tex.com' }
+          { label: 'PrimaLoft (Heat Sphere Tech)', url: 'https://www.primaloft.com' },
+          { label: 'Polartec Alpha (Isolamento Dinamico)', url: 'https://www.polartec.com/fabrics/insulation/alpha' },
+          { label: 'Tecnologie Impermeabilizzazione VAUDE', url: 'https://www.vaude.com' }
         ]}
       />
     </div>
@@ -2269,21 +2358,18 @@ function GloveLab() {
         <div>
           <div className="diagram-stage">
             <svg viewBox="0 0 540 230" role="img" aria-label="Strati interni ed esterni di un guanto tecnico da sci">
-              {/* Sagoma guanto */}
               <path
                 d="M195 190 L195 110 Q195 75 220 75 Q235 75 235 105 L235 55 Q235 35 252 35 Q268 35 268 55 L268 45 Q268 25 285 25 Q302 25 302 45 L302 58 Q302 38 318 38 Q334 38 334 62 L334 145 L350 190 Z"
                 fill={part === 'esterno' ? 'rgba(0,229,255,0.4)' : 'rgba(51,65,85,0.6)'}
                 stroke="#ffffff"
                 strokeWidth="2"
               />
-              {/* Membrana + Isolamento */}
               <path
                 d="M206 180 L206 112 Q206 86 225 86 L242 60 L274 50 L308 62 L322 145 L336 180 Z"
                 fill={part === 'isolamento' || part === 'membrana' ? 'rgba(255,204,0,0.38)' : 'rgba(255,204,0,0.12)'}
                 stroke="#ffcc00"
                 strokeWidth="1.5"
               />
-              {/* Rinforzo palmo */}
               <ellipse
                 cx="272"
                 cy="128"
@@ -2291,7 +2377,6 @@ function GloveLab() {
                 ry="26"
                 fill={part === 'palmo' ? 'rgba(0,229,255,0.55)' : 'rgba(148,163,184,0.28)'}
               />
-              {/* Polsino */}
               <rect
                 x="192"
                 y="186"
@@ -2302,7 +2387,6 @@ function GloveLab() {
                 stroke="#ffffff"
                 strokeWidth="1.5"
               />
-              {/* Elementi riscaldanti & batteria */}
               {heatedVariant && (
                 <>
                   <path
@@ -2489,7 +2573,6 @@ function OutOfLab() {
     }
   ];
 
-  // Simulazione qualitativa luminosità trasmessa
   const fixedOpacity = 0.45;
   const iridOpacity = 0.16 + (sunLevel / 100) * 0.62;
 
@@ -2508,21 +2591,18 @@ function OutOfLab() {
         <div>
           <div className="diagram-stage">
             <svg viewBox="0 0 540 200" role="img" aria-label="Componenti della maschera elettronica Out Of">
-              {/* Montatura maschera */}
               <path
                 d="M95 55 Q270 30 445 55 Q465 110 435 155 Q335 170 270 135 Q205 170 105 155 Q75 110 95 55 Z"
                 fill="rgba(30,41,59,0.85)"
                 stroke="#ffffff"
                 strokeWidth="2"
               />
-              {/* Lente + Strato LCD */}
               <path
                 d="M112 65 Q270 44 428 65 Q442 108 418 142 Q330 154 270 124 Q210 154 122 142 Q98 108 112 65 Z"
                 fill={part === 'lcd' ? 'rgba(0,229,255,0.45)' : 'rgba(2,132,199,0.28)'}
                 stroke={part === 'lente' || part === 'lcd' ? '#00e5ff' : 'rgba(255,255,255,0.3)'}
                 strokeWidth="2"
               />
-              {/* Cella solare */}
               <rect
                 x="220"
                 y="43"
@@ -2531,7 +2611,6 @@ function OutOfLab() {
                 rx="3"
                 fill={part === 'solare' ? '#ffcc00' : 'rgba(255,204,0,0.35)'}
               />
-              {/* Chip elettronico */}
               <rect
                 x="256"
                 y="58"
@@ -2727,14 +2806,10 @@ function SoundBrkrLab() {
                 stroke="#ffffff"
                 strokeWidth="2"
               />
-              {/* Trasduttori sugli zigomi */}
               <circle cx="145" cy="144" r="13" fill={part === 'trasduttori' ? '#ffcc00' : '#00e5ff'} />
               <circle cx="395" cy="144" r="13" fill={part === 'trasduttori' ? '#ffcc00' : '#00e5ff'} />
-              {/* Microfono */}
               <rect x="260" y="128" width="20" height="10" rx="3" fill={part === 'microfono' ? '#ffcc00' : '#94a3b8'} />
-              {/* Comandi */}
               <rect x="96" y="84" width="12" height="28" rx="3" fill={part === 'comandi' ? '#00e5ff' : '#64748b'} />
-              {/* Batteria */}
               <rect x="432" y="84" width="12" height="28" rx="3" fill={part === 'alimentazione' ? '#ffcc00' : '#64748b'} />
               <text x="122" y="176" fill="#ffcc00" fontSize="11">Trasduttori ossei</text>
               <text x="242" y="162" fill="#cbd5e1" fontSize="11">Microfono</text>
@@ -2858,19 +2933,19 @@ function TelemetryLab() {
   const nodes = {
     sensori: {
       title: 'Sensori inerziali (IMU) & Solette',
-      copy: 'Misurano direttamente accelerazioni lineari, velocità angolari e pressione plantare sotto il piede (es. Carv 2, Moticon OpenGo).'
+      copy: 'Misurano fisicamente accelerazioni (G-Force), velocità angolari e, tramite solette, la pressione reale sotto il piede (es. Carv 2, Moticon OpenGo).'
     },
     smartphone: {
       title: 'Smartphone (Elaborazione & Coaching)',
-      copy: 'Riceve i dati dai sensori via Bluetooth, calcola le metriche durante la discesa e fornisce feedback vocali o grafici.'
+      copy: 'Riceve i dati grezzi via Bluetooth. Utilizza algoritmi per trasformare numeri complessi (es. accelerazione laterale) in metriche semplificate (Ski:IQ) e offre feedback audio in tempo reale.'
     },
     gps: {
       title: 'GPS (Traiettoria & Velocità)',
-      copy: 'Calcola posizione, dislivello, linea percorsa e velocità tramite segnale satellitare (es. Lympic, Protern Live, pettorine GPS per scuole sci).'
+      copy: 'Non misura la tecnica del corpo! Calcola la posizione, il dislivello, la linea percorsa e la velocità assoluta (es. sistemi per atleti come Lympic o pettorine GPS per i bambini dei maestri).'
     },
     video: {
       title: 'Video sincronizzato',
-      copy: 'Permette di confrontare il dato numerico con l’immagine reale della postura (es. Dartfish, EDGIN).'
+      copy: 'Registrazione ottica standard che, abbinata ai numeri (es. Dartfish), aiuta l\'occhio del maestro a correlare il "dato" (es. pressione asimmetrica) al "gesto" (es. spalla cadente).'
     }
   };
 
@@ -2879,66 +2954,59 @@ function TelemetryLab() {
       badge: 'Sensori inerziali',
       title: 'Accelerometro & Giroscopio (IMU)',
       subtitle: 'Misure fisiche dirette.',
-      body: 'L’accelerometro misura le accelerazioni lungo tre assi; il giroscopio misura la velocità di rotazione dello scarpone o dello sci.'
+      body: 'L’accelerometro misura l\'accelerazione fisica su 3 assi, tradotta ad esempio nella "G-Force" che senti spingendo in curva. Il giroscopio misura la rotazione.'
     },
     {
-      badge: 'Metodo scientifico',
-      title: 'Misurato direttamente vs Calcolato vs Stimato',
-      subtitle: 'Distinguere la natura di ogni dato.',
-      body: 'Misurato direttamente: accelerazione, velocità angolare, pressione plantare. Calcolato: posizione e velocità da segnale GPS. Stimato algoritmicamente: angolo di spigolo, simmetria e punteggi sintetici (es. Ski:IQ).'
+      badge: 'Metodo scientifico didattico',
+      title: 'Misura Diretta vs Stima Algoritmica',
+      subtitle: 'Capire l\'origine del numero.',
+      body: 'La pressione sotto l\'avampiede (se usi solette Moticon) o la tua velocità (se usi GPS Lympic) sono MISURATE direttamente dallo strumento. Invece, la "simmetria", l\'angolo di spigolo (edge angle) o il punteggio Ski:IQ di un\'App sullo smartphone sono STIMATI da un algoritmo informatico.'
     },
     {
-      badge: 'Prodotti commerciali',
-      title: 'Carv 2 · Moticon OpenGo · Lympic · Pettorine GPS',
-      subtitle: 'Dalla didattica all’agonismo.',
-      body: 'Carv 2 offre coaching audio in pista; Moticon OpenGo analizza le pressioni plantari; Lympic traccia linee e tempi atleti; le pettorine GPS localizzano i bambini nei corsi.'
-    },
-    {
-      badge: 'Progetto di ricerca · Non commerciale',
-      isResearch: true,
-      title: 'SoleCoach (Augmented Humans 2026)',
-      subtitle: 'Traduzione dei dati plantari in linguaggio naturale.',
-      body: 'Sistema sperimentale presentato in ambito accademico che elabora dati di solette e sensori inerziali per generare consigli tecnici testuali. È ricerca, non un pacchetto commerciale completo.'
+      badge: 'Soluzioni Pratiche',
+      title: 'Atleti, Appassionati, e Bambini in Sicurezza',
+      subtitle: 'Strumenti diversi per obiettivi diversi.',
+      body: 'L\'Amatore evoluto usa Carv 2 (coach vocale in cuffia). Il Maestro usa il video per l\'analisi fine in baita. L\'Allenatore traccia centesimi e traiettorie degli atleti FIS con i GPS (Lympic). I genitori e le scuole usano le pettorine GPS per geo-localizzare e non perdere nessun bambino durante le lezioni.'
     }
   ];
 
   const turns = [
-    { name: 'Curva 1 · Sx', edge: 68, symmetry: 92, flow: 84, question: 'Questa buona simmetria iniziale si mantiene anche sul cambio di pendenza successivo?' },
-    { name: 'Curva 2 · Dx', edge: 54, symmetry: 76, flow: 72, question: 'Questa differenza tra destra e sinistra è visibile anche nel video?' },
-    { name: 'Curva 3 · Sx', edge: 71, symmetry: 88, flow: 86, question: 'L’inclinazione maggiore a sinistra nasce da una presa di spigolo graduale o da un’inclinazione del busto?' },
-    { name: 'Curva 4 · Dx', edge: 58, symmetry: 79, flow: 75, question: 'Sul lato destro lo sciatore carica lo sci esterno con lo stesso tempismo del lato sinistro?' }
+    { name: 'Curva 1 · Sx', edge: 68, symmetry: 92, flow: 84, question: 'Questa buona simmetria iniziale tra gamba interna ed esterna si manterrà anche sul cambio di pendenza?' },
+    { name: 'Curva 2 · Dx', edge: 54, symmetry: 76, flow: 72, question: 'Noti la differenza nei numeri? Questa debolezza sul lato destro (76%) corrisponde a ciò che vedi nel video (spalla destra cadente)?' },
+    { name: 'Curva 3 · Sx', edge: 71, symmetry: 88, flow: 86, question: 'L’angolo di spigolo estremo (71°) nasce da una forte conduzione di ginocchio (corretta) o il cliente sta solo piegando eccessivamente il bacino verso l\'interno (sbagliata)?' },
+    { name: 'Curva 4 · Dx', edge: 58, symmetry: 79, flow: 75, question: 'Il sensore di pressione indica che sta caricando lo sci esterno troppo tardi. Come possiamo anticipare il movimento?' }
   ];
 
   const quiz = [
     {
-      question: 'Un ricevitore GPS misura direttamente la pressione esercitata sotto la pianta del piede?',
+      question: 'L\'antenna GPS nel tuo telefono misura direttamente quanta pressione stai applicando allo sci esterno in curva?',
       answers: [
-        'Sì, i satelliti rilevano i grammi su ciascun tallone.',
-        'No: il GPS calcola posizione e velocità; la pressione richiede solette o sensori plantari dedicati.',
-        'Sì, se abbinato a un casco MIPS.'
+        'Sì, i satelliti spaziali riescono a pesare i chili spinti sullo scarpone.',
+        'No: il GPS calcola solo la posizione e la velocità nello spazio. La pressione meccanica sotto la pianta si misura SOLO con una soletta fisica sensibile (es. Moticon).',
+        'Sì, se accendo il 5G.'
       ],
       correct: 1,
-      explanation: 'Il GPS lavora sulla posizione geografica e non può rilevare cosa accade dentro lo scarpone.'
+      explanation: 'Il GPS non legge la dinamica del corpo. Serve solo per sapere DOVE sei e a CHE VELOCITÀ vai (tracking).'
     },
     {
-      question: 'Una metrica stimata da un algoritmo equivale a una misura fisica diretta?',
+      question: 'Il numerino dell\'Angolo di Spigolo o il punteggio "Ski:IQ" calcolato dal tuo smartphone è un dato fisico assoluto come la temperatura o un algoritmo di stima?',
       answers: [
-        'No: una stima combina segnali tramite un modello matematico e comporta margini di approssimazione.',
-        'Sì, è sempre identica a uno strumento di laboratorio.',
-        'Sì, non dipende mai dal posizionamento del sensore.'
+        'È una Stima Algoritmica: il telefono interpreta matematicamente i tremolii dei sensori e costruisce un numero di riferimento, non una foto perfetta della realtà.',
+        'È una misurazione fisica infallibile al millimetro scattata dal telefono.',
+        'Dipende da quanto costa l\'abbonamento all\'app.'
       ],
       correct: 0,
-      explanation: 'Distinguere misura diretta e stima algoritmica aiuta a interpretare i dati con spirito critico.'
+      explanation: 'Comprendere che molte App offrono "stime matematiche" (algoritmi) aiuta il Maestro e l\'allievo a usare il dato come stimolo, senza diventarne schiavi in modo dogmatico.'
     },
     {
-      question: 'Il punteggio numerico di un’app coincide automaticamente con un livello tecnico federale?',
+      question: 'Se un\'app per smartphone ti assegna un "Punteggio Livello 7", questo sostituisce l\'esame del Maestro di Sci FISI?',
       answers: [
-        'Sì, sostituisce la valutazione del maestro di sci.',
-        'No: i punteggi delle app sono indicatori proprietari utili al confronto personale, non valutazioni ufficiali.',
-        'Sì, vale come diploma FISI.'
+        'Sì, vale come brevetto federale ufficiale.',
+        'No: i punteggi (gamification) servono a motivare e sfidare sé stessi rispetto alla discesa precedente. Nessun singolo numero di app può giudicare la totale sicurezza, indipendenza, armonia e tattica del gesto sciistico.',
+        'Sì, posso anche dare lezioni con quel punteggio.'
       ],
       correct: 1,
-      explanation: 'Un singolo numero non può valutare postura, adattamento al terreno e sicurezza complessiva.'
+      explanation: 'Le App valutano frammenti numerici del gesto (angoli, accelerazioni). L\'occhio critico del maestro valuta l\'equilibrio globale.'
     }
   ];
 
@@ -2964,7 +3032,7 @@ function TelemetryLab() {
               <line x1="290" y1="100" x2="410" y2="140" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4 4" />
 
               <circle cx="105" cy="100" r="30" fill={node === 'sensori' ? 'rgba(0,229,255,0.4)' : '#0f172a'} stroke="#00e5ff" strokeWidth="2" />
-              <text x="82" y="104" fill="#ffffff" fontSize="11">Sensori</text>
+              <text x="82" y="104" fill="#ffffff" fontSize="11">Sensori (Sci)</text>
 
               <rect x="235" y="70" width="70" height="60" rx="10" fill={node === 'smartphone' ? 'rgba(255,204,0,0.4)' : '#0f172a'} stroke="#ffcc00" strokeWidth="2" />
               <text x="247" y="104" fill="#ffffff" fontSize="11">App / IA</text>
@@ -2979,10 +3047,10 @@ function TelemetryLab() {
 
           <div className="part-pills">
             {[
-              { id: 'sensori', label: 'Sensori IMU / Solette', color: '#00e5ff' },
-              { id: 'smartphone', label: 'Smartphone', color: '#ffcc00' },
-              { id: 'gps', label: 'GPS / Pettorine', color: '#ffcc00' },
-              { id: 'video', label: 'Video', color: '#38bdf8' }
+              { id: 'sensori', label: 'Sensori Fisici', color: '#00e5ff' },
+              { id: 'smartphone', label: 'IA (Stime Algoritmo)', color: '#ffcc00' },
+              { id: 'gps', label: 'GPS & Pettorine Bimbi', color: '#ffcc00' },
+              { id: 'video', label: 'Video (Analisi Maestro)', color: '#38bdf8' }
             ].map((p) => (
               <button
                 key={p.id}
@@ -3009,7 +3077,7 @@ function TelemetryLab() {
         <div>
           <div className="sim-box">
             <span style={{ display: 'block', fontSize: '0.66rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-gold)', marginBottom: '8px' }}>
-              Discesa dimostrativa (Dati simulati a scopo didattico)
+              Telemetria di Discesa (Esempio Didattico)
             </span>
             <div className="subtabs-row">
               {turns.map((t, idx) => (
@@ -3050,22 +3118,22 @@ function TelemetryLab() {
 
             <div style={{ display: 'grid', gap: '8px', fontSize: '0.84rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Inclinazione stimata:</span>
-                <strong style={{ color: 'var(--accent-cyan)' }}>{activeT.edge}% (stima algoritmica)</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>Angolo Edge/Spigolo:</span>
+                <strong style={{ color: 'var(--accent-cyan)' }}>{activeT.edge}° (Stima App)</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Simmetria sx / dx:</span>
-                <strong style={{ color: 'var(--accent-gold)' }}>{activeT.symmetry}% (calcolata)</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>Simmetria Pressione Sx/Dx:</span>
+                <strong style={{ color: 'var(--accent-gold)' }}>{activeT.symmetry}% (Calcolata)</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>Fluidità transizione:</span>
-                <strong style={{ color: '#ffffff' }}>{activeT.flow}% (stima)</strong>
+                <span style={{ color: 'var(--text-secondary)' }}>Fluidità di Transizione:</span>
+                <strong style={{ color: '#ffffff' }}>{activeT.flow}% (Stima)</strong>
               </div>
             </div>
           </div>
 
           <div className="lab-card gold" style={{ marginBottom: 0 }}>
-            <h5>Domanda guida per il maestro</h5>
+            <h5>La Lettura Critica del Maestro</h5>
             <p>{activeT.question}</p>
           </div>
         </div>
@@ -3076,8 +3144,8 @@ function TelemetryLab() {
       <LabFooter
         sources={[
           { label: 'Carv Digital Ski Coach', url: 'https://getcarv.com' },
-          { label: 'Moticon OpenGo', url: 'https://moticon.com' },
-          { label: 'Protern Live', url: 'https://protern.io' }
+          { label: 'Lympic (Atleti FIS)', url: 'https://lympic.com' },
+          { label: 'Moticon OpenGo', url: 'https://moticon.com' }
         ]}
       />
     </div>
