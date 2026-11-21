@@ -541,11 +541,28 @@ export default function App() {
   const [hoveredHotspot, setHoveredHotspot] = useState(null);
   const [overdriveMode, setOverdriveMode] = useState(false);
   const [audioOn, setAudioOn] = useState(false);
+  const [showShakeToast, setShowShakeToast] = useState(false);
 
   // Easter Egg Hover sul bottone HUD
   const [hudHovered, setHudHovered] = useState(false);
   const [hudLabel, setHudLabel] = useState('TELEMETRY HUD');
   const hdgRef = useRef(null);
+
+  const dismissShakeToast = useCallback(() => {
+    setShowShakeToast(false);
+    try {
+      sessionStorage.setItem('sas_shake_hint_seen', '1');
+    } catch {}
+  }, []);
+
+  const requestMotionPermission = useCallback(() => {
+    if (
+      typeof DeviceMotionEvent !== 'undefined' &&
+      typeof DeviceMotionEvent.requestPermission === 'function'
+    ) {
+      DeviceMotionEvent.requestPermission().catch(() => {});
+    }
+  }, []);
 
   const handleToggleAudio = () => {
     const nextState = soundEngine.toggle();
@@ -570,6 +587,36 @@ export default function App() {
     setActiveItem(id);
   }, []);
 
+  // Mostra il popup "Prova ad agitare il telefono" solo se viene rilevato uno smartphone
+  useEffect(() => {
+    const isSmartphone =
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.innerWidth <= 768 ||
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (!isSmartphone) return;
+
+    let alreadySeen = false;
+    try {
+      alreadySeen = sessionStorage.getItem('sas_shake_hint_seen') === '1';
+    } catch {}
+
+    if (alreadySeen) return;
+
+    const showTimer = setTimeout(() => {
+      setShowShakeToast(true);
+    }, 1500);
+
+    const hideTimer = setTimeout(() => {
+      dismissShakeToast();
+    }, 9500);
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [dismissShakeToast]);
+
   // Easter Egg Mobile: Shake del telefono per attivare Hyperspace Overdrive
   useEffect(() => {
     let lastX = null;
@@ -592,6 +639,7 @@ export default function App() {
           const now = Date.now();
           if (now - lastShakeTime > 1200) {
             lastShakeTime = now;
+            dismissShakeToast();
             if (typeof navigator !== 'undefined' && navigator.vibrate) {
               try {
                 navigator.vibrate([40, 30, 60]);
@@ -607,23 +655,14 @@ export default function App() {
       lastZ = acc.z;
     };
 
-    const requestMotionPermissionOnce = () => {
-      if (
-        typeof DeviceMotionEvent !== 'undefined' &&
-        typeof DeviceMotionEvent.requestPermission === 'function'
-      ) {
-        DeviceMotionEvent.requestPermission().catch(() => {});
-      }
-    };
-
     window.addEventListener('devicemotion', handleMotion);
-    window.addEventListener('touchend', requestMotionPermissionOnce, { once: true });
+    window.addEventListener('touchend', requestMotionPermission, { once: true });
 
     return () => {
       window.removeEventListener('devicemotion', handleMotion);
-      window.removeEventListener('touchend', requestMotionPermissionOnce);
+      window.removeEventListener('touchend', requestMotionPermission);
     };
-  }, [toggleOverdrive]);
+  }, [toggleOverdrive, dismissShakeToast, requestMotionPermission]);
 
   // Scramble effect su Hover HUD
   useEffect(() => {
@@ -750,6 +789,26 @@ export default function App() {
           </span>
         </div>
       </header>
+
+      {/* Popup automatico su Smartphone per invitare ad agitare il telefono */}
+      {showShakeToast && !activeItem && (
+        <button
+          type="button"
+          className="mobile-shake-toast"
+          onClick={() => {
+            requestMotionPermission();
+            soundEngine.play('click');
+            dismissShakeToast();
+          }}
+        >
+          <span className="shake-toast-icon" aria-hidden="true">📱</span>
+          <span className="shake-toast-text">
+            <strong>Prova ad agitare il telefono ⚡</strong>
+            <span>Attiva modalità Hyperspace Overdrive</span>
+          </span>
+          <span className="shake-toast-close" aria-hidden="true">✕</span>
+        </button>
+      )}
 
       {/* HUD Top-Right (Barra superiore pulita su Mobile) */}
       <div className={`hud-top-right ${activeItem ? 'hidden' : ''}`}>
