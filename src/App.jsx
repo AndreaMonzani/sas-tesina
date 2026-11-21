@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, useGLTF, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
 import LegalCompliance from './LegalCompliance';
+import { soundEngine } from './soundEngine';
 import './index.css';
 
 const InteractiveLab = React.lazy(() => import('./InteractiveLabs'));
@@ -45,6 +46,19 @@ const ORDERED_ITEM_IDS = [
   'attacchi',
   'telemetria',
   'sci'
+];
+
+const HOTSPOT_POINTS = [
+  { id: 'casco', pos: [0.06, 0.92, 0.08], side: 'right' },
+  { id: 'maschera_outof', pos: [-0.09, 0.80, 0.12], side: 'left' },
+  { id: 'maschera_audio', pos: [0.11, 0.70, 0.08], side: 'right' },
+  { id: 'termoregolazione', pos: [-0.16, 0.34, 0.12], side: 'left' },
+  { id: 'guanti', pos: [0.30, 0.06, 0.14], side: 'right' },
+  { id: 'bastoni', pos: [-0.30, -0.04, 0.14], side: 'left' },
+  { id: 'scarpone', pos: [-0.14, -0.66, 0.10], side: 'left' },
+  { id: 'telemetria', pos: [0.18, -0.80, 0.06], side: 'right' },
+  { id: 'attacchi', pos: [-0.15, -0.94, -0.05], side: 'left' },
+  { id: 'sci', pos: [0.15, -1.00, 0.60], side: 'right' }
 ];
 
 const DATA = {
@@ -165,7 +179,10 @@ function KineticTitle({ onTriggerEgg }) {
       className="kinetic-title"
       onClick={onTriggerEgg}
       title="Clicca per attivare Hyperspace Overdrive"
-      onMouseEnter={() => document.body.classList.add('cursor-hovering')}
+      onMouseEnter={() => {
+        soundEngine.play('hover');
+        document.body.classList.add('cursor-hovering');
+      }}
       onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
     >
       <div className="kinetic-line">
@@ -201,6 +218,7 @@ function MagneticNavBar({ items, activeId, onSelectItem, className = '' }) {
       width: btnRect.width,
       x: btnRect.left - barRect.left
     });
+    soundEngine.play('hover');
     document.body.classList.add('cursor-hovering');
   };
 
@@ -290,8 +308,41 @@ const RisingParticles = memo(function RisingParticles({ overdrive }) {
   );
 });
 
-/* --- SCI PROCEDURALI --- */
-const PerfectSkis = memo(function PerfectSkis({ xray }) {
+/* --- MIRINO OLOGRAFICO 3D SULL'HOTSPOT HOVERATO --- */
+function HoverBeacon({ pos }) {
+  const outerRef = useRef();
+  const innerRef = useRef();
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    if (outerRef.current) {
+      outerRef.current.rotation.z = t * 1.8;
+      const pulse = 1 + Math.sin(t * 6) * 0.14;
+      outerRef.current.scale.setScalar(pulse);
+    }
+    if (innerRef.current) {
+      innerRef.current.rotation.z = -t * 2.6;
+    }
+  });
+
+  if (!pos) return null;
+
+  return (
+    <group position={pos}>
+      <mesh ref={outerRef}>
+        <ringGeometry args={[0.065, 0.082, 32]} />
+        <meshBasicMaterial color="#00e5ff" transparent opacity={0.85} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh ref={innerRef}>
+        <ringGeometry args={[0.032, 0.044, 6]} />
+        <meshBasicMaterial color="#ffcc00" transparent opacity={0.95} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
+}
+
+/* --- SCI PROCEDURALI CON REAZIONE COLORE SU HOVER --- */
+const PerfectSkis = memo(function PerfectSkis({ xray, isHighlighted }) {
   const geom = useMemo(() => {
     const shape = new THREE.Shape();
     shape.moveTo(-0.044, -0.88);
@@ -310,11 +361,16 @@ const PerfectSkis = memo(function PerfectSkis({ xray }) {
     return extrude;
   }, []);
 
+  const skiColor = xray ? '#00e5ff' : isHighlighted ? '#0e3a47' : '#090c12';
+  const emissiveColor = isHighlighted && !xray ? '#00e5ff' : '#000000';
+
   return (
     <group position={[0, -1.04, 0.05]}>
       <mesh geometry={geom} position={[-0.15, 0, 0]} receiveShadow>
         <meshPhysicalMaterial
-          color={xray ? '#00e5ff' : '#090c12'}
+          color={skiColor}
+          emissive={emissiveColor}
+          emissiveIntensity={isHighlighted ? 0.35 : 0}
           wireframe={xray}
           roughness={0.25}
           metalness={0.85}
@@ -323,7 +379,9 @@ const PerfectSkis = memo(function PerfectSkis({ xray }) {
       </mesh>
       <mesh geometry={geom} position={[0.15, 0, 0]} receiveShadow>
         <meshPhysicalMaterial
-          color={xray ? '#00e5ff' : '#090c12'}
+          color={skiColor}
+          emissive={emissiveColor}
+          emissiveIntensity={isHighlighted ? 0.35 : 0}
           wireframe={xray}
           roughness={0.25}
           metalness={0.85}
@@ -334,8 +392,8 @@ const PerfectSkis = memo(function PerfectSkis({ xray }) {
   );
 });
 
-/* --- HOTSPOT 3D MEMOIZZATO (FUORI DA SKIERSCENE PER ZERO LOOP/SCATTI) --- */
-const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, onSelect }) {
+/* --- HOTSPOT 3D MEMOIZZATO CON CALLBACK HOVER --- */
+const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, onSelect, onHoverChange }) {
   const item = DATA[id];
   if (!item) return null;
 
@@ -349,8 +407,15 @@ const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, onS
             e.stopPropagation();
             onSelect(id);
           }}
-          onMouseEnter={() => document.body.classList.add('cursor-hovering')}
-          onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+          onMouseEnter={() => {
+            soundEngine.play('hover');
+            onHoverChange(id);
+            document.body.classList.add('cursor-hovering');
+          }}
+          onMouseLeave={() => {
+            onHoverChange(null);
+            document.body.classList.remove('cursor-hovering');
+          }}
         >
           <span className="hotspot-dot" />
           <span className="hotspot-line" />
@@ -361,11 +426,15 @@ const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, onS
   );
 });
 
-/* --- SCENA 3D MANICHINO --- */
-function SkierScene({ activeItem, highlightedId, onSelect, xray, onToggleXray, hdgRef }) {
+/* --- SCENA 3D MANICHINO + CAMBIO COLORE HOVER DINAMICO --- */
+function SkierScene({ activeItem, highlightedId, hoveredId, onHoverChange, onSelect, xray, onToggleXray, hdgRef }) {
   const { scene } = useGLTF('/mannequin.glb');
   const groupRef = useRef();
   const lastTelemetryRef = useRef(0);
+  const materialsRef = useRef([]);
+
+  const targetBaseColor = useMemo(() => new THREE.Color(), []);
+  const targetEmissiveColor = useMemo(() => new THREE.Color(), []);
 
   const normalizedModel = useMemo(() => {
     const clone = scene.clone();
@@ -384,16 +453,22 @@ function SkierScene({ activeItem, highlightedId, onSelect, xray, onToggleXray, h
       -center.z * targetScale
     );
 
+    const mats = [];
     clone.traverse((child) => {
       if (child.isMesh) {
-        child.material = new THREE.MeshStandardMaterial({
+        const mat = new THREE.MeshStandardMaterial({
           color: xray ? '#00e5ff' : '#1b202e',
-          roughness: xray ? 0.2 : 0.56,
-          metalness: xray ? 0.8 : 0.28,
+          emissive: '#000000',
+          emissiveIntensity: 0,
+          roughness: xray ? 0.2 : 0.52,
+          metalness: xray ? 0.8 : 0.32,
           wireframe: xray
         });
+        child.material = mat;
+        mats.push(mat);
       }
     });
+    materialsRef.current = mats;
     return clone;
   }, [scene, xray]);
 
@@ -408,7 +483,20 @@ function SkierScene({ activeItem, highlightedId, onSelect, xray, onToggleXray, h
       groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.07);
       groupRef.current.position.y = (isDesktop ? -0.04 : 0.14) + breath;
 
-      // Aggiornamento DOM diretto (zero re-render React!)
+      // Cambio colore fluido del manichino quando si fa hover su un hotspot
+      if (!xray && materialsRef.current.length > 0) {
+        targetBaseColor.set(hoveredId ? '#22384f' : '#1b202e');
+        targetEmissiveColor.set(hoveredId ? '#005f73' : '#000000');
+        const targetIntensity = hoveredId ? 0.45 : 0;
+
+        for (let i = 0; i < materialsRef.current.length; i++) {
+          const m = materialsRef.current[i];
+          m.color.lerp(targetBaseColor, 0.12);
+          m.emissive.lerp(targetEmissiveColor, 0.12);
+          m.emissiveIntensity = THREE.MathUtils.lerp(m.emissiveIntensity, targetIntensity, 0.12);
+        }
+      }
+
       if (hdgRef?.current && state.clock.elapsedTime - lastTelemetryRef.current > 0.2) {
         lastTelemetryRef.current = state.clock.elapsedTime;
         const yaw = Math.round(((state.camera.position.x * 45) % 360 + 360) % 360);
@@ -418,6 +506,7 @@ function SkierScene({ activeItem, highlightedId, onSelect, xray, onToggleXray, h
   });
 
   const currentFocus = activeItem || highlightedId;
+  const hoveredSpot = hoveredId ? HOTSPOT_POINTS.find((h) => h.id === hoveredId) : null;
 
   return (
     <group
@@ -428,18 +517,21 @@ function SkierScene({ activeItem, highlightedId, onSelect, xray, onToggleXray, h
       }}
     >
       <primitive object={normalizedModel} />
-      <PerfectSkis xray={xray} />
+      <PerfectSkis xray={xray} isHighlighted={hoveredId === 'sci' || hoveredId === 'attacchi'} />
 
-      <Hotspot pos={[0.06, 0.92, 0.08]} id="casco" side="right" isSelected={currentFocus === 'casco'} onSelect={onSelect} />
-      <Hotspot pos={[-0.09, 0.80, 0.12]} id="maschera_outof" side="left" isSelected={currentFocus === 'maschera_outof'} onSelect={onSelect} />
-      <Hotspot pos={[0.11, 0.70, 0.08]} id="maschera_audio" side="right" isSelected={currentFocus === 'maschera_audio'} onSelect={onSelect} />
-      <Hotspot pos={[-0.16, 0.34, 0.12]} id="termoregolazione" side="left" isSelected={currentFocus === 'termoregolazione'} onSelect={onSelect} />
-      <Hotspot pos={[0.30, 0.06, 0.14]} id="guanti" side="right" isSelected={currentFocus === 'guanti'} onSelect={onSelect} />
-      <Hotspot pos={[-0.30, -0.04, 0.14]} id="bastoni" side="left" isSelected={currentFocus === 'bastoni'} onSelect={onSelect} />
-      <Hotspot pos={[-0.14, -0.66, 0.10]} id="scarpone" side="left" isSelected={currentFocus === 'scarpone'} onSelect={onSelect} />
-      <Hotspot pos={[0.18, -0.80, 0.06]} id="telemetria" side="right" isSelected={currentFocus === 'telemetria'} onSelect={onSelect} />
-      <Hotspot pos={[-0.15, -0.94, -0.05]} id="attacchi" side="left" isSelected={currentFocus === 'attacchi'} onSelect={onSelect} />
-      <Hotspot pos={[0.15, -1.00, 0.60]} id="sci" side="right" isSelected={currentFocus === 'sci'} onSelect={onSelect} />
+      {hoveredSpot && <HoverBeacon pos={hoveredSpot.pos} />}
+
+      {HOTSPOT_POINTS.map((spot) => (
+        <Hotspot
+          key={spot.id}
+          pos={spot.pos}
+          id={spot.id}
+          side={spot.side}
+          isSelected={currentFocus === spot.id}
+          onSelect={onSelect}
+          onHoverChange={onHoverChange}
+        />
+      ))}
     </group>
   );
 }
@@ -448,9 +540,11 @@ useGLTF.preload('/mannequin.glb');
 
 export default function App() {
   const [activeItem, setActiveItem] = useState(null);
+  const [hoveredHotspot, setHoveredHotspot] = useState(null);
   const [overdriveMode, setOverdriveMode] = useState(false);
+  const [audioOn, setAudioOn] = useState(false);
 
-  // Easter Egg Hover sul bottone HUD (scramble text + mini-telemetria)
+  // Easter Egg Hover sul bottone HUD
   const [hudHovered, setHudHovered] = useState(false);
   const [hudLabel, setHudLabel] = useState('TELEMETRY HUD');
   const hdgRef = useRef(null);
@@ -459,19 +553,34 @@ export default function App() {
   const [mobileDeckIdx, setMobileDeckIdx] = useState(0);
   const touchStartX = useRef(null);
 
+  const handleToggleAudio = () => {
+    const nextState = soundEngine.toggle();
+    setAudioOn(nextState);
+  };
+
+  const toggleOverdrive = useCallback(() => {
+    setOverdriveMode((prev) => {
+      const next = !prev;
+      soundEngine.play(next ? 'overdrive' : 'click');
+      return next;
+    });
+  }, []);
+
   const handleToggleItem = useCallback((id) => {
+    soundEngine.play('click');
     setActiveItem((prev) => (prev === id ? null : id));
     const idx = ORDERED_ITEM_IDS.indexOf(id);
     if (idx !== -1) setMobileDeckIdx(idx);
   }, []);
 
   const handleSelectDirect = useCallback((id) => {
+    soundEngine.play('click');
     setActiveItem(id);
     const idx = ORDERED_ITEM_IDS.indexOf(id);
     if (idx !== -1) setMobileDeckIdx(idx);
   }, []);
 
-  // Scramble effect quando si fa hover sul bottone HUD
+  // Scramble effect su Hover HUD
   useEffect(() => {
     if (overdriveMode) {
       setHudLabel('OVERDRIVE // ON');
@@ -541,8 +650,15 @@ export default function App() {
   const currentMobileItem = DATA[currentMobileId];
   const currentMobileMacro = MACROS.find((m) => m.id === currentMobileItem.macro);
 
-  const nextMobileCard = () => setMobileDeckIdx((i) => (i + 1) % ORDERED_ITEM_IDS.length);
-  const prevMobileCard = () => setMobileDeckIdx((i) => (i - 1 + ORDERED_ITEM_IDS.length) % ORDERED_ITEM_IDS.length);
+  const nextMobileCard = () => {
+    soundEngine.play('swipe');
+    setMobileDeckIdx((i) => (i + 1) % ORDERED_ITEM_IDS.length);
+  };
+
+  const prevMobileCard = () => {
+    soundEngine.play('swipe');
+    setMobileDeckIdx((i) => (i - 1 + ORDERED_ITEM_IDS.length) % ORDERED_ITEM_IDS.length);
+  };
 
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
@@ -562,6 +678,14 @@ export default function App() {
   const prevItemId = currentIndexInAll !== -1 ? ORDERED_ITEM_IDS[(currentIndexInAll - 1 + ORDERED_ITEM_IDS.length) % ORDERED_ITEM_IDS.length] : null;
   const nextItemId = currentIndexInAll !== -1 ? ORDERED_ITEM_IDS[(currentIndexInAll + 1) % ORDERED_ITEM_IDS.length] : null;
 
+  const memberHoverProps = {
+    onMouseEnter: () => {
+      soundEngine.play('hover');
+      document.body.classList.add('cursor-hovering');
+    },
+    onMouseLeave: () => document.body.classList.remove('cursor-hovering')
+  };
+
   return (
     <div className={`app-shell ${overdriveMode ? 'overdrive-mode' : ''}`}>
       <div className="cursor-dot" />
@@ -573,7 +697,7 @@ export default function App() {
 
       <KineticIntro />
 
-      {/* Header con Titolo Impilato + Link Andrea */}
+      {/* Header con Titolo Impilato + Hover su tutti i membri del team */}
       <header className={`brand-header ${activeItem ? 'hidden' : ''}`}>
         <span className="kicker">
           SAS ACADEMY //{' '}
@@ -582,43 +706,75 @@ export default function App() {
             target="_blank"
             rel="noreferrer"
             className="author-inline-link"
-            onMouseEnter={() => document.body.classList.add('cursor-hovering')}
-            onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+            {...memberHoverProps}
           >
             ANDREA
           </a>
-          , MARCO, GIANLUCA ED EMMA
+          ,{' '}
+          <span className="team-member-tag" {...memberHoverProps}>
+            MARCO
+          </span>
+          ,{' '}
+          <span className="team-member-tag" {...memberHoverProps}>
+            GIANLUCA
+          </span>{' '}
+          ED{' '}
+          <span className="team-member-tag" {...memberHoverProps}>
+            EMMA
+          </span>
         </span>
-        <KineticTitle onTriggerEgg={() => setOverdriveMode((v) => !v)} />
+        <KineticTitle onTriggerEgg={toggleOverdrive} />
         <div className="hero-sub-telemetry">
           <span>
-            {overdriveMode
+            {hoveredHotspot
+              ? `[TARGET // ${DATA[hoveredHotspot]?.title.toUpperCase()}]`
+              : overdriveMode
               ? '[HYPERSPACE OVERDRIVE ATTIVO — CLICCA HUD PER USCIRE]'
               : '[SELEZIONA UN HOTSPOT SUL MODELLO O USA LA DOCK]'}
           </span>
         </div>
       </header>
 
-      {/* HUD Top-Right con Doppio Easter Egg (Hover Scramble + Click Overdrive) */}
-      <div
-        className={`hud-top-right ${activeItem ? 'hidden' : ''}`}
-        onMouseEnter={() => {
-          setHudHovered(true);
-          document.body.classList.add('cursor-hovering');
-        }}
-        onMouseLeave={() => {
-          setHudHovered(false);
-          document.body.classList.remove('cursor-hovering');
-        }}
-      >
-        <button
-          type="button"
-          className={`hud-pill-btn ${overdriveMode ? 'active' : ''}`}
-          onClick={() => setOverdriveMode((v) => !v)}
-        >
-          <span className="hud-dot" />
-          <span>{hudLabel}</span>
-        </button>
+      {/* HUD Top-Right: Audio Equalizer + Telemetry HUD */}
+      <div className={`hud-top-right ${activeItem ? 'hidden' : ''}`}>
+        <div className="hud-controls-row">
+          <button
+            type="button"
+            className={`hud-pill-btn ${audioOn ? 'audio-on active' : ''}`}
+            onClick={handleToggleAudio}
+            aria-label={audioOn ? 'Disattiva audio' : 'Attiva audio'}
+            onMouseEnter={() => {
+              soundEngine.play('hover');
+              document.body.classList.add('cursor-hovering');
+            }}
+            onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+          >
+            <span className="eq-bars" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </span>
+            <span>{audioOn ? 'AUDIO ON' : 'AUDIO'}</span>
+          </button>
+
+          <button
+            type="button"
+            className={`hud-pill-btn ${overdriveMode ? 'active' : ''}`}
+            onClick={toggleOverdrive}
+            onMouseEnter={() => {
+              setHudHovered(true);
+              soundEngine.play('hover');
+              document.body.classList.add('cursor-hovering');
+            }}
+            onMouseLeave={() => {
+              setHudHovered(false);
+              document.body.classList.remove('cursor-hovering');
+            }}
+          >
+            <span className="hud-dot" />
+            <span>{hudLabel}</span>
+          </button>
+        </div>
 
         <div ref={hdgRef} className="hud-coords">
           46.5405° N · 12.1357° E · HDG 000°
@@ -645,7 +801,7 @@ export default function App() {
         )}
       </div>
 
-      {/* Scena 3D + Particelle che salgono */}
+      {/* Scena 3D + Particelle */}
       <SceneErrorBoundary>
         <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
           <Canvas
@@ -663,9 +819,11 @@ export default function App() {
               <SkierScene
                 activeItem={activeItem}
                 highlightedId={currentMobileId}
+                hoveredId={hoveredHotspot}
+                onHoverChange={setHoveredHotspot}
                 onSelect={handleToggleItem}
                 xray={overdriveMode}
-                onToggleXray={() => setOverdriveMode((v) => !v)}
+                onToggleXray={toggleOverdrive}
                 hdgRef={hdgRef}
               />
             </Suspense>
@@ -699,7 +857,7 @@ export default function App() {
         />
       </nav>
 
-      {/* Deck Mobile Videogame / Tinder (Swipeable) */}
+      {/* Deck Mobile Videogame / Tinder */}
       <div
         className={`mobile-tinder-deck ${activeItem ? 'hidden' : ''}`}
         onTouchStart={handleTouchStart}
@@ -731,7 +889,14 @@ export default function App() {
       {/* Pannello Laterale Desktop & Scheda Mobile */}
       <aside className={`side-panel ${activeItem ? 'open' : ''}`} aria-label="Scheda approfondimento">
         <div className="panel-top-actions">
-          <button type="button" className="close-btn" onClick={() => setActiveItem(null)}>
+          <button
+            type="button"
+            className="close-btn"
+            onClick={() => {
+              soundEngine.play('click');
+              setActiveItem(null);
+            }}
+          >
             ✕ Torna al 3D
           </button>
           {activeMacroObj && (
@@ -741,7 +906,6 @@ export default function App() {
           )}
         </div>
 
-        {/* Sottomenu con la stessa Navbar Magnetica a Rolling Text */}
         {activeMacroObj && activeMacroObj.items.length > 1 && (
           <div className="sub-nav-wrap">
             <MagneticNavBar
@@ -764,7 +928,10 @@ export default function App() {
               target="_blank"
               rel="noreferrer"
               className="brand-link"
-              onMouseEnter={() => document.body.classList.add('cursor-hovering')}
+              onMouseEnter={() => {
+                soundEngine.play('hover');
+                document.body.classList.add('cursor-hovering');
+              }}
               onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
             >
               {data.brand}
@@ -787,7 +954,6 @@ export default function App() {
         )}
       </aside>
 
-      {/* Barra rapida Precedente/Successivo su Mobile dentro la scheda */}
       {activeItem && (
         <div className="mobile-panel-nav">
           <button type="button" className="action-btn secondary" onClick={() => handleSelectDirect(prevItemId)}>

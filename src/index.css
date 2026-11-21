@@ -1828,3 +1828,51 @@ input[type='range']:active::-webkit-slider-thumb {
     display: none !important;
   }
 }
+/* --- EFFETTO HOVER NOMI MEMBRI TEAM (SENZA LINK) --- */
+.team-member-tag {
+  position: relative;
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.82);
+  padding: 1px 4px;
+  border-radius: 4px;
+  cursor: default;
+  transition: color 0.25s ease, background 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-member-tag::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 0;
+  height: 1px;
+  background: var(--accent-cyan);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-member-tag:hover {
+  color: var(--accent-cyan);
+  background: rgba(0, 229, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.team-member-tag:hover::after {
+  transform: scaleX(1);
+}
+
+/* --- CAMBIO COLORE HOVER HOTSPOT SUL MANICHINO 3D --- */
+.hotspot-container:hover .hotspot-tag,
+.hotspot-container.active .hotspot-tag {
+  background: linear-gradient(135deg, var(--accent-cyan), #38bdf8);
+  color: #020305;
+  font-weight: 700;
+  border-color: #ffffff;
+  box-shadow: 0 0 22px rgba(0, 229, 255, 0.65);
+}
+
+.hotspot-container.active .hotspot-tag {
+  background: linear-gradient(135deg, var(--accent-gold), #f59e0b);
+  box-shadow: 0 0 24px rgba(255, 204, 0, 0.7);
+}
