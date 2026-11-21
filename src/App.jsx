@@ -20,7 +20,7 @@ class SceneErrorBoundary extends Component {
     if (this.state.hasError) {
       return (
         <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', color: 'rgba(255,255,255,0.65)', fontSize: '0.85rem', zIndex: 5 }}>
-          Scena 3D non disponibile. Usa il menu in basso per esplorare i laboratori.
+          Scena 3D non disponibile. Tocca i punti sul modello per esplorare i laboratori.
         </div>
       );
     }
@@ -481,7 +481,7 @@ function SkierScene({ activeItem, hoveredId, onHoverChange, onSelect, xray, onTo
 
       groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.07);
       groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.07);
-      groupRef.current.position.y = (isDesktop ? -0.04 : -0.10) + breath;
+      groupRef.current.position.y = (isDesktop ? -0.04 : -0.14) + breath;
 
       if (!xray && materialsRef.current.length > 0) {
         targetBaseColor.set(hoveredId ? '#22384f' : '#1b202e');
@@ -541,27 +541,19 @@ export default function App() {
   const [hoveredHotspot, setHoveredHotspot] = useState(null);
   const [overdriveMode, setOverdriveMode] = useState(false);
   const [audioOn, setAudioOn] = useState(false);
-  const [showShakeToast, setShowShakeToast] = useState(false);
+  const [shakeToastState, setShakeToastState] = useState('hidden'); // 'hidden' | 'prompt' | 'armed'
 
   // Easter Egg Hover sul bottone HUD
   const [hudHovered, setHudHovered] = useState(false);
   const [hudLabel, setHudLabel] = useState('TELEMETRY HUD');
   const hdgRef = useRef(null);
+  const motionArmedRef = useRef(false);
 
   const dismissShakeToast = useCallback(() => {
-    setShowShakeToast(false);
+    setShakeToastState('hidden');
     try {
       sessionStorage.setItem('sas_shake_hint_seen', '1');
     } catch {}
-  }, []);
-
-  const requestMotionPermission = useCallback(() => {
-    if (
-      typeof DeviceMotionEvent !== 'undefined' &&
-      typeof DeviceMotionEvent.requestPermission === 'function'
-    ) {
-      DeviceMotionEvent.requestPermission().catch(() => {});
-    }
   }, []);
 
   const handleToggleAudio = () => {
@@ -587,7 +579,52 @@ export default function App() {
     setActiveItem(id);
   }, []);
 
-  // Mostra il popup "Prova ad agitare il telefono" solo se viene rilevato uno smartphone
+  // Sblocca i sensori di movimento (obbligatorio su iOS Safari tramite gesto utente diretto)
+  const unlockMotionSensors = useCallback(
+    async (fromToastTap = false) => {
+      if (typeof window === 'undefined' || typeof DeviceMotionEvent === 'undefined') {
+        if (fromToastTap) {
+          toggleOverdrive();
+          dismissShakeToast();
+        }
+        return;
+      }
+
+      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        try {
+          const res = await DeviceMotionEvent.requestPermission();
+          if (res === 'granted') {
+            motionArmedRef.current = true;
+            if (fromToastTap) {
+              soundEngine.play('click');
+              setShakeToastState('armed');
+              setTimeout(() => dismissShakeToast(), 3200);
+            }
+          } else if (fromToastTap) {
+            // Se l'utente ha negato i sensori nelle impostazioni Safari, attiva Overdrive al tap
+            toggleOverdrive();
+            dismissShakeToast();
+          }
+        } catch {
+          if (fromToastTap) {
+            toggleOverdrive();
+            dismissShakeToast();
+          }
+        }
+      } else {
+        // Android / browser senza prompt esplicito: sensori già attivi
+        motionArmedRef.current = true;
+        if (fromToastTap) {
+          soundEngine.play('click');
+          setShakeToastState('armed');
+          setTimeout(() => dismissShakeToast(), 2800);
+        }
+      }
+    },
+    [toggleOverdrive, dismissShakeToast]
+  );
+
+  // Mostra il popup centrato su smartphone
   useEffect(() => {
     const isSmartphone =
       window.matchMedia('(pointer: coarse)').matches ||
@@ -604,12 +641,12 @@ export default function App() {
     if (alreadySeen) return;
 
     const showTimer = setTimeout(() => {
-      setShowShakeToast(true);
-    }, 1500);
+      setShakeToastState('prompt');
+    }, 1300);
 
     const hideTimer = setTimeout(() => {
       dismissShakeToast();
-    }, 9500);
+    }, 11000);
 
     return () => {
       clearTimeout(showTimer);
@@ -617,32 +654,34 @@ export default function App() {
     };
   }, [dismissShakeToast]);
 
-  // Easter Egg Mobile: Shake del telefono per attivare Hyperspace Overdrive
+  // Rilevamento Shake ad alta precisione (iOS & Android)
   useEffect(() => {
     let lastX = null;
     let lastY = null;
     let lastZ = null;
     let lastShakeTime = 0;
-    const SHAKE_THRESHOLD = 24;
+    const SHAKE_DELTA_THRESHOLD = 15; // Soglia reattiva per movimento naturale del polso
 
     const handleMotion = (e) => {
-      const acc = e.accelerationIncludingGravity || e.acceleration;
+      const acc = e.acceleration || e.accelerationIncludingGravity;
       if (!acc || acc.x === null) return;
 
-      if (lastX !== null) {
-        const delta =
-          Math.abs(acc.x - lastX) +
-          Math.abs(acc.y - lastY) +
-          Math.abs(acc.z - lastZ);
+      motionArmedRef.current = true;
 
-        if (delta > SHAKE_THRESHOLD) {
+      if (lastX !== null) {
+        const dx = acc.x - lastX;
+        const dy = acc.y - lastY;
+        const dz = acc.z - lastZ;
+        const magnitude = Math.hypot(dx, dy, dz);
+
+        if (magnitude > SHAKE_DELTA_THRESHOLD) {
           const now = Date.now();
-          if (now - lastShakeTime > 1200) {
+          if (now - lastShakeTime > 950) {
             lastShakeTime = now;
             dismissShakeToast();
             if (typeof navigator !== 'undefined' && navigator.vibrate) {
               try {
-                navigator.vibrate([40, 30, 60]);
+                navigator.vibrate([45, 35, 70]);
               } catch {}
             }
             toggleOverdrive();
@@ -656,13 +695,10 @@ export default function App() {
     };
 
     window.addEventListener('devicemotion', handleMotion);
-    window.addEventListener('touchend', requestMotionPermission, { once: true });
-
     return () => {
       window.removeEventListener('devicemotion', handleMotion);
-      window.removeEventListener('touchend', requestMotionPermission);
     };
-  }, [toggleOverdrive, dismissShakeToast, requestMotionPermission]);
+  }, [toggleOverdrive, dismissShakeToast]);
 
   // Scramble effect su Hover HUD
   useEffect(() => {
@@ -690,7 +726,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, [hudHovered, overdriveMode]);
 
-  // Cursore custom
+  // Cursore custom desktop
   useEffect(() => {
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
@@ -742,7 +778,12 @@ export default function App() {
   };
 
   return (
-    <div className={`app-shell ${overdriveMode ? 'overdrive-mode' : ''}`}>
+    <div
+      className={`app-shell ${overdriveMode ? 'overdrive-mode' : ''}`}
+      onClick={() => {
+        if (!motionArmedRef.current) unlockMotionSensors(false);
+      }}
+    >
       <div className="cursor-dot" />
       <div className="cursor-ring" />
       <div className="studio-canvas" />
@@ -785,32 +826,39 @@ export default function App() {
               ? `[TARGET // ${DATA[hoveredHotspot]?.title.toUpperCase()}]`
               : overdriveMode
               ? '[HYPERSPACE OVERDRIVE ATTIVO — CLICCA HUD O SCUOTI PER USCIRE]'
-              : '[TOCCA UN HOTSPOT SUL MODELLO O SCORRI IL MENU]'}
+              : '[TOCCA UN PUNTO SUL MODELLO 3D PER ESPLORARE]'}
           </span>
         </div>
       </header>
 
-      {/* Popup automatico su Smartphone per invitare ad agitare il telefono */}
-      {showShakeToast && !activeItem && (
+      {/* Popup Centrato su Smartphone per Shake-to-Overdrive */}
+      {shakeToastState !== 'hidden' && !activeItem && (
         <button
           type="button"
           className="mobile-shake-toast"
-          onClick={() => {
-            requestMotionPermission();
-            soundEngine.play('click');
-            dismissShakeToast();
+          onClick={(e) => {
+            e.stopPropagation();
+            unlockMotionSensors(true);
           }}
         >
           <span className="shake-toast-icon" aria-hidden="true">📱</span>
           <span className="shake-toast-text">
-            <strong>Prova ad agitare il telefono ⚡</strong>
-            <span>Attiva modalità Hyperspace Overdrive</span>
+            {shakeToastState === 'armed' ? (
+              <>
+                <strong>Sensori attivi! Agita ora ⚡</strong>
+                <span>Scuoti il telefono per Hyperspace Overdrive</span>
+              </>
+            ) : (
+              <>
+                <strong>Prova ad agitare il telefono ⚡</strong>
+                <span>Tocca qui per attivare i sensori Overdrive</span>
+              </>
+            )}
           </span>
-          <span className="shake-toast-close" aria-hidden="true">✕</span>
         </button>
       )}
 
-      {/* HUD Top-Right (Barra superiore pulita su Mobile) */}
+      {/* HUD Top-Right */}
       <div className={`hud-top-right ${activeItem ? 'hidden' : ''}`}>
         <div className="hud-controls-row">
           <button
@@ -918,7 +966,7 @@ export default function App() {
         </div>
       </SceneErrorBoundary>
 
-      {/* Dock Magnetica (Fissa al centro su Desktop, Scorrevole Orizzontalmente su Mobile) */}
+      {/* Dock Magnetica (Solo Desktop; su Mobile si usa esclusivamente il modellino 3D) */}
       <nav className={`macro-dock ${activeItem ? 'hidden' : ''}`} aria-label="Categorie principali">
         <MagneticNavBar
           items={MACROS.map((m) => ({

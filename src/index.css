@@ -1679,10 +1679,19 @@ input[type='range']:active::-webkit-slider-thumb {
 }
 
 /* ============================================================================
-   MOBILE UX: HEADER ORDINATO, SOLO MODELLINO 3D + DOCK SCORREVOLE
+   MOBILE UX: POPUP CENTRATO + SOLO MODELLINO 3D (ZERO DOCK IN BASSO)
    ============================================================================ */
-.mobile-panel-nav {
+.mobile-panel-nav,
+.mobile-shake-toast {
   display: none;
+}
+
+@keyframes phoneWiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-16deg); }
+  40% { transform: rotate(14deg); }
+  60% { transform: rotate(-10deg); }
+  80% { transform: rotate(8deg); }
 }
 
 @media (max-width: 768px) {
@@ -1690,7 +1699,7 @@ input[type='range']:active::-webkit-slider-thumb {
     padding: 24px 20px;
   }
 
-  /* 1. Barra superiore fissa con AUDIO a sinistra e TELEMETRY HUD a destra */
+  /* 1. Barra superiore con AUDIO a sinistra e TELEMETRY HUD a destra */
   .hud-top-right {
     top: 14px;
     left: 14px;
@@ -1716,12 +1725,12 @@ input[type='range']:active::-webkit-slider-thumb {
     display: none;
   }
 
-  /* 2. Titolo e nomi del team posizionati sotto la barra HUD a piena larghezza */
+  /* 2. Titolo e nomi del team sotto la barra HUD a piena larghezza */
   .brand-header {
     top: 56px;
     left: 16px;
     right: 16px;
-    gap: 5px;
+    gap: 4px;
   }
 
   .kicker {
@@ -1731,7 +1740,7 @@ input[type='range']:active::-webkit-slider-thumb {
   }
 
   .kinetic-line {
-    font-size: 2.05rem;
+    font-size: 2.0rem;
   }
 
   .kinetic-underline-bar {
@@ -1740,60 +1749,85 @@ input[type='range']:active::-webkit-slider-thumb {
 
   .hero-sub-telemetry {
     display: block;
-    font-size: 0.55rem;
+    font-size: 0.54rem;
     letter-spacing: 0.05em;
     margin-top: 2px;
   }
 
-  /* 3. Hotspot compatti sul modellino 3D per interagire direttamente col manichino */
+  /* 3. Popup Shake perfettamente centrato senza conflitti di transform */
+  .mobile-shake-toast {
+    position: fixed;
+    top: 166px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    z-index: 28;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: fit-content;
+    max-width: calc(100vw - 28px);
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(6, 11, 20, 0.94);
+    border: 1px solid rgba(255, 204, 0, 0.65);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85), 0 0 22px rgba(255, 204, 0, 0.22);
+    color: #ffffff;
+    cursor: pointer;
+    animation: fadeSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .shake-toast-icon {
+    display: inline-block;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    animation: phoneWiggle 1.25s ease-in-out infinite;
+  }
+
+  .shake-toast-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    line-height: 1.25;
+  }
+
+  .shake-toast-text strong {
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+  }
+
+  .shake-toast-text span {
+    font-size: 0.62rem;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  /* 4. Nessun menu in basso: navigazione pura via modellino 3D */
+  .macro-dock {
+    display: none !important;
+  }
+
+  .hotspot-container {
+    padding: 10px 6px;
+  }
+
   .hotspot-dot {
-    width: 11px;
-    height: 11px;
+    width: 12px;
+    height: 12px;
   }
 
   .hotspot-line {
-    width: 12px;
+    width: 13px;
   }
 
   .hotspot-tag {
-    font-size: 0.54rem;
-    padding: 3px 6px;
+    font-size: 0.56rem;
+    padding: 4px 7px;
     letter-spacing: 0.06em;
-  }
-
-  /* 4. Dock orizzontale a scorrimento in basso */
-  .macro-dock {
-    bottom: 42px;
-    left: 12px;
-    right: 12px;
-    transform: none;
-    max-width: calc(100vw - 24px);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .macro-dock::-webkit-scrollbar {
-    display: none;
-  }
-
-  .macro-dock.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(16px);
-  }
-
-  .dock-magnetic-pill {
-    display: none;
-  }
-
-  .mag-nav-btn {
-    padding: 9px 14px;
-    flex-shrink: 0;
-  }
-
-  .roll-wrap {
-    font-size: 0.68rem;
   }
 
   /* Scheda Lab su Mobile */
@@ -1833,7 +1867,7 @@ input[type='range']:active::-webkit-slider-thumb {
   }
 
   .legal-dock {
-    bottom: 8px;
+    bottom: 10px;
     padding: 4px 10px;
     font-size: 0.54rem;
     gap: 6px;
@@ -1855,74 +1889,5 @@ input[type='range']:active::-webkit-slider-thumb {
   .cursor-dot,
   .cursor-ring {
     display: none !important;
-  }
-}
-/* --- POPUP MOBILE SHAKE-TO-OVERDRIVE --- */
-.mobile-shake-toast {
-  display: none;
-}
-
-@keyframes phoneWiggle {
-  0%, 100% { transform: rotate(0deg); }
-  20% { transform: rotate(-16deg); }
-  40% { transform: rotate(14deg); }
-  60% { transform: rotate(-10deg); }
-  80% { transform: rotate(8deg); }
-}
-
-@media (max-width: 768px) {
-  .mobile-shake-toast {
-    position: fixed;
-    top: 174px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 28;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    width: max-content;
-    max-width: calc(100vw - 28px);
-    padding: 9px 14px;
-    border-radius: 999px;
-    background: rgba(6, 11, 20, 0.92);
-    border: 1px solid rgba(255, 204, 0, 0.55);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), 0 0 18px rgba(255, 204, 0, 0.18);
-    color: #ffffff;
-    cursor: pointer;
-    animation: fadeSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .shake-toast-icon {
-    display: inline-block;
-    font-size: 1rem;
-    animation: phoneWiggle 1.3s ease-in-out infinite;
-  }
-
-  .shake-toast-text {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    line-height: 1.2;
-  }
-
-  .shake-toast-text strong {
-    font-family: var(--font-mono);
-    font-size: 0.64rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--accent-gold);
-  }
-
-  .shake-toast-text span {
-    font-size: 0.62rem;
-    color: var(--text-secondary);
-  }
-
-  .shake-toast-close {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    color: var(--text-secondary);
-    padding-left: 4px;
   }
 }
