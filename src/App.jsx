@@ -1,11 +1,10 @@
-import React, { useState, useRef, useEffect, useMemo, Suspense, Component } from 'react';
+import React, { useState, useRef, useEffect, useMemo, Suspense, Component, memo, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, useGLTF, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
 import LegalCompliance from './LegalCompliance';
 import './index.css';
 
-// Caricamento differito dei 10 laboratori per massimizzare Speed Insights
 const InteractiveLab = React.lazy(() => import('./InteractiveLabs'));
 
 class SceneErrorBoundary extends Component {
@@ -33,6 +32,19 @@ const MACROS = [
   { id: 'sicurezza', label: 'Sicurezza', items: ['casco', 'attacchi', 'bastoni'] },
   { id: 'comfort', label: 'Comfort', items: ['termoregolazione', 'guanti'] },
   { id: 'dati_visione', label: 'Visione & Dati', items: ['maschera_outof', 'maschera_audio', 'telemetria'] }
+];
+
+const ORDERED_ITEM_IDS = [
+  'casco',
+  'maschera_outof',
+  'maschera_audio',
+  'termoregolazione',
+  'guanti',
+  'bastoni',
+  'scarpone',
+  'attacchi',
+  'telemetria',
+  'sci'
 ];
 
 const DATA = {
@@ -89,7 +101,7 @@ const DATA = {
 };
 
 /* --- PRELOADER CINETICO FULL-SCREEN --- */
-function KineticIntro({ onReady }) {
+function KineticIntro() {
   const { progress } = useProgress();
   const [displayPct, setDisplayPct] = useState(0);
   const [dismissed, setDismissed] = useState(false);
@@ -103,27 +115,25 @@ function KineticIntro({ onReady }) {
           return 100;
         }
         const step = Math.ceil((target - prev) / 4);
-        return Math.min(100, prev + Math.max(4, step));
+        return Math.min(100, prev + Math.max(5, step));
       });
-    }, 35);
+    }, 30);
     return () => clearInterval(timer);
   }, [progress]);
 
   useEffect(() => {
     if (displayPct >= 100) {
-      const t = setTimeout(() => {
-        setDismissed(true);
-        onReady?.();
-      }, 320);
+      const t = setTimeout(() => setDismissed(true), 280);
       return () => clearTimeout(t);
     }
-  }, [displayPct, onReady]);
+  }, [displayPct]);
 
   return (
     <div className={`intro-curtain ${dismissed ? 'dismissed' : ''}`} aria-hidden={dismissed}>
+      <div className="intro-scan-beam" />
       <div className="intro-top-bar">
         <span>SAS ACADEMY // SKITECH LAB</span>
-        <span>SYS.BOOT — 2026</span>
+        <span>ANDREA MONZANI · 2026</span>
       </div>
 
       <div className="intro-center">
@@ -145,7 +155,7 @@ function KineticIntro({ onReady }) {
   );
 }
 
-/* --- TITOLO CON HOVER CINETICO CARATTERE PER CARATTERE --- */
+/* --- TITOLO CON HOVER CINETICO 3D --- */
 function KineticTitle({ onTriggerEgg }) {
   const line1 = 'INNOVAZIONE';
   const line2 = 'SCI 2026';
@@ -154,7 +164,7 @@ function KineticTitle({ onTriggerEgg }) {
     <div
       className="kinetic-title"
       onClick={onTriggerEgg}
-      title="Clicca per attivare la scansione X-Ray"
+      title="Clicca per attivare Hyperspace Overdrive"
       onMouseEnter={() => document.body.classList.add('cursor-hovering')}
       onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
     >
@@ -172,12 +182,116 @@ function KineticTitle({ onTriggerEgg }) {
           </span>
         ))}
       </div>
+      <div className="kinetic-underline-bar" />
     </div>
   );
 }
 
+/* --- NAVBAR MAGNETICA RIUTILIZZABILE CON ROLLING TEXT --- */
+function MagneticNavBar({ items, activeId, onSelectItem, className = '' }) {
+  const barRef = useRef(null);
+  const [pill, setPill] = useState({ opacity: 0, width: 0, x: 0 });
+
+  const handleEnter = (e) => {
+    if (!barRef.current) return;
+    const barRect = barRef.current.getBoundingClientRect();
+    const btnRect = e.currentTarget.getBoundingClientRect();
+    setPill({
+      opacity: 1,
+      width: btnRect.width,
+      x: btnRect.left - barRect.left
+    });
+    document.body.classList.add('cursor-hovering');
+  };
+
+  const handleLeave = () => {
+    setPill((prev) => ({ ...prev, opacity: 0 }));
+    document.body.classList.remove('cursor-hovering');
+  };
+
+  return (
+    <div ref={barRef} className={`magnetic-bar ${className}`} onMouseLeave={handleLeave}>
+      <div
+        className="dock-magnetic-pill"
+        style={{
+          opacity: pill.opacity,
+          width: `${pill.width}px`,
+          transform: `translateX(${pill.x}px)`
+        }}
+      />
+      {items.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          className={`mag-nav-btn ${activeId === item.id ? 'is-active' : ''}`}
+          onClick={() => onSelectItem(item.id)}
+          onMouseEnter={handleEnter}
+        >
+          <span className="roll-wrap">
+            <span className="roll-text">{item.label}</span>
+            <span className="roll-text clone" aria-hidden="true">
+              {item.label}
+            </span>
+          </span>
+          {item.badge && <span className="macro-count">{item.badge}</span>}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* --- PARTICELLINE FIOCHE CHE SALGONO (E DIVENTANO SCIE STAR WARS IN OVERDRIVE) --- */
+const RisingParticles = memo(function RisingParticles({ overdrive }) {
+  const pointsRef = useRef();
+  const count = 130;
+
+  const { positions, speeds } = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    const spd = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 7.5;
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 4.6;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 4.5 - 0.6;
+      spd[i] = 0.14 + Math.random() * 0.22;
+    }
+    return { positions: pos, speeds: spd };
+  }, []);
+
+  useFrame((_, delta) => {
+    if (!pointsRef.current) return;
+    const arr = pointsRef.current.geometry.attributes.position.array;
+    const mult = overdrive ? 24 : 1;
+
+    for (let i = 0; i < count; i++) {
+      arr[i * 3 + 1] += speeds[i] * delta * mult;
+      if (arr[i * 3 + 1] > 2.3) {
+        arr[i * 3 + 1] = -2.3;
+        arr[i * 3] = (Math.random() - 0.5) * 7.5;
+      }
+    }
+    pointsRef.current.geometry.attributes.position.needsUpdate = true;
+    pointsRef.current.scale.y = THREE.MathUtils.lerp(pointsRef.current.scale.y, overdrive ? 14 : 1, 0.12);
+  });
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={overdrive ? 0.032 : 0.022}
+        color={overdrive ? '#ffcc00' : '#00e5ff'}
+        transparent
+        opacity={overdrive ? 0.72 : 0.24}
+        sizeAttenuation
+        depthWrite={false}
+      />
+    </points>
+  );
+});
+
 /* --- SCI PROCEDURALI --- */
-function PerfectSkis({ xray }) {
+const PerfectSkis = memo(function PerfectSkis({ xray }) {
   const geom = useMemo(() => {
     const shape = new THREE.Shape();
     shape.moveTo(-0.044, -0.88);
@@ -218,10 +332,37 @@ function PerfectSkis({ xray }) {
       </mesh>
     </group>
   );
-}
+});
 
-/* --- SCENA 3D MANICHINO + EASTER EGG X-RAY --- */
-function SkierScene({ activeItem, onSelect, xray, onToggleXray, onUpdateTelemetry }) {
+/* --- HOTSPOT 3D MEMOIZZATO (FUORI DA SKIERSCENE PER ZERO LOOP/SCATTI) --- */
+const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, onSelect }) {
+  const item = DATA[id];
+  if (!item) return null;
+
+  return (
+    <Html position={pos} center zIndexRange={[50, 0]}>
+      <div className="hotspot-anchor">
+        <button
+          type="button"
+          className={`hotspot-container ${side} ${isSelected ? 'active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(id);
+          }}
+          onMouseEnter={() => document.body.classList.add('cursor-hovering')}
+          onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+        >
+          <span className="hotspot-dot" />
+          <span className="hotspot-line" />
+          <span className="hotspot-tag">{item.shortLabel}</span>
+        </button>
+      </div>
+    </Html>
+  );
+});
+
+/* --- SCENA 3D MANICHINO --- */
+function SkierScene({ activeItem, highlightedId, onSelect, xray, onToggleXray, hdgRef }) {
   const { scene } = useGLTF('/mannequin.glb');
   const groupRef = useRef();
   const lastTelemetryRef = useRef(0);
@@ -258,47 +399,25 @@ function SkierScene({ activeItem, onSelect, xray, onToggleXray, onUpdateTelemetr
 
   useFrame((state) => {
     if (groupRef.current) {
-      const breath = Math.sin(state.clock.elapsedTime * 1.4) * 0.015;
+      const breath = Math.sin(state.clock.elapsedTime * 1.4) * 0.014;
       const isDesktop = window.innerWidth > 768;
       const targetX = activeItem && isDesktop ? -0.95 : 0;
       const targetRotY = activeItem && isDesktop ? 0.28 : 0;
 
       groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.07);
       groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.07);
-      groupRef.current.position.y = -0.04 + breath;
+      groupRef.current.position.y = (isDesktop ? -0.04 : 0.14) + breath;
 
-      if (state.clock.elapsedTime - lastTelemetryRef.current > 0.25) {
+      // Aggiornamento DOM diretto (zero re-render React!)
+      if (hdgRef?.current && state.clock.elapsedTime - lastTelemetryRef.current > 0.2) {
         lastTelemetryRef.current = state.clock.elapsedTime;
         const yaw = Math.round(((state.camera.position.x * 45) % 360 + 360) % 360);
-        onUpdateTelemetry?.(yaw);
+        hdgRef.current.textContent = `46.5405° N · 12.1357° E · HDG ${String(yaw).padStart(3, '0')}°`;
       }
     }
   });
 
-  const Hotspot = ({ pos, id, side = 'right' }) => {
-    const item = DATA[id];
-    if (!item) return null;
-    return (
-      <Html position={pos} center zIndexRange={[50, 0]}>
-        <div className="hotspot-anchor">
-          <button
-            type="button"
-            className={`hotspot-container ${side} ${activeItem === id ? 'active' : ''}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect(activeItem === id ? null : id, false);
-            }}
-            onMouseEnter={() => document.body.classList.add('cursor-hovering')}
-            onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
-          >
-            <span className="hotspot-dot" />
-            <span className="hotspot-line" />
-            <span className="hotspot-tag">{item.shortLabel}</span>
-          </button>
-        </div>
-      </Html>
-    );
-  };
+  const currentFocus = activeItem || highlightedId;
 
   return (
     <group
@@ -311,16 +430,16 @@ function SkierScene({ activeItem, onSelect, xray, onToggleXray, onUpdateTelemetr
       <primitive object={normalizedModel} />
       <PerfectSkis xray={xray} />
 
-      <Hotspot pos={[0.06, 0.92, 0.08]} id="casco" side="right" />
-      <Hotspot pos={[-0.09, 0.80, 0.12]} id="maschera_outof" side="left" />
-      <Hotspot pos={[0.11, 0.70, 0.08]} id="maschera_audio" side="right" />
-      <Hotspot pos={[-0.16, 0.34, 0.12]} id="termoregolazione" side="left" />
-      <Hotspot pos={[0.30, 0.06, 0.14]} id="guanti" side="right" />
-      <Hotspot pos={[-0.30, -0.04, 0.14]} id="bastoni" side="left" />
-      <Hotspot pos={[-0.14, -0.66, 0.10]} id="scarpone" side="left" />
-      <Hotspot pos={[0.18, -0.80, 0.06]} id="telemetria" side="right" />
-      <Hotspot pos={[-0.15, -0.94, -0.05]} id="attacchi" side="left" />
-      <Hotspot pos={[0.15, -1.00, 0.60]} id="sci" side="right" />
+      <Hotspot pos={[0.06, 0.92, 0.08]} id="casco" side="right" isSelected={currentFocus === 'casco'} onSelect={onSelect} />
+      <Hotspot pos={[-0.09, 0.80, 0.12]} id="maschera_outof" side="left" isSelected={currentFocus === 'maschera_outof'} onSelect={onSelect} />
+      <Hotspot pos={[0.11, 0.70, 0.08]} id="maschera_audio" side="right" isSelected={currentFocus === 'maschera_audio'} onSelect={onSelect} />
+      <Hotspot pos={[-0.16, 0.34, 0.12]} id="termoregolazione" side="left" isSelected={currentFocus === 'termoregolazione'} onSelect={onSelect} />
+      <Hotspot pos={[0.30, 0.06, 0.14]} id="guanti" side="right" isSelected={currentFocus === 'guanti'} onSelect={onSelect} />
+      <Hotspot pos={[-0.30, -0.04, 0.14]} id="bastoni" side="left" isSelected={currentFocus === 'bastoni'} onSelect={onSelect} />
+      <Hotspot pos={[-0.14, -0.66, 0.10]} id="scarpone" side="left" isSelected={currentFocus === 'scarpone'} onSelect={onSelect} />
+      <Hotspot pos={[0.18, -0.80, 0.06]} id="telemetria" side="right" isSelected={currentFocus === 'telemetria'} onSelect={onSelect} />
+      <Hotspot pos={[-0.15, -0.94, -0.05]} id="attacchi" side="left" isSelected={currentFocus === 'attacchi'} onSelect={onSelect} />
+      <Hotspot pos={[0.15, -1.00, 0.60]} id="sci" side="right" isSelected={currentFocus === 'sci'} onSelect={onSelect} />
     </group>
   );
 }
@@ -329,39 +448,56 @@ useGLTF.preload('/mannequin.glb');
 
 export default function App() {
   const [activeItem, setActiveItem] = useState(null);
-  const [openedFromMacro, setOpenedFromMacro] = useState(false);
-  const [xrayMode, setXrayMode] = useState(false);
-  const [yawAngle, setYawAngle] = useState(0);
-  const [sheetSnap, setSheetSnap] = useState('half'); // 'peek' | 'half' | 'full'
+  const [overdriveMode, setOverdriveMode] = useState(false);
 
-  const dockRef = useRef(null);
-  const [pillStyle, setPillStyle] = useState({ opacity: 0, width: 0, x: 0 });
+  // Easter Egg Hover sul bottone HUD (scramble text + mini-telemetria)
+  const [hudHovered, setHudHovered] = useState(false);
+  const [hudLabel, setHudLabel] = useState('TELEMETRY HUD');
+  const hdgRef = useRef(null);
 
-  const handleSelectItem = (id, fromMacro = false) => {
+  // Stato Deck Mobile stile Videogame / Tinder
+  const [mobileDeckIdx, setMobileDeckIdx] = useState(0);
+  const touchStartX = useRef(null);
+
+  const handleToggleItem = useCallback((id) => {
+    setActiveItem((prev) => (prev === id ? null : id));
+    const idx = ORDERED_ITEM_IDS.indexOf(id);
+    if (idx !== -1) setMobileDeckIdx(idx);
+  }, []);
+
+  const handleSelectDirect = useCallback((id) => {
     setActiveItem(id);
-    setOpenedFromMacro(Boolean(id && fromMacro));
-    if (id) setSheetSnap('half');
-  };
+    const idx = ORDERED_ITEM_IDS.indexOf(id);
+    if (idx !== -1) setMobileDeckIdx(idx);
+  }, []);
 
-  const handleDockHover = (e) => {
-    if (!dockRef.current) return;
-    const dockRect = dockRef.current.getBoundingClientRect();
-    const btnRect = e.currentTarget.getBoundingClientRect();
-    setPillStyle({
-      opacity: 1,
-      width: btnRect.width,
-      x: btnRect.left - dockRect.left
-    });
-  };
+  // Scramble effect quando si fa hover sul bottone HUD
+  useEffect(() => {
+    if (overdriveMode) {
+      setHudLabel('OVERDRIVE // ON');
+      return;
+    }
+    if (!hudHovered) {
+      setHudLabel('TELEMETRY HUD');
+      return;
+    }
+    const target = 'SYS.SCAN // LIVE';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/#*';
+    let step = 0;
+    const interval = setInterval(() => {
+      step += 1;
+      setHudLabel(
+        target
+          .split('')
+          .map((ch, i) => (ch === ' ' || i < step ? ch : chars[Math.floor(Math.random() * chars.length)]))
+          .join('')
+      );
+      if (step >= target.length) clearInterval(interval);
+    }, 28);
+    return () => clearInterval(interval);
+  }, [hudHovered, overdriveMode]);
 
-  const handleDockLeave = () => {
-    setPillStyle((prev) => ({ ...prev, opacity: 0 }));
-  };
-
-  const cycleSheetSnap = () => {
-    setSheetSnap((prev) => (prev === 'half' ? 'full' : prev === 'full' ? 'peek' : 'half'));
-  };
-
+  // Cursore custom
   useEffect(() => {
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
@@ -398,60 +534,139 @@ export default function App() {
   }, []);
 
   const data = activeItem ? DATA[activeItem] : null;
-  const activeMacroObj = data && openedFromMacro ? MACROS.find((m) => m.id === data.macro) : null;
+  const activeMacroObj = data ? MACROS.find((m) => m.id === data.macro) : null;
+
+  // Navigazione mobile Tinder deck
+  const currentMobileId = ORDERED_ITEM_IDS[mobileDeckIdx];
+  const currentMobileItem = DATA[currentMobileId];
+  const currentMobileMacro = MACROS.find((m) => m.id === currentMobileItem.macro);
+
+  const nextMobileCard = () => setMobileDeckIdx((i) => (i + 1) % ORDERED_ITEM_IDS.length);
+  const prevMobileCard = () => setMobileDeckIdx((i) => (i - 1 + ORDERED_ITEM_IDS.length) % ORDERED_ITEM_IDS.length);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const diff = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(diff) > 42) {
+      if (diff < 0) nextMobileCard();
+      else prevMobileCard();
+    }
+    touchStartX.current = null;
+  };
+
+  const currentIndexInAll = activeItem ? ORDERED_ITEM_IDS.indexOf(activeItem) : -1;
+  const prevItemId = currentIndexInAll !== -1 ? ORDERED_ITEM_IDS[(currentIndexInAll - 1 + ORDERED_ITEM_IDS.length) % ORDERED_ITEM_IDS.length] : null;
+  const nextItemId = currentIndexInAll !== -1 ? ORDERED_ITEM_IDS[(currentIndexInAll + 1) % ORDERED_ITEM_IDS.length] : null;
 
   return (
-    <>
+    <div className={`app-shell ${overdriveMode ? 'overdrive-mode' : ''}`}>
       <div className="cursor-dot" />
       <div className="cursor-ring" />
       <div className="studio-canvas" />
       <div className="telemetry-grid-bg" />
+      <div className="overdrive-vignette" />
       <div className="noise-film" />
 
       <KineticIntro />
 
+      {/* Header con Titolo Impilato + Link Andrea */}
       <header className={`brand-header ${activeItem ? 'hidden' : ''}`}>
-        <span className="kicker">SAS ACADEMY // ANDREA, MARCO, GIANLUCA ED EMMA</span>
-        <KineticTitle onTriggerEgg={() => setXrayMode((v) => !v)} />
+        <span className="kicker">
+          SAS ACADEMY //{' '}
+          <a
+            href="https://home.andreamonzani.com"
+            target="_blank"
+            rel="noreferrer"
+            className="author-inline-link"
+            onMouseEnter={() => document.body.classList.add('cursor-hovering')}
+            onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+          >
+            ANDREA
+          </a>
+          , MARCO, GIANLUCA ED EMMA
+        </span>
+        <KineticTitle onTriggerEgg={() => setOverdriveMode((v) => !v)} />
         <div className="hero-sub-telemetry">
-          <span>[SELEZIONA UN HOTSPOT SUL MODELLO O USA LA DOCK]</span>
+          <span>
+            {overdriveMode
+              ? '[HYPERSPACE OVERDRIVE ATTIVO — CLICCA HUD PER USCIRE]'
+              : '[SELEZIONA UN HOTSPOT SUL MODELLO O USA LA DOCK]'}
+          </span>
         </div>
       </header>
 
-      <div className={`hud-top-right ${activeItem ? 'hidden' : ''}`}>
+      {/* HUD Top-Right con Doppio Easter Egg (Hover Scramble + Click Overdrive) */}
+      <div
+        className={`hud-top-right ${activeItem ? 'hidden' : ''}`}
+        onMouseEnter={() => {
+          setHudHovered(true);
+          document.body.classList.add('cursor-hovering');
+        }}
+        onMouseLeave={() => {
+          setHudHovered(false);
+          document.body.classList.remove('cursor-hovering');
+        }}
+      >
         <button
           type="button"
-          className={`hud-pill-btn ${xrayMode ? 'active' : ''}`}
-          onClick={() => setXrayMode((v) => !v)}
-          onMouseEnter={() => document.body.classList.add('cursor-hovering')}
-          onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+          className={`hud-pill-btn ${overdriveMode ? 'active' : ''}`}
+          onClick={() => setOverdriveMode((v) => !v)}
         >
           <span className="hud-dot" />
-          <span>{xrayMode ? 'X-RAY SCAN: ON' : 'TELEMETRY HUD'}</span>
+          <span>{hudLabel}</span>
         </button>
-        <div className="hud-coords">
-          46.5405° N · 12.1357° E · HDG {String(yawAngle).padStart(3, '0')}°
+
+        <div ref={hdgRef} className="hud-coords">
+          46.5405° N · 12.1357° E · HDG 000°
         </div>
+
+        {(hudHovered || overdriveMode) && (
+          <div className="hud-easter-card">
+            <div className="hud-easter-row">
+              <span style={{ color: 'var(--text-secondary)' }}>EDGE ANGLE</span>
+              <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>64.2° MAX</span>
+            </div>
+            <div className="hud-easter-row">
+              <span style={{ color: 'var(--text-secondary)' }}>G-LOAD PEAK</span>
+              <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>2.38 G</span>
+            </div>
+            <div className="hud-easter-row">
+              <span style={{ color: 'var(--text-secondary)' }}>SNOW TEMP</span>
+              <span>-6.4°C COMPACT</span>
+            </div>
+            <div className="hud-easter-hint">
+              {overdriveMode ? '⚡ MODALITÀ OVERDRIVE ATTIVA' : 'CLICCA PER HYPERSPACE OVERDRIVE ⚡'}
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* Scena 3D + Particelle che salgono */}
       <SceneErrorBoundary>
         <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
           <Canvas
             dpr={[1, 2]}
             camera={{ position: [0, 0.02, 4.35], fov: 44 }}
-            onPointerMissed={() => handleSelectItem(null, false)}
+            onPointerMissed={() => setActiveItem(null)}
           >
-            <hemisphereLight intensity={1.4} color="#ffffff" groundColor="#1e293b" />
+            <hemisphereLight intensity={1.45} color="#ffffff" groundColor="#1e293b" />
             <directionalLight position={[3, 5, 4]} intensity={2.2} color="#ffffff" />
             <directionalLight position={[-4, 2, -2]} intensity={1.5} color="#00e5ff" />
+
+            <RisingParticles overdrive={overdriveMode} />
 
             <Suspense fallback={null}>
               <SkierScene
                 activeItem={activeItem}
-                onSelect={handleSelectItem}
-                xray={xrayMode}
-                onToggleXray={() => setXrayMode((v) => !v)}
-                onUpdateTelemetry={setYawAngle}
+                highlightedId={currentMobileId}
+                onSelect={handleToggleItem}
+                xray={overdriveMode}
+                onToggleXray={() => setOverdriveMode((v) => !v)}
+                hdgRef={hdgRef}
               />
             </Suspense>
 
@@ -459,7 +674,7 @@ export default function App() {
               enableZoom={true}
               enablePan={false}
               autoRotate={!activeItem}
-              autoRotateSpeed={0.45}
+              autoRotateSpeed={overdriveMode ? 3.2 : 0.45}
               minDistance={3.0}
               maxDistance={6.0}
               minPolarAngle={Math.PI / 3}
@@ -471,79 +686,87 @@ export default function App() {
         </div>
       </SceneErrorBoundary>
 
-      <nav
-        ref={dockRef}
-        className={`macro-dock ${activeItem ? 'hidden' : ''}`}
-        aria-label="Categorie principali"
-        onMouseLeave={handleDockLeave}
-      >
-        <div
-          className="dock-magnetic-pill"
-          style={{
-            opacity: pillStyle.opacity,
-            width: `${pillStyle.width}px`,
-            transform: `translateX(${pillStyle.x}px)`
-          }}
+      {/* Dock Magnetica Desktop */}
+      <nav className={`macro-dock ${activeItem ? 'hidden' : ''}`} aria-label="Categorie principali">
+        <MagneticNavBar
+          items={MACROS.map((m) => ({
+            id: m.items[0],
+            label: m.label,
+            badge: `0${m.items.length}`
+          }))}
+          activeId={null}
+          onSelectItem={handleSelectDirect}
         />
-        {MACROS.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            className="macro-btn"
-            onClick={() => handleSelectItem(m.items[0], true)}
-            onMouseEnter={(e) => {
-              handleDockHover(e);
-              document.body.classList.add('cursor-hovering');
-            }}
-            onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
-          >
-            <span className="macro-roll-wrap">
-              <span className="macro-roll-text">{m.label}</span>
-              <span className="macro-roll-text clone" aria-hidden="true">
-                {m.label}
-              </span>
-            </span>
-            <span className="macro-count">0{m.items.length}</span>
-          </button>
-        ))}
       </nav>
 
-      <aside
-        className={`side-panel ${activeItem ? 'open' : ''} snap-${sheetSnap}`}
-        aria-label="Scheda approfondimento"
+      {/* Deck Mobile Videogame / Tinder (Swipeable) */}
+      <div
+        className={`mobile-tinder-deck ${activeItem ? 'hidden' : ''}`}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
-        <div className="sheet-drag-handle" onClick={cycleSheetSnap} title="Cambia altezza scheda">
-          <span />
+        <div className="tinder-card">
+          <div className="tinder-card-top">
+            <span className="tinder-badge">{currentMobileMacro?.label}</span>
+            <span className="tinder-counter">
+              {String(mobileDeckIdx + 1).padStart(2, '0')} / {ORDERED_ITEM_IDS.length}
+            </span>
+          </div>
+          <div className="tinder-card-title">{currentMobileItem.title}</div>
+          <p className="tinder-card-desc">{currentMobileItem.summary}</p>
+          <div className="tinder-controls">
+            <button type="button" className="tinder-arrow-btn" onClick={prevMobileCard} aria-label="Precedente">
+              ◀
+            </button>
+            <button type="button" className="tinder-open-btn" onClick={() => handleSelectDirect(currentMobileId)}>
+              Esplora Lab →
+            </button>
+            <button type="button" className="tinder-arrow-btn" onClick={nextMobileCard} aria-label="Successivo">
+              ▶
+            </button>
+          </div>
         </div>
+      </div>
 
+      {/* Pannello Laterale Desktop & Scheda Mobile */}
+      <aside className={`side-panel ${activeItem ? 'open' : ''}`} aria-label="Scheda approfondimento">
         <div className="panel-top-actions">
-          <button type="button" className="close-btn" onClick={() => handleSelectItem(null, false)}>
-            ✕ Chiudi
+          <button type="button" className="close-btn" onClick={() => setActiveItem(null)}>
+            ✕ Torna al 3D
           </button>
-          <button type="button" className="sheet-snap-btn" onClick={cycleSheetSnap}>
-            {sheetSnap === 'half' ? '⤢ Espandi' : sheetSnap === 'full' ? '⤓ Riduci al 3D' : '⤢ Metà schermo'}
-          </button>
+          {activeMacroObj && (
+            <span className="mono" style={{ fontSize: '0.64rem', color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+              {activeMacroObj.label}
+            </span>
+          )}
         </div>
 
+        {/* Sottomenu con la stessa Navbar Magnetica a Rolling Text */}
         {activeMacroObj && activeMacroObj.items.length > 1 && (
-          <div className="sub-nav">
-            {activeMacroObj.items.map((subId) => (
-              <button
-                key={subId}
-                type="button"
-                className={`sub-pill ${activeItem === subId ? 'active' : ''}`}
-                onClick={() => handleSelectItem(subId, true)}
-              >
-                {DATA[subId].shortLabel}
-              </button>
-            ))}
+          <div className="sub-nav-wrap">
+            <MagneticNavBar
+              className="sub-nav-bar"
+              items={activeMacroObj.items.map((subId) => ({
+                id: subId,
+                label: DATA[subId].shortLabel
+              }))}
+              activeId={activeItem}
+              onSelectItem={handleSelectDirect}
+            />
           </div>
         )}
 
         {data && (
           <div>
             <h3 style={{ fontSize: '2.15rem', marginBottom: '6px' }}>{data.title}</h3>
-            <a href={data.url} target="_blank" rel="noreferrer" className="brand-link">
+            <a
+              href={data.url}
+              target="_blank"
+              rel="noreferrer"
+              className="brand-link"
+              onMouseEnter={() => document.body.classList.add('cursor-hovering')}
+              onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+            >
               {data.brand}
             </a>
 
@@ -564,7 +787,19 @@ export default function App() {
         )}
       </aside>
 
+      {/* Barra rapida Precedente/Successivo su Mobile dentro la scheda */}
+      {activeItem && (
+        <div className="mobile-panel-nav">
+          <button type="button" className="action-btn secondary" onClick={() => handleSelectDirect(prevItemId)}>
+            ◀ {DATA[prevItemId]?.shortLabel}
+          </button>
+          <button type="button" className="action-btn" onClick={() => handleSelectDirect(nextItemId)}>
+            {DATA[nextItemId]?.shortLabel} ▶
+          </button>
+        </div>
+      )}
+
       <LegalCompliance isPanelOpen={Boolean(activeItem)} />
-    </>
+    </div>
   );
 }

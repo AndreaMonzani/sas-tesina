@@ -59,7 +59,14 @@ export default function LegalCompliance({ isPanelOpen }) {
   return (
     <>
       <footer className={`legal-dock ${isPanelOpen ? 'hidden' : ''}`} aria-label="Informative legali e copyright">
-        <span>© 2026 ANDREA MONZANI</span>
+        <a
+          href="https://home.andreamonzani.com"
+          target="_blank"
+          rel="noreferrer"
+          className="legal-owner-link"
+        >
+          © 2026 ANDREA MONZANI
+        </a>
         <span aria-hidden="true">·</span>
         <button type="button" className="legal-link-btn" onClick={() => setModalTab('privacy')}>
           Privacy
@@ -70,7 +77,7 @@ export default function LegalCompliance({ isPanelOpen }) {
         </button>
         <span aria-hidden="true">·</span>
         <button type="button" className="legal-link-btn" onClick={() => setModalTab('opensource')}>
-          Copyright &amp; Licenze
+          Licenze
         </button>
       </footer>
 
@@ -152,12 +159,21 @@ export default function LegalCompliance({ isPanelOpen }) {
                 <div>
                   <h4>1. Titolare del Trattamento</h4>
                   <p>
-                    Il titolare del sito <strong>skitech.andreamonzani.com</strong> è <strong>Andrea Monzani</strong> (contatto web: <a href="https://andreamonzani.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent-cyan)' }}>andreamonzani.com</a>). Il progetto <em>Innovazione Sci 2026</em> nasce come piattaforma didattica realizzata nell’ambito di SAS Academy con Andrea, Marco, Gianluca ed Emma.
+                    Il titolare del sito <strong>skitech.andreamonzani.com</strong> è{' '}
+                    <a
+                      href="https://home.andreamonzani.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ color: 'var(--accent-cyan)' }}
+                    >
+                      Andrea Monzani
+                    </a>
+                    . Il progetto <em>Innovazione Sci 2026</em> nasce come piattaforma didattica realizzata nell’ambito di SAS Academy con Andrea, Marco, Gianluca ed Emma.
                   </p>
 
                   <h4>2. Architettura Privacy-by-Design (Zero Tracciamento)</h4>
                   <p>
-                    Il sito è progettato secondo il principio di minimizzazione dei dati (Art. 5 GDPR): non utilizza Google Fonts esterni, non carica mappe HDRI da CDN di terze parti, non raccoglie form né dati personali identificativi e non impiega strumenti di profilazione. I soli log tecnici di connessione sono gestiti dall’infrastruttura di hosting <strong>Vercel Inc.</strong> per garantire sicurezza e continuità del servizio (Art. 6, par. 1, lett. f GDPR).
+                    Il sito è progettato secondo il principio di minimizzazione dei dati (Art. 5 GDPR): utilizza font self-hosted locali, non carica mappe HDRI da CDN esterni, non raccoglie form né dati personali identificativi e non impiega strumenti di profilazione. I soli log tecnici di connessione sono gestiti dall’infrastruttura di hosting <strong>Vercel Inc.</strong> per garantire sicurezza e continuità del servizio (Art. 6, par. 1, lett. f GDPR).
                   </p>
 
                   <h4>3. Diritti dell’Interessato</h4>
@@ -203,7 +219,19 @@ export default function LegalCompliance({ isPanelOpen }) {
                 <div>
                   <h4>1. Diritti d’Autore e Proprietà Intellettuale</h4>
                   <p>
-                    <strong>© 2026 Andrea Monzani — Tutti i diritti riservati.</strong> L’architettura dell’interfaccia, il design interattivo, gli schemi grafici vettoriali e il codice originale sono di proprietà esclusiva di Andrea Monzani. I contenuti didattici sono stati sviluppati con la collaborazione di Marco, Gianluca ed Emma (SAS Academy).
+                    <strong>
+                      © 2026{' '}
+                      <a
+                        href="https://home.andreamonzani.com"
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: 'var(--accent-gold)' }}
+                      >
+                        Andrea Monzani
+                      </a>{' '}
+                      — Tutti i diritti riservati.
+                    </strong>{' '}
+                    L’architettura dell’interfaccia, il design interattivo, gli schemi grafici vettoriali e il codice originale sono di proprietà esclusiva di Andrea Monzani. I contenuti didattici sono stati sviluppati con la collaborazione di Marco, Gianluca ed Emma (SAS Academy).
                   </p>
 
                   <h4>2. Componenti Open Source Utilizzati (Licenza MIT)</h4>
