@@ -18,23 +18,12 @@ class SceneErrorBoundary extends Component {
     if (this.state.hasError) {
       return (
         <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', color: 'rgba(255,255,255,0.65)', fontSize: '0.85rem', zIndex: 5 }}>
-          Modello 3D non disponibile. Usa il menu in basso per esplorare i laboratori.
+          Scena 3D non disponibile. Usa il menu in basso per esplorare i laboratori.
         </div>
       );
     }
     return this.props.children;
   }
-}
-
-function Loader() {
-  const { progress } = useProgress();
-  return (
-    <Html center>
-      <div style={{ color: '#00e5ff', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
-        Caricamento 3D {progress.toFixed(0)}%
-      </div>
-    </Html>
-  );
 }
 
 const MACROS = [
@@ -97,7 +86,96 @@ const DATA = {
   }
 };
 
-function PerfectSkis() {
+/* --- PRELOADER CINETICO FULL-SCREEN --- */
+function KineticIntro({ onReady }) {
+  const { progress } = useProgress();
+  const [displayPct, setDisplayPct] = useState(0);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    const target = Math.max(progress, 100);
+    const timer = setInterval(() => {
+      setDisplayPct((prev) => {
+        if (prev >= 100) {
+          clearInterval(timer);
+          return 100;
+        }
+        const step = Math.ceil((target - prev) / 4);
+        return Math.min(100, prev + Math.max(4, step));
+      });
+    }, 35);
+    return () => clearInterval(timer);
+  }, [progress]);
+
+  useEffect(() => {
+    if (displayPct >= 100) {
+      const t = setTimeout(() => {
+        setDismissed(true);
+        onReady?.();
+      }, 320);
+      return () => clearTimeout(t);
+    }
+  }, [displayPct, onReady]);
+
+  return (
+    <div className={`intro-curtain ${dismissed ? 'dismissed' : ''}`} aria-hidden={dismissed}>
+      <div className="intro-top-bar">
+        <span>SAS ACADEMY // SKITECH LAB</span>
+        <span>SYS.BOOT — 2026</span>
+      </div>
+
+      <div className="intro-center">
+        <div className="intro-mask-line">
+          <span className="intro-kinetic-word">INNOVAZIONE</span>
+        </div>
+        <div className="intro-mask-line">
+          <span className="intro-kinetic-word cyan">SCI 2026</span>
+        </div>
+      </div>
+
+      <div className="intro-bottom-bar">
+        <div className="intro-progress-track">
+          <div className="intro-progress-fill" style={{ width: `${displayPct}%` }} />
+        </div>
+        <div className="intro-counter">{String(displayPct).padStart(3, '0')}%</div>
+      </div>
+    </div>
+  );
+}
+
+/* --- TITOLO CON HOVER CINETICO CARATTERE PER CARATTERE --- */
+function KineticTitle({ onTriggerEgg }) {
+  const line1 = 'INNOVAZIONE';
+  const line2 = 'SCI 2026';
+
+  return (
+    <div
+      className="kinetic-title"
+      onClick={onTriggerEgg}
+      title="Clicca per attivare la scansione X-Ray"
+      onMouseEnter={() => document.body.classList.add('cursor-hovering')}
+      onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+    >
+      <div className="kinetic-line">
+        {line1.split('').map((ch, idx) => (
+          <span key={idx} className="kinetic-char" style={{ '--char-idx': idx }}>
+            {ch}
+          </span>
+        ))}
+      </div>
+      <div className="kinetic-line second">
+        {line2.split('').map((ch, idx) => (
+          <span key={idx} className="kinetic-char" style={{ '--char-idx': idx }}>
+            {ch === ' ' ? '\u00A0' : ch}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* --- SCI PROCEDURALI --- */
+function PerfectSkis({ xray }) {
   const geom = useMemo(() => {
     const shape = new THREE.Shape();
     shape.moveTo(-0.044, -0.88);
@@ -119,18 +197,32 @@ function PerfectSkis() {
   return (
     <group position={[0, -1.04, 0.05]}>
       <mesh geometry={geom} position={[-0.15, 0, 0]} receiveShadow>
-        <meshPhysicalMaterial color="#090c12" roughness={0.25} metalness={0.85} clearcoat={0.9} />
+        <meshPhysicalMaterial
+          color={xray ? '#00e5ff' : '#090c12'}
+          wireframe={xray}
+          roughness={0.25}
+          metalness={0.85}
+          clearcoat={0.9}
+        />
       </mesh>
       <mesh geometry={geom} position={[0.15, 0, 0]} receiveShadow>
-        <meshPhysicalMaterial color="#090c12" roughness={0.25} metalness={0.85} clearcoat={0.9} />
+        <meshPhysicalMaterial
+          color={xray ? '#00e5ff' : '#090c12'}
+          wireframe={xray}
+          roughness={0.25}
+          metalness={0.85}
+          clearcoat={0.9}
+        />
       </mesh>
     </group>
   );
 }
 
-function SkierScene({ activeItem, onSelect }) {
+/* --- SCENA 3D MANICHINO + EASTER EGG X-RAY --- */
+function SkierScene({ activeItem, onSelect, xray, onToggleXray, onUpdateTelemetry }) {
   const { scene } = useGLTF('/mannequin.glb');
   const groupRef = useRef();
+  const lastTelemetryRef = useRef(0);
 
   const normalizedModel = useMemo(() => {
     const clone = scene.clone();
@@ -152,14 +244,15 @@ function SkierScene({ activeItem, onSelect }) {
     clone.traverse((child) => {
       if (child.isMesh) {
         child.material = new THREE.MeshStandardMaterial({
-          color: '#1b202e',
-          roughness: 0.56,
-          metalness: 0.28
+          color: xray ? '#00e5ff' : '#1b202e',
+          roughness: xray ? 0.2 : 0.56,
+          metalness: xray ? 0.8 : 0.28,
+          wireframe: xray
         });
       }
     });
     return clone;
-  }, [scene]);
+  }, [scene, xray]);
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -171,6 +264,13 @@ function SkierScene({ activeItem, onSelect }) {
       groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.07);
       groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.07);
       groupRef.current.position.y = -0.04 + breath;
+
+      // Aggiorna telemetria ogni ~250ms per non appesantire React
+      if (state.clock.elapsedTime - lastTelemetryRef.current > 0.25) {
+        lastTelemetryRef.current = state.clock.elapsedTime;
+        const yaw = Math.round(((state.camera.position.x * 45) % 360 + 360) % 360);
+        onUpdateTelemetry?.(yaw);
+      }
     }
   });
 
@@ -200,9 +300,15 @@ function SkierScene({ activeItem, onSelect }) {
   };
 
   return (
-    <group ref={groupRef}>
+    <group
+      ref={groupRef}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        onToggleXray();
+      }}
+    >
       <primitive object={normalizedModel} />
-      <PerfectSkis />
+      <PerfectSkis xray={xray} />
 
       <Hotspot pos={[0.06, 0.92, 0.08]} id="casco" side="right" />
       <Hotspot pos={[-0.09, 0.80, 0.12]} id="maschera_outof" side="left" />
@@ -223,10 +329,37 @@ useGLTF.preload('/mannequin.glb');
 export default function App() {
   const [activeItem, setActiveItem] = useState(null);
   const [openedFromMacro, setOpenedFromMacro] = useState(false);
+  const [xrayMode, setXrayMode] = useState(false);
+  const [yawAngle, setYawAngle] = useState(0);
+  const [sheetSnap, setSheetSnap] = useState('half'); // 'peek' | 'half' | 'full'
+
+  // Stato pillola magnetica dock desktop
+  const dockRef = useRef(null);
+  const [pillStyle, setPillStyle] = useState({ opacity: 0, width: 0, x: 0 });
 
   const handleSelectItem = (id, fromMacro = false) => {
     setActiveItem(id);
     setOpenedFromMacro(Boolean(id && fromMacro));
+    if (id) setSheetSnap('half');
+  };
+
+  const handleDockHover = (e) => {
+    if (!dockRef.current) return;
+    const dockRect = dockRef.current.getBoundingClientRect();
+    const btnRect = e.currentTarget.getBoundingClientRect();
+    setPillStyle({
+      opacity: 1,
+      width: btnRect.width,
+      x: btnRect.left - dockRect.left
+    });
+  };
+
+  const handleDockLeave = () => {
+    setPillStyle((prev) => ({ ...prev, opacity: 0 }));
+  };
+
+  const cycleSheetSnap = () => {
+    setSheetSnap((prev) => (prev === 'half' ? 'full' : prev === 'full' ? 'peek' : 'half'));
   };
 
   useEffect(() => {
@@ -272,17 +405,39 @@ export default function App() {
       <div className="cursor-dot" />
       <div className="cursor-ring" />
       <div className="studio-canvas" />
+      <div className="telemetry-grid-bg" />
       <div className="noise-film" />
 
+      {/* Preloader Cinetico Full-Screen */}
+      <KineticIntro />
+
+      {/* Header con Titolo Cinetico */}
       <header className={`brand-header ${activeItem ? 'hidden' : ''}`}>
-        <span className="kicker">SAS Academy — Andrea, Marco, Gianluca ed Emma</span>
-        <h1>
-          Innovazione
-          <br />
-          Sci 2026
-        </h1>
+        <span className="kicker">SAS ACADEMY // ANDREA, MARCO, GIANLUCA ED EMMA</span>
+        <KineticTitle onTriggerEgg={() => setXrayMode((v) => !v)} />
+        <div className="hero-sub-telemetry">
+          <span>[SELEZIONA UN HOTSPOT SUL MODELLO O USA LA DOCK]</span>
+        </div>
       </header>
 
+      {/* HUD Telemetrico + Easter Egg X-Ray */}
+      <div className={`hud-top-right ${activeItem ? 'hidden' : ''}`}>
+        <button
+          type="button"
+          className={`hud-pill-btn ${xrayMode ? 'active' : ''}`}
+          onClick={() => setXrayMode((v) => !v)}
+          onMouseEnter={() => document.body.classList.add('cursor-hovering')}
+          onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+        >
+          <span className="hud-dot" />
+          <span>{xrayMode ? 'X-RAY SCAN: ON' : 'TELEMETRY HUD'}</span>
+        </button>
+        <div className="hud-coords">
+          46.5405° N · 12.1357° E · HDG {String(yawAngle).padStart(3, '0')}°
+        </div>
+      </div>
+
+      {/* Scena 3D */}
       <SceneErrorBoundary>
         <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
           <Canvas
@@ -294,15 +449,21 @@ export default function App() {
             <directionalLight position={[3, 5, 4]} intensity={2.2} color="#ffffff" />
             <directionalLight position={[-4, 2, -2]} intensity={1.5} color="#00e5ff" />
 
-            <Suspense fallback={<Loader />}>
-              <SkierScene activeItem={activeItem} onSelect={handleSelectItem} />
+            <Suspense fallback={null}>
+              <SkierScene
+                activeItem={activeItem}
+                onSelect={handleSelectItem}
+                xray={xrayMode}
+                onToggleXray={() => setXrayMode((v) => !v)}
+                onUpdateTelemetry={setYawAngle}
+              />
             </Suspense>
 
             <OrbitControls
               enableZoom={true}
               enablePan={false}
               autoRotate={!activeItem}
-              autoRotateSpeed={0.4}
+              autoRotateSpeed={0.45}
               minDistance={3.0}
               maxDistance={6.0}
               minPolarAngle={Math.PI / 3}
@@ -314,25 +475,61 @@ export default function App() {
         </div>
       </SceneErrorBoundary>
 
-      <nav className={`macro-dock ${activeItem ? 'hidden' : ''}`} aria-label="Categorie principali">
+      {/* Dock Magnetica con Rolling Text */}
+      <nav
+        ref={dockRef}
+        className={`macro-dock ${activeItem ? 'hidden' : ''}`}
+        aria-label="Categorie principali"
+        onMouseLeave={handleDockLeave}
+      >
+        <div
+          className="dock-magnetic-pill"
+          style={{
+            opacity: pillStyle.opacity,
+            width: `${pillStyle.width}px`,
+            transform: `translateX(${pillStyle.x}px)`
+          }}
+        />
         {MACROS.map((m) => (
           <button
             key={m.id}
             type="button"
             className="macro-btn"
             onClick={() => handleSelectItem(m.items[0], true)}
-            onMouseEnter={() => document.body.classList.add('cursor-hovering')}
+            onMouseEnter={(e) => {
+              handleDockHover(e);
+              document.body.classList.add('cursor-hovering');
+            }}
             onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
           >
-            {m.label}
+            <span className="macro-roll-wrap">
+              <span className="macro-roll-text">{m.label}</span>
+              <span className="macro-roll-text clone" aria-hidden="true">
+                {m.label}
+              </span>
+            </span>
+            <span className="macro-count">0{m.items.length}</span>
           </button>
         ))}
       </nav>
 
-      <aside className={`side-panel ${activeItem ? 'open' : ''}`} aria-label="Scheda approfondimento">
-        <button type="button" className="close-btn" onClick={() => handleSelectItem(null, false)}>
-          ✕ Chiudi esplorazione
-        </button>
+      {/* Pannello Laterale / Bottom-Sheet Mobile */}
+      <aside
+        className={`side-panel ${activeItem ? 'open' : ''} snap-${sheetSnap}`}
+        aria-label="Scheda approfondimento"
+      >
+        <div className="sheet-drag-handle" onClick={cycleSheetSnap} title="Cambia altezza scheda">
+          <span />
+        </div>
+
+        <div className="panel-top-actions">
+          <button type="button" className="close-btn" onClick={() => handleSelectItem(null, false)}>
+            ✕ Chiudi
+          </button>
+          <button type="button" className="sheet-snap-btn" onClick={cycleSheetSnap}>
+            {sheetSnap === 'half' ? '⤢ Espandi' : sheetSnap === 'full' ? '⤓ Riduci al 3D' : '⤢ Metà schermo'}
+          </button>
+        </div>
 
         {activeMacroObj && activeMacroObj.items.length > 1 && (
           <div className="sub-nav">
@@ -351,12 +548,12 @@ export default function App() {
 
         {data && (
           <div>
-            <h3 style={{ fontSize: '2.05rem', marginBottom: '6px' }}>{data.title}</h3>
+            <h3 style={{ fontSize: '2.15rem', marginBottom: '6px' }}>{data.title}</h3>
             <a href={data.url} target="_blank" rel="noreferrer" className="brand-link">
               {data.brand}
             </a>
 
-            <p style={{ marginTop: '14px', fontSize: '0.94rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.82)' }}>
+            <p style={{ marginTop: '14px', fontSize: '0.94rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.84)' }}>
               {data.summary}
             </p>
 

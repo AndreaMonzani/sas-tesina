@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const STORAGE_KEY = 'sas_privacy_consent_v1';
+const STORAGE_KEY = 'sas_skitech_privacy_v2';
 
 const OPEN_SOURCE_PACKAGES = [
   {
@@ -37,7 +37,7 @@ export default function LegalCompliance({ isPanelOpen }) {
       return null;
     }
   });
-  const [modalTab, setModalTab] = useState(null); // 'privacy' | 'cookies' | 'opensource' | null
+  const [modalTab, setModalTab] = useState(null);
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -51,17 +51,16 @@ export default function LegalCompliance({ isPanelOpen }) {
 
   const saveConsent = (level) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ level, date: '2026-11-20' }));
-    } catch {
-      // Fallback silenzioso se localStorage è bloccato dal browser
-    }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ level, date: '2026-11-21' }));
+    } catch {}
     setConsent(level);
   };
 
   return (
     <>
-      {/* Barra discreta di accesso alle informative (sempre raggiungibile) */}
-      <footer className={`legal-dock ${isPanelOpen ? 'hidden' : ''}`} aria-label="Informative legali e licenze">
+      <footer className={`legal-dock ${isPanelOpen ? 'hidden' : ''}`} aria-label="Informative legali e copyright">
+        <span>© 2026 ANDREA MONZANI</span>
+        <span aria-hidden="true">·</span>
         <button type="button" className="legal-link-btn" onClick={() => setModalTab('privacy')}>
           Privacy
         </button>
@@ -71,17 +70,16 @@ export default function LegalCompliance({ isPanelOpen }) {
         </button>
         <span aria-hidden="true">·</span>
         <button type="button" className="legal-link-btn" onClick={() => setModalTab('opensource')}>
-          Open Source &amp; Marchi
+          Copyright &amp; Licenze
         </button>
       </footer>
 
-      {/* Banner informativo minimale alla prima visita */}
       {!consent && (
-        <div className="cookie-banner" role="region" aria-label="Informativa cookie e privacy">
+        <div className="cookie-banner" role="region" aria-label="Informativa privacy e cookie">
           <div className="cookie-banner-text">
-            <strong>Trasparenza &amp; Privacy:</strong> questo progetto didattico utilizza solo memoria tecnica locale e risorse di rete essenziali (hosting Vercel, font e illuminazione 3D), senza cookie di profilazione o tracciamento pubblicitario.{' '}
+            <strong>Zero Cookie di Tracciamento (100% GDPR):</strong> questo sito utilizza font locali di sistema e nessun tracker di terze parti. Salviamo solo la tua conferma tecnica in memoria locale.{' '}
             <button type="button" className="cookie-inline-link" onClick={() => setModalTab('cookies')}>
-              Leggi l’informativa
+              Dettagli Privacy &amp; Cookie
             </button>
             .
           </div>
@@ -90,13 +88,12 @@ export default function LegalCompliance({ isPanelOpen }) {
               Solo essenziali
             </button>
             <button type="button" className="cookie-btn primary" onClick={() => saveConsent('accepted')}>
-              Ho capito
+              Conferma
             </button>
           </div>
         </div>
       )}
 
-      {/* Modale completo Privacy, Cookie & Open Source */}
       {modalTab && (
         <div
           className="legal-modal-backdrop"
@@ -109,13 +106,13 @@ export default function LegalCompliance({ isPanelOpen }) {
             <div className="legal-modal-header">
               <div>
                 <span className="kicker" style={{ marginBottom: '4px' }}>
-                  Conformità &amp; Trasparenza — SAS Academy
+                  skitech.andreamonzani.com — Conformità GDPR
                 </span>
                 <h2 id="legal-modal-title" style={{ fontSize: '1.5rem' }}>
-                  Note Legali, Privacy &amp; Open Source
+                  Privacy, Cookie &amp; Proprietà Intellettuale
                 </h2>
               </div>
-              <button type="button" className="close-btn" style={{ marginBottom: 0 }} onClick={() => setModalTab(null)}>
+              <button type="button" className="close-btn" onClick={() => setModalTab(null)}>
                 ✕ Chiudi
               </button>
             </div>
@@ -146,48 +143,45 @@ export default function LegalCompliance({ isPanelOpen }) {
                 className={`legal-tab ${modalTab === 'opensource' ? 'active' : ''}`}
                 onClick={() => setModalTab('opensource')}
               >
-                Open Source &amp; Marchi
+                Copyright &amp; Licenze
               </button>
             </div>
 
             <div className="legal-modal-body">
               {modalTab === 'privacy' && (
                 <div>
-                  <h4>1. Natura del progetto e Referenti</h4>
+                  <h4>1. Titolare del Trattamento</h4>
                   <p>
-                    <strong>Innovazione Sci 2026</strong> è un elaborato didattico e divulgativo realizzato dal gruppo di lavoro <strong>Andrea, Marco, Gianluca ed Emma</strong> nell’ambito del percorso <strong>SAS Academy</strong>. Il sito non svolge attività commerciale né vendita diretta.
+                    Il titolare del sito <strong>skitech.andreamonzani.com</strong> è <strong>Andrea Monzani</strong> (contatto web: <a href="https://andreamonzani.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent-cyan)' }}>andreamonzani.com</a>). Il progetto <em>Innovazione Sci 2026</em> nasce come piattaforma didattica realizzata nell’ambito di SAS Academy con Andrea, Marco, Gianluca ed Emma.
                   </p>
 
-                  <h4>2. Dati trattati e Base Giuridica (Art. 6 GDPR)</h4>
+                  <h4>2. Architettura Privacy-by-Design (Zero Tracciamento)</h4>
                   <p>
-                    Non vengono raccolti moduli di registrazione, nomi, email o dati personali identificativi. Durante la navigazione vengono trattati esclusivamente dati tecnici di connessione (indirizzo IP, user-agent, log di sicurezza) necessari all’erogazione del servizio web tramite l’infrastruttura <strong>Vercel Inc.</strong> e al caricamento dei font tipografici (Google Fonts) e delle mappe di illuminazione 3D.
+                    Il sito è progettato secondo il principio di minimizzazione dei dati (Art. 5 GDPR): non utilizza Google Fonts esterni, non carica mappe HDRI da CDN di terze parti, non raccoglie form né dati personali identificativi e non impiega strumenti di profilazione. I soli log tecnici di connessione sono gestiti dall’infrastruttura di hosting <strong>Vercel Inc.</strong> per garantire sicurezza e continuità del servizio (Art. 6, par. 1, lett. f GDPR).
                   </p>
 
-                  <h4>3. Diritti dell’utente</h4>
+                  <h4>3. Diritti dell’Interessato</h4>
                   <p>
-                    Ai sensi degli artt. 15–22 del Regolamento (UE) 2016/679 (GDPR), l’utente può cancellare in ogni momento i dati tecnici salvati localmente tramite le impostazioni del proprio browser o reimpostando le preferenze nella scheda Cookie Policy.
+                    Ai sensi degli artt. 15–22 del Regolamento (UE) 2016/679, puoi cancellare in qualsiasi momento la preferenza tecnica salvata sul tuo dispositivo tramite il pulsante nella scheda Cookie Policy o dalle impostazioni del browser.
                   </p>
                 </div>
               )}
 
               {modalTab === 'cookies' && (
                 <div>
-                  <h4>1. Nessun cookie di profilazione</h4>
+                  <h4>1. Assenza di Cookie di Profilazione</h4>
                   <p>
-                    In conformità alle <em>Linee guida cookie e altri strumenti di tracciamento</em> del Garante per la Protezione dei Dati Personali, questo sito <strong>non utilizza cookie di profilazione, marketing o analitica di terze parti</strong>.
+                    In conformità alle Linee guida del Garante per la Protezione dei Dati Personali, questo sito <strong>non installa cookie di profilazione, marketing o analitica</strong>.
                   </p>
 
-                  <h4>2. Strumenti tecnici utilizzati</h4>
+                  <h4>2. Memoria Locale Tecnica</h4>
                   <ul className="legal-list">
                     <li>
-                      <strong>Memoria locale tecnica (localStorage — <code>{STORAGE_KEY}</code>):</strong> salva esclusivamente la conferma di lettura dell’informativa da parte dell’utente. Non trasmette dati a server esterni.
-                    </li>
-                    <li>
-                      <strong>Risorse CDN tecniche:</strong> caricamento dei font web (Google Fonts) e dell’ambiente 3D HDRI per il rendering della scena WebGL.
+                      <strong><code>{STORAGE_KEY}</code> (localStorage):</strong> memorizza esclusivamente l’avvenuta presa visione del banner informativo. Resta sul dispositivo dell’utente e non viene mai inviato a server esterni.
                     </li>
                   </ul>
 
-                  <div style={{ marginTop: '16px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <div style={{ marginTop: '16px' }}>
                     <button
                       type="button"
                       className="cookie-btn secondary"
@@ -207,12 +201,12 @@ export default function LegalCompliance({ isPanelOpen }) {
 
               {modalTab === 'opensource' && (
                 <div>
-                  <h4>1. Licenza del Codice Sorgente</h4>
+                  <h4>1. Diritti d’Autore e Proprietà Intellettuale</h4>
                   <p>
-                    Il codice originale dell’applicazione è rilasciato sotto <strong>Licenza MIT</strong> (file <code>LICENSE</code> nel repository). È consentito il riutilizzo, la modifica e la distribuzione citando gli autori originali.
+                    <strong>© 2026 Andrea Monzani — Tutti i diritti riservati.</strong> L’architettura dell’interfaccia, il design interattivo, gli schemi grafici vettoriali e il codice originale sono di proprietà esclusiva di Andrea Monzani. I contenuti didattici sono stati sviluppati con la collaborazione di Marco, Gianluca ed Emma (SAS Academy).
                   </p>
 
-                  <h4>2. Librerie Open Source di Terze Parti</h4>
+                  <h4>2. Componenti Open Source Utilizzati (Licenza MIT)</h4>
                   <div className="os-grid">
                     {OPEN_SOURCE_PACKAGES.map((pkg) => (
                       <a key={pkg.name} href={pkg.url} target="_blank" rel="noreferrer" className="os-card">
@@ -225,9 +219,9 @@ export default function LegalCompliance({ isPanelOpen }) {
                     ))}
                   </div>
 
-                  <h4>3. Marchi e Fonti Tecniche</h4>
+                  <h4>3. Marchi Commerciali Citati</h4>
                   <p>
-                    Tutti i marchi, i nomi di tecnologie e i brevetti citati nei laboratori (tra cui <em>Mips, Koroyd, WaveCel, RECCO, Out Of, BoneTech, PrimaLoft, Polartec, Leki, Tyrolia, Carv, Moticon, Lympic, HEAD, Salomon, Atomic, Tecnica, Fischer, BOA, Wintersteiger</em>) appartengono ai rispettivi proprietari e sono menzionati esclusivamente a fini didattici, informativi e comparativi.
+                    Tutti i marchi e le tecnologie citati nei laboratori (tra cui <em>Mips, Koroyd, WaveCel, RECCO, Out Of, BoneTech, PrimaLoft, Polartec, Leki, Tyrolia, Carv, Moticon, Lympic, HEAD, Salomon, Atomic, Tecnica, Fischer, BOA, Wintersteiger</em>) appartengono ai rispettivi titolari e sono riportati esclusivamente a scopo didattico e divulgativo.
                   </p>
                 </div>
               )}
