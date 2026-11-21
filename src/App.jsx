@@ -427,7 +427,7 @@ const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, onS
 });
 
 /* --- SCENA 3D MANICHINO + CAMBIO COLORE HOVER DINAMICO --- */
-function SkierScene({ activeItem, highlightedId, hoveredId, onHoverChange, onSelect, xray, onToggleXray, hdgRef }) {
+function SkierScene({ activeItem, hoveredId, onHoverChange, onSelect, xray, onToggleXray, hdgRef }) {
   const { scene } = useGLTF('/mannequin.glb');
   const groupRef = useRef();
   const lastTelemetryRef = useRef(0);
@@ -481,9 +481,8 @@ function SkierScene({ activeItem, highlightedId, hoveredId, onHoverChange, onSel
 
       groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.07);
       groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.07);
-      groupRef.current.position.y = (isDesktop ? -0.04 : 0.14) + breath;
+      groupRef.current.position.y = (isDesktop ? -0.04 : -0.10) + breath;
 
-      // Cambio colore fluido del manichino quando si fa hover su un hotspot
       if (!xray && materialsRef.current.length > 0) {
         targetBaseColor.set(hoveredId ? '#22384f' : '#1b202e');
         targetEmissiveColor.set(hoveredId ? '#005f73' : '#000000');
@@ -505,7 +504,6 @@ function SkierScene({ activeItem, highlightedId, hoveredId, onHoverChange, onSel
     }
   });
 
-  const currentFocus = activeItem || highlightedId;
   const hoveredSpot = hoveredId ? HOTSPOT_POINTS.find((h) => h.id === hoveredId) : null;
 
   return (
@@ -527,7 +525,7 @@ function SkierScene({ activeItem, highlightedId, hoveredId, onHoverChange, onSel
           pos={spot.pos}
           id={spot.id}
           side={spot.side}
-          isSelected={currentFocus === spot.id}
+          isSelected={activeItem === spot.id}
           onSelect={onSelect}
           onHoverChange={onHoverChange}
         />
@@ -549,10 +547,6 @@ export default function App() {
   const [hudLabel, setHudLabel] = useState('TELEMETRY HUD');
   const hdgRef = useRef(null);
 
-  // Stato Deck Mobile stile Videogame / Tinder
-  const [mobileDeckIdx, setMobileDeckIdx] = useState(0);
-  const touchStartX = useRef(null);
-
   const handleToggleAudio = () => {
     const nextState = soundEngine.toggle();
     setAudioOn(nextState);
@@ -569,16 +563,67 @@ export default function App() {
   const handleToggleItem = useCallback((id) => {
     soundEngine.play('click');
     setActiveItem((prev) => (prev === id ? null : id));
-    const idx = ORDERED_ITEM_IDS.indexOf(id);
-    if (idx !== -1) setMobileDeckIdx(idx);
   }, []);
 
   const handleSelectDirect = useCallback((id) => {
     soundEngine.play('click');
     setActiveItem(id);
-    const idx = ORDERED_ITEM_IDS.indexOf(id);
-    if (idx !== -1) setMobileDeckIdx(idx);
   }, []);
+
+  // Easter Egg Mobile: Shake del telefono per attivare Hyperspace Overdrive
+  useEffect(() => {
+    let lastX = null;
+    let lastY = null;
+    let lastZ = null;
+    let lastShakeTime = 0;
+    const SHAKE_THRESHOLD = 24;
+
+    const handleMotion = (e) => {
+      const acc = e.accelerationIncludingGravity || e.acceleration;
+      if (!acc || acc.x === null) return;
+
+      if (lastX !== null) {
+        const delta =
+          Math.abs(acc.x - lastX) +
+          Math.abs(acc.y - lastY) +
+          Math.abs(acc.z - lastZ);
+
+        if (delta > SHAKE_THRESHOLD) {
+          const now = Date.now();
+          if (now - lastShakeTime > 1200) {
+            lastShakeTime = now;
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+              try {
+                navigator.vibrate([40, 30, 60]);
+              } catch {}
+            }
+            toggleOverdrive();
+          }
+        }
+      }
+
+      lastX = acc.x;
+      lastY = acc.y;
+      lastZ = acc.z;
+    };
+
+    const requestMotionPermissionOnce = () => {
+      if (
+        typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function'
+      ) {
+        DeviceMotionEvent.requestPermission().catch(() => {});
+      }
+    };
+
+    window.addEventListener('devicemotion', handleMotion);
+    window.addEventListener('touchend', requestMotionPermissionOnce, { once: true });
+
+    return () => {
+      window.removeEventListener('devicemotion', handleMotion);
+      window.removeEventListener('touchend', requestMotionPermissionOnce);
+    };
+  }, [toggleOverdrive]);
 
   // Scramble effect su Hover HUD
   useEffect(() => {
@@ -645,35 +690,6 @@ export default function App() {
   const data = activeItem ? DATA[activeItem] : null;
   const activeMacroObj = data ? MACROS.find((m) => m.id === data.macro) : null;
 
-  // Navigazione mobile Tinder deck
-  const currentMobileId = ORDERED_ITEM_IDS[mobileDeckIdx];
-  const currentMobileItem = DATA[currentMobileId];
-  const currentMobileMacro = MACROS.find((m) => m.id === currentMobileItem.macro);
-
-  const nextMobileCard = () => {
-    soundEngine.play('swipe');
-    setMobileDeckIdx((i) => (i + 1) % ORDERED_ITEM_IDS.length);
-  };
-
-  const prevMobileCard = () => {
-    soundEngine.play('swipe');
-    setMobileDeckIdx((i) => (i - 1 + ORDERED_ITEM_IDS.length) % ORDERED_ITEM_IDS.length);
-  };
-
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e) => {
-    if (touchStartX.current === null) return;
-    const diff = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(diff) > 42) {
-      if (diff < 0) nextMobileCard();
-      else prevMobileCard();
-    }
-    touchStartX.current = null;
-  };
-
   const currentIndexInAll = activeItem ? ORDERED_ITEM_IDS.indexOf(activeItem) : -1;
   const prevItemId = currentIndexInAll !== -1 ? ORDERED_ITEM_IDS[(currentIndexInAll - 1 + ORDERED_ITEM_IDS.length) % ORDERED_ITEM_IDS.length] : null;
   const nextItemId = currentIndexInAll !== -1 ? ORDERED_ITEM_IDS[(currentIndexInAll + 1) % ORDERED_ITEM_IDS.length] : null;
@@ -729,13 +745,13 @@ export default function App() {
             {hoveredHotspot
               ? `[TARGET // ${DATA[hoveredHotspot]?.title.toUpperCase()}]`
               : overdriveMode
-              ? '[HYPERSPACE OVERDRIVE ATTIVO — CLICCA HUD PER USCIRE]'
-              : '[SELEZIONA UN HOTSPOT SUL MODELLO O USA LA DOCK]'}
+              ? '[HYPERSPACE OVERDRIVE ATTIVO — CLICCA HUD O SCUOTI PER USCIRE]'
+              : '[TOCCA UN HOTSPOT SUL MODELLO O SCORRI IL MENU]'}
           </span>
         </div>
       </header>
 
-      {/* HUD Top-Right: Audio Equalizer + Telemetry HUD */}
+      {/* HUD Top-Right (Barra superiore pulita su Mobile) */}
       <div className={`hud-top-right ${activeItem ? 'hidden' : ''}`}>
         <div className="hud-controls-row">
           <button
@@ -795,7 +811,7 @@ export default function App() {
               <span>-6.4°C COMPACT</span>
             </div>
             <div className="hud-easter-hint">
-              {overdriveMode ? '⚡ MODALITÀ OVERDRIVE ATTIVA' : 'CLICCA PER HYPERSPACE OVERDRIVE ⚡'}
+              {overdriveMode ? '⚡ MODALITÀ OVERDRIVE ATTIVA' : 'CLICCA O SCUOTI PER OVERDRIVE ⚡'}
             </div>
           </div>
         )}
@@ -818,7 +834,6 @@ export default function App() {
             <Suspense fallback={null}>
               <SkierScene
                 activeItem={activeItem}
-                highlightedId={currentMobileId}
                 hoveredId={hoveredHotspot}
                 onHoverChange={setHoveredHotspot}
                 onSelect={handleToggleItem}
@@ -844,7 +859,7 @@ export default function App() {
         </div>
       </SceneErrorBoundary>
 
-      {/* Dock Magnetica Desktop */}
+      {/* Dock Magnetica (Fissa al centro su Desktop, Scorrevole Orizzontalmente su Mobile) */}
       <nav className={`macro-dock ${activeItem ? 'hidden' : ''}`} aria-label="Categorie principali">
         <MagneticNavBar
           items={MACROS.map((m) => ({
@@ -856,35 +871,6 @@ export default function App() {
           onSelectItem={handleSelectDirect}
         />
       </nav>
-
-      {/* Deck Mobile Videogame / Tinder */}
-      <div
-        className={`mobile-tinder-deck ${activeItem ? 'hidden' : ''}`}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div className="tinder-card">
-          <div className="tinder-card-top">
-            <span className="tinder-badge">{currentMobileMacro?.label}</span>
-            <span className="tinder-counter">
-              {String(mobileDeckIdx + 1).padStart(2, '0')} / {ORDERED_ITEM_IDS.length}
-            </span>
-          </div>
-          <div className="tinder-card-title">{currentMobileItem.title}</div>
-          <p className="tinder-card-desc">{currentMobileItem.summary}</p>
-          <div className="tinder-controls">
-            <button type="button" className="tinder-arrow-btn" onClick={prevMobileCard} aria-label="Precedente">
-              ◀
-            </button>
-            <button type="button" className="tinder-open-btn" onClick={() => handleSelectDirect(currentMobileId)}>
-              Esplora Lab →
-            </button>
-            <button type="button" className="tinder-arrow-btn" onClick={nextMobileCard} aria-label="Successivo">
-              ▶
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Pannello Laterale Desktop & Scheda Mobile */}
       <aside className={`side-panel ${activeItem ? 'open' : ''}`} aria-label="Scheda approfondimento">

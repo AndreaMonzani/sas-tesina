@@ -255,7 +255,7 @@ summary:focus-visible {
   }
 }
 
-/* --- TITOLO PRINCIPALE IMPILATO CORRETTAMENTE + HOVER WOW --- */
+/* --- TITOLO PRINCIPALE + HOVER TEAM --- */
 .brand-header {
   position: fixed;
   top: 28px;
@@ -295,6 +295,39 @@ summary:focus-visible {
 .author-inline-link:hover {
   color: var(--accent-gold);
   border-bottom-color: var(--accent-gold);
+}
+
+.team-member-tag {
+  position: relative;
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.82);
+  padding: 1px 4px;
+  border-radius: 4px;
+  cursor: default;
+  transition: color 0.25s ease, background 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-member-tag::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 0;
+  height: 1px;
+  background: var(--accent-cyan);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-member-tag:hover {
+  color: var(--accent-cyan);
+  background: rgba(0, 229, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.team-member-tag:hover::after {
+  transform: scaleX(1);
 }
 
 .kinetic-title {
@@ -360,7 +393,7 @@ summary:focus-visible {
   color: rgba(255, 255, 255, 0.85);
 }
 
-/* --- HUD TELEMETRICO & EASTER EGG HOVER / CLICK --- */
+/* --- HUD TELEMETRICO, AUDIO EQUALIZER & EASTER EGG --- */
 .hud-top-right {
   position: fixed;
   top: 28px;
@@ -376,6 +409,12 @@ summary:focus-visible {
 .hud-top-right.hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+.hud-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .hud-pill-btn {
@@ -416,6 +455,41 @@ summary:focus-visible {
   box-shadow: 0 0 10px var(--accent-gold);
 }
 
+.eq-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 11px;
+  width: 12px;
+}
+
+.eq-bars span {
+  display: block;
+  width: 2px;
+  height: 3px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  transition: height 0.2s ease, background 0.2s ease;
+}
+
+.hud-pill-btn.audio-on .eq-bars span {
+  background: var(--accent-cyan);
+  animation: eqDance 0.85s ease-in-out infinite alternate;
+}
+
+.hud-pill-btn.audio-on .eq-bars span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.hud-pill-btn.audio-on .eq-bars span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes eqDance {
+  0% { height: 3px; }
+  100% { height: 11px; }
+}
+
 .hud-coords {
   font-family: var(--font-mono);
   font-size: 0.62rem;
@@ -424,7 +498,6 @@ summary:focus-visible {
   white-space: nowrap;
 }
 
-/* Easter Egg Mini-Telemetry Card su Hover HUD */
 .hud-easter-card {
   width: 248px;
   padding: 12px 14px;
@@ -464,7 +537,7 @@ summary:focus-visible {
   text-align: center;
 }
 
-/* --- HOTSPOT 3D STABILI (ZERO JITTER / ZERO LOOP) --- */
+/* --- HOTSPOT 3D STABILI CON CAMBIO COLORE HOVER --- */
 .hotspot-anchor {
   position: relative;
   width: 0;
@@ -531,10 +604,9 @@ summary:focus-visible {
   letter-spacing: 0.11em;
   color: rgba(255, 255, 255, 0.92);
   white-space: nowrap;
-  transition: transform 0.22s ease, color 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+  transition: transform 0.22s ease, color 0.22s ease, border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
 }
 
-/* Traslazione visiva senza alterare la hit-box */
 .hotspot-container.right:hover .hotspot-tag,
 .hotspot-container.right.active .hotspot-tag {
   transform: translateX(4px);
@@ -558,11 +630,20 @@ summary:focus-visible {
   background: var(--accent-gold);
 }
 
-.hotspot-container:hover .hotspot-tag,
+.hotspot-container:hover .hotspot-tag {
+  background: linear-gradient(135deg, var(--accent-cyan), #38bdf8);
+  color: #020305;
+  font-weight: 700;
+  border-color: #ffffff;
+  box-shadow: 0 0 22px rgba(0, 229, 255, 0.65);
+}
+
 .hotspot-container.active .hotspot-tag {
-  color: var(--accent-gold);
-  border-color: rgba(255, 204, 0, 0.6);
-  background: rgba(4, 7, 13, 0.98);
+  background: linear-gradient(135deg, var(--accent-gold), #f59e0b);
+  color: #020305;
+  font-weight: 700;
+  border-color: #ffffff;
+  box-shadow: 0 0 24px rgba(255, 204, 0, 0.7);
 }
 
 /* --- SISTEMA UNIFICATO NAVBAR MAGNETICA CON ROLLING TEXT --- */
@@ -719,7 +800,7 @@ summary:focus-visible {
   transform: scaleX(1);
 }
 
-/* --- PANNELLO LATERALE DESKTOP --- */
+/* --- PANNELLO LATERALE DESKTOP & SCHEDA MOBILE --- */
 .side-panel {
   position: fixed;
   top: 0;
@@ -1598,12 +1679,8 @@ input[type='range']:active::-webkit-slider-thumb {
 }
 
 /* ============================================================================
-   MOBILE UX: VIDEOGAME CHARACTER LOADOUT & TINDER CARD SWIPE
+   MOBILE UX: HEADER ORDINATO, SOLO MODELLINO 3D + DOCK SCORREVOLE
    ============================================================================ */
-.mobile-tinder-deck {
-  display: none;
-}
-
 .mobile-panel-nav {
   display: none;
 }
@@ -1613,35 +1690,24 @@ input[type='range']:active::-webkit-slider-thumb {
     padding: 24px 20px;
   }
 
-  .brand-header {
-    top: 16px;
-    left: 16px;
-    right: 92px;
-    gap: 4px;
-  }
-
-  .kicker {
-    font-size: 0.54rem;
-    letter-spacing: 0.1em;
-    line-height: 1.3;
-  }
-
-  .kinetic-line {
-    font-size: 1.95rem;
-  }
-
-  .kinetic-underline-bar,
-  .hero-sub-telemetry {
-    display: none;
-  }
-
+  /* 1. Barra superiore fissa con AUDIO a sinistra e TELEMETRY HUD a destra */
   .hud-top-right {
-    top: 16px;
+    top: 14px;
+    left: 14px;
     right: 14px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .hud-controls-row {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
   }
 
   .hud-pill-btn {
-    padding: 7px 11px;
+    padding: 7px 12px;
     font-size: 0.58rem;
   }
 
@@ -1650,124 +1716,87 @@ input[type='range']:active::-webkit-slider-thumb {
     display: none;
   }
 
-  /* Su smartphone nascondiamo la dock desktop e le etichette lunghe sul 3D:
-     restano solo i pallini luminosi cliccabili sul manichino */
-  .macro-dock {
-    display: none !important;
+  /* 2. Titolo e nomi del team posizionati sotto la barra HUD a piena larghezza */
+  .brand-header {
+    top: 56px;
+    left: 16px;
+    right: 16px;
+    gap: 5px;
   }
 
-  .hotspot-line,
-  .hotspot-tag {
-    display: none !important;
+  .kicker {
+    font-size: 0.56rem;
+    letter-spacing: 0.08em;
+    line-height: 1.35;
   }
 
+  .kinetic-line {
+    font-size: 2.05rem;
+  }
+
+  .kinetic-underline-bar {
+    margin-top: 4px;
+  }
+
+  .hero-sub-telemetry {
+    display: block;
+    font-size: 0.55rem;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  /* 3. Hotspot compatti sul modellino 3D per interagire direttamente col manichino */
   .hotspot-dot {
-    width: 14px;
-    height: 14px;
+    width: 11px;
+    height: 11px;
   }
 
-  /* Deck Tinder / Videogame Loadout in basso (Thumb-Zone) */
-  .mobile-tinder-deck {
-    position: fixed;
-    left: 14px;
-    right: 14px;
-    bottom: 36px;
-    z-index: 26;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+  .hotspot-line {
+    width: 12px;
   }
 
-  .mobile-tinder-deck.hidden {
+  .hotspot-tag {
+    font-size: 0.54rem;
+    padding: 3px 6px;
+    letter-spacing: 0.06em;
+  }
+
+  /* 4. Dock orizzontale a scorrimento in basso */
+  .macro-dock {
+    bottom: 42px;
+    left: 12px;
+    right: 12px;
+    transform: none;
+    max-width: calc(100vw - 24px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .macro-dock::-webkit-scrollbar {
+    display: none;
+  }
+
+  .macro-dock.hidden {
     opacity: 0;
     pointer-events: none;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
 
-  .tinder-card {
-    background: rgba(6, 10, 18, 0.9);
-    border: 1px solid rgba(0, 229, 255, 0.32);
-    border-radius: 20px;
-    padding: 14px 16px;
-    backdrop-filter: blur(24px);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
-    touch-action: pan-y;
+  .dock-magnetic-pill {
+    display: none;
   }
 
-  .tinder-card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
+  .mag-nav-btn {
+    padding: 9px 14px;
+    flex-shrink: 0;
   }
 
-  .tinder-badge {
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--accent-cyan);
+  .roll-wrap {
+    font-size: 0.68rem;
   }
 
-  .tinder-counter {
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    color: var(--accent-gold);
-    font-weight: 700;
-  }
-
-  .tinder-card-title {
-    font-family: var(--font-display);
-    font-size: 1.35rem;
-    color: #ffffff;
-    margin-bottom: 4px;
-  }
-
-  .tinder-card-desc {
-    font-size: 0.78rem;
-    line-height: 1.4;
-    color: var(--text-secondary);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin-bottom: 12px;
-  }
-
-  .tinder-controls {
-    display: grid;
-    grid-template-columns: 46px 1fr 46px;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .tinder-arrow-btn {
-    height: 44px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--glass-border);
-    color: #ffffff;
-    font-family: var(--font-mono);
-    font-size: 1rem;
-    display: grid;
-    place-items: center;
-  }
-
-  .tinder-open-btn {
-    height: 44px;
-    border-radius: 12px;
-    background: linear-gradient(90deg, var(--accent-cyan), #38bdf8);
-    border: none;
-    color: #020305;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  /* Scheda Lab su Mobile a schermo pulito */
+  /* Scheda Lab su Mobile */
   .side-panel {
     top: auto;
     height: 88vh;
@@ -1817,7 +1846,7 @@ input[type='range']:active::-webkit-slider-thumb {
   .cookie-banner {
     flex-direction: column;
     align-items: stretch;
-    bottom: 38px;
+    bottom: 42px;
     left: 12px;
     right: 12px;
     padding: 14px;
@@ -1827,52 +1856,4 @@ input[type='range']:active::-webkit-slider-thumb {
   .cursor-ring {
     display: none !important;
   }
-}
-/* --- EFFETTO HOVER NOMI MEMBRI TEAM (SENZA LINK) --- */
-.team-member-tag {
-  position: relative;
-  display: inline-block;
-  color: rgba(255, 255, 255, 0.82);
-  padding: 1px 4px;
-  border-radius: 4px;
-  cursor: default;
-  transition: color 0.25s ease, background 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.team-member-tag::after {
-  content: '';
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  bottom: 0;
-  height: 1px;
-  background: var(--accent-cyan);
-  transform: scaleX(0);
-  transform-origin: center;
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.team-member-tag:hover {
-  color: var(--accent-cyan);
-  background: rgba(0, 229, 255, 0.1);
-  transform: translateY(-1px);
-}
-
-.team-member-tag:hover::after {
-  transform: scaleX(1);
-}
-
-/* --- CAMBIO COLORE HOVER HOTSPOT SUL MANICHINO 3D --- */
-.hotspot-container:hover .hotspot-tag,
-.hotspot-container.active .hotspot-tag {
-  background: linear-gradient(135deg, var(--accent-cyan), #38bdf8);
-  color: #020305;
-  font-weight: 700;
-  border-color: #ffffff;
-  box-shadow: 0 0 22px rgba(0, 229, 255, 0.65);
-}
-
-.hotspot-container.active .hotspot-tag {
-  background: linear-gradient(135deg, var(--accent-gold), #f59e0b);
-  box-shadow: 0 0 24px rgba(255, 204, 0, 0.7);
 }
