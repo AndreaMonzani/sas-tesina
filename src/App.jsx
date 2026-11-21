@@ -2,9 +2,11 @@ import React, { useState, useRef, useEffect, useMemo, Suspense, Component } from
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, useGLTF, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
-import InteractiveLab from './InteractiveLabs';
 import LegalCompliance from './LegalCompliance';
 import './index.css';
+
+// Caricamento differito dei 10 laboratori per massimizzare Speed Insights
+const InteractiveLab = React.lazy(() => import('./InteractiveLabs'));
 
 class SceneErrorBoundary extends Component {
   constructor(props) {
@@ -265,7 +267,6 @@ function SkierScene({ activeItem, onSelect, xray, onToggleXray, onUpdateTelemetr
       groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.07);
       groupRef.current.position.y = -0.04 + breath;
 
-      // Aggiorna telemetria ogni ~250ms per non appesantire React
       if (state.clock.elapsedTime - lastTelemetryRef.current > 0.25) {
         lastTelemetryRef.current = state.clock.elapsedTime;
         const yaw = Math.round(((state.camera.position.x * 45) % 360 + 360) % 360);
@@ -333,7 +334,6 @@ export default function App() {
   const [yawAngle, setYawAngle] = useState(0);
   const [sheetSnap, setSheetSnap] = useState('half'); // 'peek' | 'half' | 'full'
 
-  // Stato pillola magnetica dock desktop
   const dockRef = useRef(null);
   const [pillStyle, setPillStyle] = useState({ opacity: 0, width: 0, x: 0 });
 
@@ -408,10 +408,8 @@ export default function App() {
       <div className="telemetry-grid-bg" />
       <div className="noise-film" />
 
-      {/* Preloader Cinetico Full-Screen */}
       <KineticIntro />
 
-      {/* Header con Titolo Cinetico */}
       <header className={`brand-header ${activeItem ? 'hidden' : ''}`}>
         <span className="kicker">SAS ACADEMY // ANDREA, MARCO, GIANLUCA ED EMMA</span>
         <KineticTitle onTriggerEgg={() => setXrayMode((v) => !v)} />
@@ -420,7 +418,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* HUD Telemetrico + Easter Egg X-Ray */}
       <div className={`hud-top-right ${activeItem ? 'hidden' : ''}`}>
         <button
           type="button"
@@ -437,7 +434,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Scena 3D */}
       <SceneErrorBoundary>
         <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
           <Canvas
@@ -475,7 +471,6 @@ export default function App() {
         </div>
       </SceneErrorBoundary>
 
-      {/* Dock Magnetica con Rolling Text */}
       <nav
         ref={dockRef}
         className={`macro-dock ${activeItem ? 'hidden' : ''}`}
@@ -513,7 +508,6 @@ export default function App() {
         ))}
       </nav>
 
-      {/* Pannello Laterale / Bottom-Sheet Mobile */}
       <aside
         className={`side-panel ${activeItem ? 'open' : ''} snap-${sheetSnap}`}
         aria-label="Scheda approfondimento"
@@ -557,7 +551,15 @@ export default function App() {
               {data.summary}
             </p>
 
-            <InteractiveLab itemId={data.id} />
+            <Suspense
+              fallback={
+                <p className="mono" style={{ marginTop: '20px', fontSize: '0.75rem', color: 'var(--accent-cyan)' }}>
+                  Caricamento laboratorio...
+                </p>
+              }
+            >
+              <InteractiveLab itemId={data.id} />
+            </Suspense>
           </div>
         )}
       </aside>
