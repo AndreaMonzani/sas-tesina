@@ -1,11 +1,21 @@
-// Motore Audio Ibrido (Streaming 1h Ambient + Buffer SFX con Sync Offset/Delay)
-// 100% Self-Hosted & Mobile Safari/Chrome Safe
+// Motore Audio Ibrido (Streaming 1h Ambient + Buffer SFX con Sync Offset/Delay e Boost Volume)
+// 100% Self-Hosted, Touch-Safe & Mobile Safari/Chrome Safe
 
 export const AUDIO_CONFIG = {
-  ambientTargetVolume: 0.45,  // Volume massimo del loop ambient (0.0 - 1.0)
+  ambientTargetVolume: 0.42,  // Volume massimo del loop ambient (0.0 - 1.0)
   ambientFadeInMs: 1400,      // Durata fade-in all'avvio (ms)
   ambientFadeOutMs: 900,      // Durata fade-out allo spegnimento (ms)
   ambientStartOffsetSec: 0,   // Secondo da cui far partire l'ambient
+
+  // Volumi singoli SFX (valori > 1.0 applicano un boost pulito tramite limiter)
+  sfxVolumes: {
+    hover: 0.45,
+    click: 0.78,
+    swipe: 0.78,
+    overdrive: 0.90,
+    correct: 1.65,
+    wrong: 1.65
+  },
 
   // Taglio silenzio iniziale del file MP3 (in SECONDI)
   sfxOffsetsSec: {
@@ -46,6 +56,7 @@ const TRACK_ALIASES = {
 class SoundEngine {
   constructor() {
     this.ctx = null;
+    this.sfxLimiter = null;
     this.enabled = false;
     this.preloaded = false;
     this.ambientEl = null;
@@ -72,6 +83,14 @@ class SoundEngine {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
+        const limiter = this.ctx.createDynamicsCompressor();
+        limiter.threshold.setValueAtTime(-4, this.ctx.currentTime);
+        limiter.knee.setValueAtTime(6, this.ctx.currentTime);
+        limiter.ratio.setValueAtTime(12, this.ctx.currentTime);
+        limiter.attack.setValueAtTime(0.002, this.ctx.currentTime);
+        limiter.release.setValueAtTime(0.12, this.ctx.currentTime);
+        limiter.connect(this.ctx.destination);
+        this.sfxLimiter = limiter;
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
@@ -79,7 +98,6 @@ class SoundEngine {
     }
   }
 
-  // Sblocca hardware audio iOS/Safari al tap
   unlockHardware() {
     this.initContext();
     if (this.ctx) {
@@ -109,7 +127,7 @@ class SoundEngine {
         const decoded = await this.ctx.decodeAudioData(arrayBuf);
         if (decoded) return decoded;
       } catch {
-        // Prova il prossimo candidato
+        // Prova il candidato successivo
       }
     }
     return null;
@@ -121,10 +139,8 @@ class SoundEngine {
       this.fetchFirstValidBuffer(urls).then((decoded) => {
         if (decoded) {
           this.buffers[key] = decoded;
-          console.info(`[SkiTech Audio] Caricato SFX: ${key}`);
         } else {
           this.missingFiles.add(key);
-          console.warn(`[SkiTech Audio] File non trovato per "${key}", uso sintesi fallback.`);
         }
       });
     });
@@ -136,7 +152,7 @@ class SoundEngine {
 
     if (this.enabled) {
       this.startAmbient();
-      this._triggerSound('click', true);
+      this._triggerSound('click');
     } else {
       this.stopAmbient();
     }
@@ -181,10 +197,10 @@ class SoundEngine {
       if (!this.ambientEl) {
         const audio = new Audio(CUSTOM_TRACKS.ambient[0]);
         audio.loop = true;
-        audio.preload = 'auto';
+        // Streaming on-demand: non scarica gli 83MB finché non viene avviato
+        audio.preload = 'none';
         audio.volume = 0.15;
-        audio.addEventListener('error', (e) => {
-          console.warn('[SkiTech Audio] Errore caricamento ambient.mp3, attivo pad sintetico.', e);
+        audio.addEventListener('error', () => {
           this.missingFiles.add('ambient');
           this.ambientEl = null;
           if (this.enabled) this.startSynthAmbient();
@@ -201,12 +217,10 @@ class SoundEngine {
       this.ambientEl
         .play()
         .then(() => {
-          console.info('[SkiTech Audio] Riproduzione ambient.mp3 avviata.');
           this.ambientMode = 'file';
           this.fadeAmbientTo(AUDIO_CONFIG.ambientTargetVolume, AUDIO_CONFIG.ambientFadeInMs);
         })
-        .catch((err) => {
-          console.warn('[SkiTech Audio] Play ambient.mp3 bloccato o in buffering:', err);
+        .catch(() => {
           this.startSynthAmbient();
         });
       return;
@@ -325,7 +339,11 @@ class SoundEngine {
     if (!this.enabled) return;
     const type = TRACK_ALIASES[rawType] || rawType;
 
+    // Evita il doppio suono (hover + click) sui dispositivi touch
     if (type === 'hover') {
+      if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) {
+        return;
+      }
       const nowMs = performance.now();
       if (nowMs - this.lastHoverTime < 55) return;
       this.lastHoverTime = nowMs;
@@ -344,6 +362,8 @@ class SoundEngine {
     this.initContext();
     if (!this.ctx) return;
 
+    const outputNode = this.sfxLimiter || this.ctx.destination;
+
     // 1. File MP3 locale decodificato
     if (this.buffers[type]) {
       const now = this.ctx.currentTime;
@@ -355,7 +375,7 @@ class SoundEngine {
       src.buffer = buffer;
 
       const gain = this.ctx.createGain();
-      const targetGain = type === 'hover' ? 0.45 : 0.78;
+      const targetGain = AUDIO_CONFIG.sfxVolumes[type] ?? 0.85;
       gain.gain.setValueAtTime(0.01, now);
       gain.gain.linearRampToValueAtTime(targetGain, now + 0.012);
       if (playDuration > 0.06) {
@@ -364,7 +384,7 @@ class SoundEngine {
       }
 
       src.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(outputNode);
       src.start(now, offset);
       return;
     }
@@ -381,7 +401,7 @@ class SoundEngine {
       gain.gain.setValueAtTime(0.08, now);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.028);
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(outputNode);
       osc.start(now);
       osc.stop(now + 0.03);
     } else if (type === 'click') {
@@ -393,7 +413,7 @@ class SoundEngine {
       gain.gain.setValueAtTime(0.24, now);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.085);
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(outputNode);
       osc.start(now);
       osc.stop(now + 0.09);
     } else if (type === 'swipe') {
@@ -418,7 +438,7 @@ class SoundEngine {
 
       noise.connect(filter);
       filter.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(outputNode);
       noise.start(now);
     } else if (type === 'overdrive') {
       const osc = this.ctx.createOscillator();
@@ -437,7 +457,7 @@ class SoundEngine {
 
       osc.connect(filter);
       filter.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(outputNode);
       osc.start(now);
       osc.stop(now + 0.43);
     } else if (type === 'correct') {
@@ -446,10 +466,10 @@ class SoundEngine {
         const gain = this.ctx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, now + i * 0.08);
-        gain.gain.setValueAtTime(0.14, now + i * 0.08);
+        gain.gain.setValueAtTime(0.32, now + i * 0.08);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 0.18);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(outputNode);
         osc.start(now + i * 0.08);
         osc.stop(now + i * 0.08 + 0.19);
       });
@@ -459,10 +479,10 @@ class SoundEngine {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(160, now);
       osc.frequency.linearRampToValueAtTime(115, now + 0.16);
-      gain.gain.setValueAtTime(0.14, now);
+      gain.gain.setValueAtTime(0.32, now);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(outputNode);
       osc.start(now);
       osc.stop(now + 0.19);
     }

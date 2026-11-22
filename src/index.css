@@ -34,16 +34,18 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Modalità Easter Egg: Hyperspace Overdrive (Colori invertiti) */
+/* Modalità Easter Egg: Tactical Hyperdrive (Palette nativa ad alto contrasto, 60fps senza filter: invert) */
 .app-shell {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  transition: filter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .app-shell.overdrive-mode {
-  filter: invert(0.95) hue-rotate(180deg) contrast(1.08);
+  --accent-cyan: #ffcc00;
+  --accent-gold: #00e5ff;
+  --bg-panel: rgba(10, 6, 18, 0.96);
+  --glass-border: rgba(255, 204, 0, 0.28);
 }
 
 .overdrive-vignette {
@@ -52,7 +54,9 @@ body {
   z-index: 2;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(circle at 50% 50%, transparent 42%, rgba(0, 229, 255, 0.28) 100%);
+  background:
+    radial-gradient(circle at 50% 50%, transparent 38%, rgba(255, 204, 0, 0.16) 82%, rgba(0, 229, 255, 0.24) 100%);
+  box-shadow: inset 0 0 80px rgba(255, 204, 0, 0.15);
   transition: opacity 0.45s ease;
 }
 
@@ -117,6 +121,11 @@ summary:focus-visible {
   inset: 0;
   z-index: 0;
   background: radial-gradient(circle at 50% 42%, #101929 0%, #020305 82%);
+  transition: background 0.6s ease;
+}
+
+.app-shell.overdrive-mode .studio-canvas {
+  background: radial-gradient(circle at 50% 42%, #24170a 0%, #090512 52%, #010103 88%);
 }
 
 .telemetry-grid-bg {
@@ -125,9 +134,17 @@ summary:focus-visible {
   z-index: 1;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(0, 229, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.035) 1px, transparent 1px);
   background-size: 64px 64px;
+  transition: opacity 0.4s ease;
+}
+
+.app-shell.overdrive-mode .telemetry-grid-bg {
+  background-image:
+    linear-gradient(rgba(255, 204, 0, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.08) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
 .noise-film {
@@ -382,11 +399,23 @@ summary:focus-visible {
 
 .hero-sub-telemetry {
   margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-mono);
   font-size: 0.64rem;
   color: var(--text-secondary);
   letter-spacing: 0.08em;
   transition: color 0.25s ease;
+}
+
+.progress-pill {
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  color: var(--accent-cyan);
+  font-weight: 700;
 }
 
 .brand-header:hover .hero-sub-telemetry {
@@ -537,7 +566,7 @@ summary:focus-visible {
   text-align: center;
 }
 
-/* --- HOTSPOT 3D STABILI CON CAMBIO COLORE HOVER --- */
+/* --- HOTSPOT 3D STABILI CON CAMBIO COLORE HOVER & BADGE ESPLORATO --- */
 .hotspot-anchor {
   position: relative;
   width: 0;
@@ -578,6 +607,11 @@ summary:focus-visible {
   box-shadow: 0 0 14px rgba(0, 229, 255, 0.85);
   flex-shrink: 0;
   transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+
+.hotspot-container.explored .hotspot-dot {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.8);
 }
 
 .hotspot-line {
@@ -646,14 +680,14 @@ summary:focus-visible {
   box-shadow: 0 0 24px rgba(255, 204, 0, 0.7);
 }
 
-/* --- SISTEMA UNIFICATO NAVBAR MAGNETICA CON ROLLING TEXT --- */
+/* --- SISTEMA UNIFICATO NAVBAR MAGNETICA CON ROLLING TEXT (5 CATEGORIE) --- */
 .magnetic-bar {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   padding: 6px;
-  background: rgba(6, 10, 18, 0.82);
+  background: rgba(6, 10, 18, 0.84);
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 999px;
   backdrop-filter: blur(26px);
@@ -666,6 +700,7 @@ summary:focus-visible {
   left: 50%;
   transform: translateX(-50%);
   z-index: 25;
+  max-width: calc(100vw - 32px);
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
@@ -692,14 +727,15 @@ summary:focus-visible {
   z-index: 2;
   background: none;
   border: none;
-  padding: 10px 18px;
+  padding: 10px 15px;
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.8);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   cursor: pointer;
   overflow: hidden;
+  white-space: nowrap;
   transition: color 0.25s ease, background 0.25s ease;
 }
 
@@ -715,10 +751,10 @@ summary:focus-visible {
   height: 1.2em;
   overflow: hidden;
   font-family: var(--font-sans);
-  font-size: 0.73rem;
+  font-size: 0.71rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.11em;
   line-height: 1.2em;
 }
 
@@ -740,7 +776,7 @@ summary:focus-visible {
 
 .macro-count {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   padding: 2px 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.07);
@@ -1679,7 +1715,7 @@ input[type='range']:active::-webkit-slider-thumb {
 }
 
 /* ============================================================================
-   MOBILE UX: POPUP CENTRATO + SOLO MODELLINO 3D (ZERO DOCK IN BASSO)
+   MOBILE UX: POPUP IN BASSO CENTRATO + SOLO MODELLINO 3D (ZERO DOCK IN BASSO)
    ============================================================================ */
 .mobile-panel-nav,
 .mobile-shake-toast {
@@ -1692,6 +1728,11 @@ input[type='range']:active::-webkit-slider-thumb {
   40% { transform: rotate(14deg); }
   60% { transform: rotate(-10deg); }
   80% { transform: rotate(8deg); }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 768px) {
@@ -1748,16 +1789,16 @@ input[type='range']:active::-webkit-slider-thumb {
   }
 
   .hero-sub-telemetry {
-    display: block;
+    display: flex;
     font-size: 0.54rem;
     letter-spacing: 0.05em;
     margin-top: 2px;
   }
 
-  /* 3. Popup Shake perfettamente centrato senza conflitti di transform */
+  /* 3. Popup Shake centrato in basso (così non copre mai testa e maschere del manichino) */
   .mobile-shake-toast {
     position: fixed;
-    top: 166px;
+    bottom: 42px;
     left: 0;
     right: 0;
     margin: 0 auto;
@@ -1776,7 +1817,7 @@ input[type='range']:active::-webkit-slider-thumb {
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85), 0 0 22px rgba(255, 204, 0, 0.22);
     color: #ffffff;
     cursor: pointer;
-    animation: fadeSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: fadeSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .shake-toast-icon {
@@ -1821,11 +1862,11 @@ input[type='range']:active::-webkit-slider-thumb {
   }
 
   .hotspot-line {
-    width: 13px;
+    width: 12px;
   }
 
   .hotspot-tag {
-    font-size: 0.56rem;
+    font-size: 0.55rem;
     padding: 4px 7px;
     letter-spacing: 0.06em;
   }

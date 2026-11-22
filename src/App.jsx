@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, Suspense, Component, memo, useCallback } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Html, useGLTF, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
 import LegalCompliance from './LegalCompliance';
@@ -28,11 +28,13 @@ class SceneErrorBoundary extends Component {
   }
 }
 
+/* 5 PILASTRI: Maschere e Telemetria IA ora sono categorie distinte */
 const MACROS = [
   { id: 'performance', label: 'Performance', items: ['sci', 'scarpone'] },
   { id: 'sicurezza', label: 'Sicurezza', items: ['casco', 'attacchi', 'bastoni'] },
   { id: 'comfort', label: 'Comfort', items: ['termoregolazione', 'guanti'] },
-  { id: 'dati_visione', label: 'Visione & Dati', items: ['maschera_outof', 'maschera_audio', 'telemetria'] }
+  { id: 'maschere', label: 'Maschere', items: ['maschera_outof', 'maschera_audio'] },
+  { id: 'telemetria_ia', label: 'Telemetria IA', items: ['telemetria'] }
 ];
 
 const ORDERED_ITEM_IDS = [
@@ -48,17 +50,18 @@ const ORDERED_ITEM_IDS = [
   'sci'
 ];
 
+/* Coordinate hotspot distanziate per zero sovrapposizioni + target focus camera */
 const HOTSPOT_POINTS = [
-  { id: 'casco', pos: [0.06, 0.92, 0.08], side: 'right' },
-  { id: 'maschera_outof', pos: [-0.09, 0.80, 0.12], side: 'left' },
-  { id: 'maschera_audio', pos: [0.11, 0.70, 0.08], side: 'right' },
-  { id: 'termoregolazione', pos: [-0.16, 0.34, 0.12], side: 'left' },
-  { id: 'guanti', pos: [0.30, 0.06, 0.14], side: 'right' },
-  { id: 'bastoni', pos: [-0.30, -0.04, 0.14], side: 'left' },
-  { id: 'scarpone', pos: [-0.14, -0.66, 0.10], side: 'left' },
-  { id: 'telemetria', pos: [0.18, -0.80, 0.06], side: 'right' },
-  { id: 'attacchi', pos: [-0.15, -0.94, -0.05], side: 'left' },
-  { id: 'sci', pos: [0.15, -1.00, 0.60], side: 'right' }
+  { id: 'casco', pos: [0.06, 0.94, 0.08], side: 'right', focusY: 0.72, focusDist: 3.35 },
+  { id: 'maschera_outof', pos: [-0.09, 0.80, 0.13], side: 'left', focusY: 0.70, focusDist: 3.35 },
+  { id: 'maschera_audio', pos: [0.12, 0.67, 0.08], side: 'right', focusY: 0.66, focusDist: 3.35 },
+  { id: 'termoregolazione', pos: [-0.16, 0.34, 0.12], side: 'left', focusY: 0.25, focusDist: 3.65 },
+  { id: 'guanti', pos: [0.30, 0.06, 0.14], side: 'right', focusY: 0.05, focusDist: 3.85 },
+  { id: 'bastoni', pos: [-0.30, -0.04, 0.14], side: 'left', focusY: 0.0, focusDist: 3.85 },
+  { id: 'scarpone', pos: [-0.14, -0.62, 0.11], side: 'left', focusY: -0.62, focusDist: 3.45 },
+  { id: 'telemetria', pos: [0.18, -0.78, 0.07], side: 'right', focusY: -0.68, focusDist: 3.45 },
+  { id: 'attacchi', pos: [-0.16, -0.92, -0.04], side: 'left', focusY: -0.75, focusDist: 3.45 },
+  { id: 'sci', pos: [0.15, -1.00, 0.62], side: 'right', focusY: -0.72, focusDist: 3.65 }
 ];
 
 const DATA = {
@@ -68,12 +71,12 @@ const DATA = {
     summary: 'Calotta esterna, nucleo assorbente EPS/EPP e sistemi per gli impatti obliqui (Mips, Koroyd, WaveCel) con comunicazione Mesh.'
   },
   maschera_outof: {
-    id: 'maschera_outof', macro: 'dati_visione', shortLabel: 'Out Of',
+    id: 'maschera_outof', macro: 'maschere', shortLabel: 'Out Of',
     title: 'Out Of', brand: 'Visita Out Of ↗', url: 'https://out-of.com',
     summary: 'Lente elettronica IRID alimentata a cella solare che adatta la trasmissione luminosa tra S1 e S3 in meno di 1 secondo.'
   },
   maschera_audio: {
-    id: 'maschera_audio', macro: 'dati_visione', shortLabel: 'Sound BRKR',
+    id: 'maschera_audio', macro: 'maschere', shortLabel: 'Sound BRKR',
     title: 'Sound BRKR', brand: 'Visita BoneTech ↗', url: 'https://www.bonetech.it',
     summary: 'Trasduttori a conduzione ossea integrati nella montatura per comunicare in gruppo lasciando libere le orecchie.'
   },
@@ -103,7 +106,7 @@ const DATA = {
     summary: 'Bilanciamento tra ritenzione elastica e sgancio, con talloniera a rotazione laterale Tyrolia Protector e verifica norme suola.'
   },
   telemetria: {
-    id: 'telemetria', macro: 'dati_visione', shortLabel: 'Telemetria IA',
+    id: 'telemetria', macro: 'telemetria_ia', shortLabel: 'Telemetria IA',
     title: 'Telemetria, GPS & AI', brand: 'Scopri Carv 2 ↗', url: 'https://getcarv.com',
     summary: 'Sensori inerziali Carv 2, solette Moticon OpenGo, tracciamento atleti Lympic e pettorine GPS per bambini.'
   },
@@ -114,26 +117,29 @@ const DATA = {
   }
 };
 
-/* --- PRELOADER CINETICO FULL-SCREEN --- */
+/* --- PRELOADER CINETICO FULL-SCREEN SINCRONIZZATO AL CARICAMENTO 3D --- */
 function KineticIntro() {
-  const { progress } = useProgress();
+  const { active, progress } = useProgress();
   const [displayPct, setDisplayPct] = useState(0);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    const target = Math.max(progress, 100);
+    const target = !active && progress >= 99 ? 100 : Math.min(95, Math.round(progress));
     const timer = setInterval(() => {
       setDisplayPct((prev) => {
-        if (prev >= 100) {
-          clearInterval(timer);
-          return 100;
-        }
+        if (prev >= target) return prev;
         const step = Math.ceil((target - prev) / 4);
-        return Math.min(100, prev + Math.max(5, step));
+        return Math.min(target, prev + Math.max(3, step));
       });
     }, 30);
     return () => clearInterval(timer);
-  }, [progress]);
+  }, [active, progress]);
+
+  // Paracadute: garantisce apertura entro 3.2s anche su reti lente
+  useEffect(() => {
+    const safety = setTimeout(() => setDisplayPct(100), 3200);
+    return () => clearTimeout(safety);
+  }, []);
 
   useEffect(() => {
     if (displayPct >= 100) {
@@ -258,7 +264,7 @@ function MagneticNavBar({ items, activeId, onSelectItem, className = '' }) {
   );
 }
 
-/* --- PARTICELLINE FIOCHE CHE SALGONO (E DIVENTANO SCIE STAR WARS IN OVERDRIVE) --- */
+/* --- PARTICELLINE FIOCHE CHE SALGONO (E SCIE STAR WARS IN OVERDRIVE) --- */
 const RisingParticles = memo(function RisingParticles({ overdrive }) {
   const pointsRef = useRef();
   const count = 130;
@@ -308,6 +314,36 @@ const RisingParticles = memo(function RisingParticles({ overdrive }) {
   );
 });
 
+/* --- PEDANA RADAR OLOGRAFICA SOTTO GLI SCI --- */
+const RadarPlatform = memo(function RadarPlatform({ overdrive }) {
+  const ringRef = useRef();
+
+  useFrame((_, delta) => {
+    if (ringRef.current) {
+      ringRef.current.rotation.z += delta * (overdrive ? 1.4 : 0.22);
+    }
+  });
+
+  const primary = overdrive ? '#ffcc00' : '#00e5ff';
+
+  return (
+    <group position={[0, -1.055, 0.05]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh>
+        <ringGeometry args={[0.52, 0.535, 64]} />
+        <meshBasicMaterial color={primary} transparent opacity={0.32} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh ref={ringRef}>
+        <ringGeometry args={[0.74, 0.752, 48, 1, 0, Math.PI * 1.45]} />
+        <meshBasicMaterial color={primary} transparent opacity={0.22} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh>
+        <circleGeometry args={[0.52, 48]} />
+        <meshBasicMaterial color={primary} transparent opacity={0.04} />
+      </mesh>
+    </group>
+  );
+});
+
 /* --- MIRINO OLOGRAFICO 3D SULL'HOTSPOT HOVERATO --- */
 function HoverBeacon({ pos }) {
   const outerRef = useRef();
@@ -341,7 +377,7 @@ function HoverBeacon({ pos }) {
   );
 }
 
-/* --- SCI PROCEDURALI CON REAZIONE COLORE SU HOVER --- */
+/* --- SCI PROCEDURALI --- */
 const PerfectSkis = memo(function PerfectSkis({ xray, isHighlighted }) {
   const geom = useMemo(() => {
     const shape = new THREE.Shape();
@@ -361,7 +397,7 @@ const PerfectSkis = memo(function PerfectSkis({ xray, isHighlighted }) {
     return extrude;
   }, []);
 
-  const skiColor = xray ? '#00e5ff' : isHighlighted ? '#0e3a47' : '#090c12';
+  const skiColor = xray ? '#ffcc00' : isHighlighted ? '#0e3a47' : '#090c12';
   const emissiveColor = isHighlighted && !xray ? '#00e5ff' : '#000000';
 
   return (
@@ -392,8 +428,8 @@ const PerfectSkis = memo(function PerfectSkis({ xray, isHighlighted }) {
   );
 });
 
-/* --- HOTSPOT 3D MEMOIZZATO CON CALLBACK HOVER --- */
-const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, onSelect, onHoverChange }) {
+/* --- HOTSPOT 3D MEMOIZZATO --- */
+const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, isExplored, onSelect, onHoverChange }) {
   const item = DATA[id];
   if (!item) return null;
 
@@ -402,7 +438,7 @@ const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, onS
       <div className="hotspot-anchor">
         <button
           type="button"
-          className={`hotspot-container ${side} ${isSelected ? 'active' : ''}`}
+          className={`hotspot-container ${side} ${isSelected ? 'active' : ''} ${isExplored ? 'explored' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             onSelect(id);
@@ -426,8 +462,60 @@ const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, onS
   );
 });
 
-/* --- SCENA 3D MANICHINO + CAMBIO COLORE HOVER DINAMICO --- */
-function SkierScene({ activeItem, hoveredId, onHoverChange, onSelect, xray, onToggleXray, hdgRef }) {
+/* --- CAMERA RIG INTELLIGENTE (INQUADRA L'HOTSPOT SENZA BLOCCARE LO ZOOM UTENTE) --- */
+function CameraRig({ activeItem, controlsRef }) {
+  const { camera } = useThree();
+  const desiredDistRef = useRef(4.35);
+  const autoZoomActiveRef = useRef(false);
+
+  useEffect(() => {
+    if (activeItem) {
+      const spot = HOTSPOT_POINTS.find((h) => h.id === activeItem);
+      desiredDistRef.current = spot ? spot.focusDist : 3.75;
+    } else {
+      desiredDistRef.current = 4.35;
+    }
+    autoZoomActiveRef.current = true;
+  }, [activeItem]);
+
+  useEffect(() => {
+    const ctrl = controlsRef.current;
+    if (!ctrl) return;
+    const stopAutoZoom = () => {
+      autoZoomActiveRef.current = false;
+    };
+    ctrl.addEventListener('start', stopAutoZoom);
+    return () => ctrl.removeEventListener('start', stopAutoZoom);
+  }, [controlsRef]);
+
+  useFrame(() => {
+    const ctrl = controlsRef.current;
+    if (!ctrl) return;
+
+    const spot = activeItem ? HOTSPOT_POINTS.find((h) => h.id === activeItem) : null;
+    const targetY = spot ? spot.focusY * 0.45 : 0;
+
+    ctrl.target.y = THREE.MathUtils.lerp(ctrl.target.y, targetY, 0.08);
+
+    if (autoZoomActiveRef.current) {
+      const offset = camera.position.clone().sub(ctrl.target);
+      const currentDist = offset.length();
+      const nextDist = THREE.MathUtils.lerp(currentDist, desiredDistRef.current, 0.08);
+      if (Math.abs(nextDist - desiredDistRef.current) < 0.01) {
+        autoZoomActiveRef.current = false;
+      }
+      offset.setLength(nextDist);
+      camera.position.copy(ctrl.target).add(offset);
+    }
+
+    ctrl.update();
+  });
+
+  return null;
+}
+
+/* --- SCENA 3D MANICHINO + MATERIAL CLEANUP --- */
+function SkierScene({ activeItem, hoveredId, exploredIds, onHoverChange, onSelect, xray, onToggleXray, hdgRef }) {
   const { scene } = useGLTF('/mannequin.glb');
   const groupRef = useRef();
   const lastTelemetryRef = useRef(0);
@@ -458,10 +546,10 @@ function SkierScene({ activeItem, hoveredId, onHoverChange, onSelect, xray, onTo
       if (child.isMesh) {
         const mat = new THREE.MeshStandardMaterial({
           color: xray ? '#00e5ff' : '#1b202e',
-          emissive: '#000000',
-          emissiveIntensity: 0,
+          emissive: xray ? '#ffcc00' : '#000000',
+          emissiveIntensity: xray ? 0.25 : 0,
           roughness: xray ? 0.2 : 0.52,
-          metalness: xray ? 0.8 : 0.32,
+          metalness: xray ? 0.85 : 0.32,
           wireframe: xray
         });
         child.material = mat;
@@ -471,6 +559,12 @@ function SkierScene({ activeItem, hoveredId, onHoverChange, onSelect, xray, onTo
     materialsRef.current = mats;
     return clone;
   }, [scene, xray]);
+
+  useEffect(() => {
+    return () => {
+      materialsRef.current.forEach((m) => m.dispose());
+    };
+  }, [normalizedModel]);
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -516,6 +610,7 @@ function SkierScene({ activeItem, hoveredId, onHoverChange, onSelect, xray, onTo
     >
       <primitive object={normalizedModel} />
       <PerfectSkis xray={xray} isHighlighted={hoveredId === 'sci' || hoveredId === 'attacchi'} />
+      <RadarPlatform overdrive={xray} />
 
       {hoveredSpot && <HoverBeacon pos={hoveredSpot.pos} />}
 
@@ -526,6 +621,7 @@ function SkierScene({ activeItem, hoveredId, onHoverChange, onSelect, xray, onTo
           id={spot.id}
           side={spot.side}
           isSelected={activeItem === spot.id}
+          isExplored={exploredIds.has(spot.id)}
           onSelect={onSelect}
           onHoverChange={onHoverChange}
         />
@@ -538,15 +634,16 @@ useGLTF.preload('/mannequin.glb');
 
 export default function App() {
   const [activeItem, setActiveItem] = useState(null);
+  const [exploredIds, setExploredIds] = useState(() => new Set());
   const [hoveredHotspot, setHoveredHotspot] = useState(null);
   const [overdriveMode, setOverdriveMode] = useState(false);
   const [audioOn, setAudioOn] = useState(false);
   const [shakeToastState, setShakeToastState] = useState('hidden'); // 'hidden' | 'prompt' | 'armed'
 
-  // Easter Egg Hover sul bottone HUD
   const [hudHovered, setHudHovered] = useState(false);
   const [hudLabel, setHudLabel] = useState('TELEMETRY HUD');
   const hdgRef = useRef(null);
+  const controlsRef = useRef(null);
   const motionArmedRef = useRef(false);
 
   const dismissShakeToast = useCallback(() => {
@@ -569,15 +666,36 @@ export default function App() {
     });
   }, []);
 
-  const handleToggleItem = useCallback((id) => {
-    soundEngine.play('click');
-    setActiveItem((prev) => (prev === id ? null : id));
+  const markExplored = useCallback((id) => {
+    if (!id) return;
+    setExploredIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
   }, []);
 
-  const handleSelectDirect = useCallback((id) => {
-    soundEngine.play('click');
-    setActiveItem(id);
-  }, []);
+  const handleToggleItem = useCallback(
+    (id) => {
+      soundEngine.play('click');
+      setActiveItem((prev) => {
+        const next = prev === id ? null : id;
+        if (next) markExplored(next);
+        return next;
+      });
+    },
+    [markExplored]
+  );
+
+  const handleSelectDirect = useCallback(
+    (id) => {
+      soundEngine.play('click');
+      setActiveItem(id);
+      markExplored(id);
+    },
+    [markExplored]
+  );
 
   // Sblocca i sensori di movimento (obbligatorio su iOS Safari tramite gesto utente diretto)
   const unlockMotionSensors = useCallback(
@@ -601,7 +719,6 @@ export default function App() {
               setTimeout(() => dismissShakeToast(), 3200);
             }
           } else if (fromToastTap) {
-            // Se l'utente ha negato i sensori nelle impostazioni Safari, attiva Overdrive al tap
             toggleOverdrive();
             dismissShakeToast();
           }
@@ -612,7 +729,6 @@ export default function App() {
           }
         }
       } else {
-        // Android / browser senza prompt esplicito: sensori già attivi
         motionArmedRef.current = true;
         if (fromToastTap) {
           soundEngine.play('click');
@@ -624,7 +740,7 @@ export default function App() {
     [toggleOverdrive, dismissShakeToast]
   );
 
-  // Mostra il popup centrato su smartphone
+  // Popup centrato in basso su smartphone
   useEffect(() => {
     const isSmartphone =
       window.matchMedia('(pointer: coarse)').matches ||
@@ -642,11 +758,11 @@ export default function App() {
 
     const showTimer = setTimeout(() => {
       setShakeToastState('prompt');
-    }, 1300);
+    }, 1400);
 
     const hideTimer = setTimeout(() => {
       dismissShakeToast();
-    }, 11000);
+    }, 11500);
 
     return () => {
       clearTimeout(showTimer);
@@ -660,7 +776,7 @@ export default function App() {
     let lastY = null;
     let lastZ = null;
     let lastShakeTime = 0;
-    const SHAKE_DELTA_THRESHOLD = 15; // Soglia reattiva per movimento naturale del polso
+    const SHAKE_DELTA_THRESHOLD = 15;
 
     const handleMotion = (e) => {
       const acc = e.acceleration || e.accelerationIncludingGravity;
@@ -703,7 +819,7 @@ export default function App() {
   // Scramble effect su Hover HUD
   useEffect(() => {
     if (overdriveMode) {
-      setHudLabel('OVERDRIVE // ON');
+      setHudLabel('HYPERDRIVE // ON');
       return;
     }
     if (!hudHovered) {
@@ -793,7 +909,7 @@ export default function App() {
 
       <KineticIntro />
 
-      {/* Header con Titolo Impilato + Hover su tutti i membri del team */}
+      {/* Header con Titolo Impilato + Progresso Esplorazione */}
       <header className={`brand-header ${activeItem ? 'hidden' : ''}`}>
         <span className="kicker">
           SAS ACADEMY //{' '}
@@ -821,17 +937,20 @@ export default function App() {
         </span>
         <KineticTitle onTriggerEgg={toggleOverdrive} />
         <div className="hero-sub-telemetry">
+          <span className="progress-pill">
+            LABS {String(exploredIds.size).padStart(2, '0')}/10
+          </span>
           <span>
             {hoveredHotspot
               ? `[TARGET // ${DATA[hoveredHotspot]?.title.toUpperCase()}]`
               : overdriveMode
-              ? '[HYPERSPACE OVERDRIVE ATTIVO — CLICCA HUD O SCUOTI PER USCIRE]'
+              ? '[HYPERDRIVE ATTIVO — CLICCA HUD O SCUOTI PER USCIRE]'
               : '[TOCCA UN PUNTO SUL MODELLO 3D PER ESPLORARE]'}
           </span>
         </div>
       </header>
 
-      {/* Popup Centrato su Smartphone per Shake-to-Overdrive */}
+      {/* Popup Centrato in Basso su Smartphone per Shake-to-Overdrive */}
       {shakeToastState !== 'hidden' && !activeItem && (
         <button
           type="button"
@@ -846,12 +965,12 @@ export default function App() {
             {shakeToastState === 'armed' ? (
               <>
                 <strong>Sensori attivi! Agita ora ⚡</strong>
-                <span>Scuoti il telefono per Hyperspace Overdrive</span>
+                <span>Scuoti il telefono per Tactical Hyperdrive</span>
               </>
             ) : (
               <>
                 <strong>Prova ad agitare il telefono ⚡</strong>
-                <span>Tocca qui per attivare i sensori Overdrive</span>
+                <span>Tocca qui per attivare i sensori Hyperdrive</span>
               </>
             )}
           </span>
@@ -907,24 +1026,28 @@ export default function App() {
           <div className="hud-easter-card">
             <div className="hud-easter-row">
               <span style={{ color: 'var(--text-secondary)' }}>EDGE ANGLE</span>
-              <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>64.2° MAX</span>
+              <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>
+                {overdriveMode ? '71.4° RACE' : '64.2° MAX'}
+              </span>
             </div>
             <div className="hud-easter-row">
               <span style={{ color: 'var(--text-secondary)' }}>G-LOAD PEAK</span>
-              <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>2.38 G</span>
+              <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>
+                {overdriveMode ? '3.12 G' : '2.38 G'}
+              </span>
             </div>
             <div className="hud-easter-row">
               <span style={{ color: 'var(--text-secondary)' }}>SNOW TEMP</span>
               <span>-6.4°C COMPACT</span>
             </div>
             <div className="hud-easter-hint">
-              {overdriveMode ? '⚡ MODALITÀ OVERDRIVE ATTIVA' : 'CLICCA O SCUOTI PER OVERDRIVE ⚡'}
+              {overdriveMode ? '⚡ TACTICAL HYPERDRIVE ATTIVO' : 'CLICCA O SCUOTI PER HYPERDRIVE ⚡'}
             </div>
           </div>
         )}
       </div>
 
-      {/* Scena 3D + Particelle */}
+      {/* Scena 3D + Pedana Radar + Camera Focus */}
       <SceneErrorBoundary>
         <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
           <Canvas
@@ -932,9 +1055,21 @@ export default function App() {
             camera={{ position: [0, 0.02, 4.35], fov: 44 }}
             onPointerMissed={() => setActiveItem(null)}
           >
-            <hemisphereLight intensity={1.45} color="#ffffff" groundColor="#1e293b" />
-            <directionalLight position={[3, 5, 4]} intensity={2.2} color="#ffffff" />
-            <directionalLight position={[-4, 2, -2]} intensity={1.5} color="#00e5ff" />
+            <hemisphereLight
+              intensity={overdriveMode ? 1.8 : 1.45}
+              color={overdriveMode ? '#ffcc00' : '#ffffff'}
+              groundColor="#1e293b"
+            />
+            <directionalLight
+              position={[3, 5, 4]}
+              intensity={2.2}
+              color={overdriveMode ? '#00e5ff' : '#ffffff'}
+            />
+            <directionalLight
+              position={[-4, 2, -2]}
+              intensity={1.6}
+              color={overdriveMode ? '#ffcc00' : '#00e5ff'}
+            />
 
             <RisingParticles overdrive={overdriveMode} />
 
@@ -942,6 +1077,7 @@ export default function App() {
               <SkierScene
                 activeItem={activeItem}
                 hoveredId={hoveredHotspot}
+                exploredIds={exploredIds}
                 onHoverChange={setHoveredHotspot}
                 onSelect={handleToggleItem}
                 xray={overdriveMode}
@@ -950,12 +1086,15 @@ export default function App() {
               />
             </Suspense>
 
+            <CameraRig activeItem={activeItem} controlsRef={controlsRef} />
+
             <OrbitControls
+              ref={controlsRef}
               enableZoom={true}
               enablePan={false}
               autoRotate={!activeItem}
               autoRotateSpeed={overdriveMode ? 3.2 : 0.45}
-              minDistance={3.0}
+              minDistance={2.7}
               maxDistance={6.0}
               minPolarAngle={Math.PI / 3}
               maxPolarAngle={Math.PI / 1.85}
@@ -966,7 +1105,7 @@ export default function App() {
         </div>
       </SceneErrorBoundary>
 
-      {/* Dock Magnetica (Solo Desktop; su Mobile si usa esclusivamente il modellino 3D) */}
+      {/* Dock Magnetica Desktop a 5 Pilastri (Maschere e Telemetria IA separati) */}
       <nav className={`macro-dock ${activeItem ? 'hidden' : ''}`} aria-label="Categorie principali">
         <MagneticNavBar
           items={MACROS.map((m) => ({
@@ -999,6 +1138,7 @@ export default function App() {
           )}
         </div>
 
+        {/* Sottomenu magnetico visibile solo se la categoria ha più di 1 elemento (es. Maschere -> Out Of / Sound BRKR) */}
         {activeMacroObj && activeMacroObj.items.length > 1 && (
           <div className="sub-nav-wrap">
             <MagneticNavBar
