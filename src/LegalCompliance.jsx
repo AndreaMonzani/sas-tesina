@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { m, AnimatePresence } from 'motion/react';
 import { IconClose } from './components/KokonutPrimitives';
 
 const STORAGE_KEY = 'sas_skitech_privacy_v2';
@@ -53,7 +53,7 @@ export default function LegalCompliance({ isPanelOpen }) {
 
   const saveConsent = (level) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ level, date: '2026-11-22' }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ level, date: '2026-11-23' }));
     } catch {}
     setConsent(level);
   };
@@ -85,7 +85,7 @@ export default function LegalCompliance({ isPanelOpen }) {
 
       <AnimatePresence>
         {!consent && (
-          <motion.div
+          <m.div
             className="cookie-banner"
             role="region"
             aria-label="Informativa privacy e cookie"
@@ -109,13 +109,13 @@ export default function LegalCompliance({ isPanelOpen }) {
                 Conferma
               </button>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {modalTab && (
-          <motion.div
+          <m.div
             className="legal-modal-backdrop"
             role="dialog"
             aria-modal="true"
@@ -126,7 +126,7 @@ export default function LegalCompliance({ isPanelOpen }) {
             transition={{ duration: 0.22 }}
             onClick={() => setModalTab(null)}
           >
-            <motion.div
+            <m.div
               className="legal-modal-card"
               initial={{ opacity: 0, y: 20, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -279,8 +279,8 @@ export default function LegalCompliance({ isPanelOpen }) {
                   </div>
                 )}
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
+import { m, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
 
-/* --- SET ICONE VETTORIALI AEROSPAZIALI (SOSTITUISCE TUTTE LE EMOJI) --- */
 export function IconBolt({ size = 14 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -55,11 +54,10 @@ export function IconArrowUpRight({ size = 13 }) {
   );
 }
 
-/* --- 1. KOKONUTUI INSPIRED: MAGNET BUTTON --- */
 export function MagnetButton({
   children,
   className = '',
-  strength = 0.28,
+  strength = 0.25,
   onClick,
   onMouseEnter,
   onMouseLeave,
@@ -68,17 +66,14 @@ export function MagnetButton({
   const ref = useRef(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-
   const springX = useSpring(x, { stiffness: 320, damping: 22, mass: 0.4 });
   const springY = useSpring(y, { stiffness: 320, damping: 22, mass: 0.4 });
 
   const handleMove = (e) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    x.set((e.clientX - centerX) * strength);
-    y.set((e.clientY - centerY) * strength);
+    x.set((e.clientX - (rect.left + rect.width / 2)) * strength);
+    y.set((e.clientY - (rect.top + rect.height / 2)) * strength);
   };
 
   const handleLeave = (e) => {
@@ -88,7 +83,7 @@ export function MagnetButton({
   };
 
   return (
-    <motion.button
+    <m.button
       ref={ref}
       type="button"
       className={className}
@@ -101,11 +96,10 @@ export function MagnetButton({
       {...rest}
     >
       {children}
-    </motion.button>
+    </m.button>
   );
 }
 
-/* --- 2. KOKONUTUI INSPIRED: PARTICLE BURST BUTTON --- */
 export function ParticleButton({
   children,
   className = '',
@@ -117,48 +111,32 @@ export function ParticleButton({
 
   const triggerBurst = (e) => {
     const id = Date.now() + Math.random();
-    const particles = Array.from({ length: 10 }, (_, idx) => {
-      const angle = (idx / 10) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-      const dist = 26 + Math.random() * 22;
-      return {
-        key: idx,
-        tx: Math.cos(angle) * dist,
-        ty: Math.sin(angle) * dist,
-        size: 2.5 + Math.random() * 2
-      };
+    const particles = Array.from({ length: 8 }, (_, idx) => {
+      const angle = (idx / 8) * Math.PI * 2 + (Math.random() - 0.5) * 0.35;
+      const dist = 24 + Math.random() * 18;
+      return { key: idx, tx: Math.cos(angle) * dist, ty: Math.sin(angle) * dist, size: 2.5 + Math.random() * 1.5 };
     });
 
     setBursts((prev) => [...prev, { id, particles }]);
-    setTimeout(() => {
-      setBursts((prev) => prev.filter((b) => b.id !== id));
-    }, 650);
-
+    setTimeout(() => setBursts((prev) => prev.filter((b) => b.id !== id)), 600);
     onClick?.(e);
   };
 
   return (
-    <MagnetButton
-      className={`particle-btn-host ${className}`}
-      onClick={triggerBurst}
-      {...rest}
-    >
+    <MagnetButton className={`particle-btn-host ${className}`} onClick={triggerBurst} {...rest}>
       {children}
       <AnimatePresence>
         {bursts.map((b) => (
           <span key={b.id} className="particle-burst-layer" aria-hidden="true">
             {b.particles.map((p) => (
-              <motion.span
+              <m.span
                 key={p.key}
                 className="particle-spark"
-                style={{
-                  width: p.size,
-                  height: p.size,
-                  backgroundColor: particleColor
-                }}
+                style={{ width: p.size, height: p.size, backgroundColor: particleColor }}
                 initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
                 animate={{ x: p.tx, y: p.ty, opacity: 0, scale: 0.2 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               />
             ))}
           </span>
@@ -168,10 +146,9 @@ export function ParticleButton({
   );
 }
 
-/* --- 3. KOKONUTUI INSPIRED: SLIDE TEXT LINK / BUTTON --- */
 export function SlideTextLink({ href, children, className = '', onMouseEnter }) {
   return (
-    <motion.a
+    <m.a
       href={href}
       target="_blank"
       rel="noreferrer"
@@ -181,43 +158,33 @@ export function SlideTextLink({ href, children, className = '', onMouseEnter }) 
       onMouseEnter={onMouseEnter}
     >
       <span className="slide-text-track">
-        <motion.span
+        <m.span
           className="slide-text-line"
-          variants={{
-            rest: { y: '0%' },
-            hovered: { y: '-105%' }
-          }}
-          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          variants={{ rest: { y: '0%' }, hovered: { y: '-105%' } }}
+          transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
         >
           {children}
-        </motion.span>
-        <motion.span
+        </m.span>
+        <m.span
           className="slide-text-line clone"
           aria-hidden="true"
-          variants={{
-            rest: { y: '105%' },
-            hovered: { y: '0%' }
-          }}
-          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          variants={{ rest: { y: '105%' }, hovered: { y: '0%' } }}
+          transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
         >
           {children}
-        </motion.span>
+        </m.span>
       </span>
-      <motion.span
+      <m.span
         className="slide-text-icon"
-        variants={{
-          rest: { x: 0, y: 0 },
-          hovered: { x: 2, y: -2 }
-        }}
-        transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+        variants={{ rest: { x: 0, y: 0 }, hovered: { x: 2, y: -2 } }}
+        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
       >
         <IconArrowUpRight size={13} />
-      </motion.span>
-    </motion.a>
+      </m.span>
+    </m.a>
   );
 }
 
-/* --- 4. KOKONUTUI INSPIRED: TELEMETRY ACTIVITY RING (PROGRESSO LABS 00/10) --- */
 export function TelemetryActivityRing({ current, total }) {
   const size = 24;
   const stroke = 2.4;
@@ -227,17 +194,10 @@ export function TelemetryActivityRing({ current, total }) {
   const dashOffset = circumference * (1 - ratio);
 
   return (
-    <div className="telemetry-ring-badge" title={`Laboratori esplorati: ${current} su ${total}`}>
+    <div className="telemetry-ring-badge" aria-label={`Laboratori esplorati: ${current} su ${total}`}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="rgba(255,255,255,0.12)"
-          strokeWidth={stroke}
-        />
-        <motion.circle
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth={stroke} />
+        <m.circle
           cx={size / 2}
           cy={size / 2}
           r={radius}

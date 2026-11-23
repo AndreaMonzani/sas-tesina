@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, Suspense, Component, memo, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Html, useGLTF, useProgress } from '@react-three/drei';
-import { motion, AnimatePresence, MotionConfig, useMotionValue, useSpring } from 'motion/react';
+import { LazyMotion, domAnimation, m, AnimatePresence, MotionConfig, useMotionValue, useSpring } from 'motion/react';
 import { animate, stagger, createScope, createTimeline } from 'animejs';
 import * as THREE from 'three';
 import LegalCompliance from './LegalCompliance';
@@ -32,8 +32,8 @@ class SceneErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', color: 'rgba(255,255,255,0.65)', fontSize: '0.85rem', zIndex: 5 }}>
-          Scena 3D non disponibile. Tocca i punti sul modello per esplorare i laboratori.
+        <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center', color: 'rgba(255,255,255,0.72)', fontSize: '0.88rem', zIndex: 5 }}>
+          Scena 3D non disponibile. Usa il menu per esplorare i laboratori.
         </div>
       );
     }
@@ -41,7 +41,6 @@ class SceneErrorBoundary extends Component {
   }
 }
 
-/* 5 PILASTRI: Maschere e Telemetria IA separati */
 const MACROS = [
   { id: 'performance', label: 'Performance', items: ['sci', 'scarpone'] },
   { id: 'sicurezza', label: 'Sicurezza', items: ['casco', 'attacchi', 'bastoni'] },
@@ -51,16 +50,8 @@ const MACROS = [
 ];
 
 const ORDERED_ITEM_IDS = [
-  'casco',
-  'maschera_outof',
-  'maschera_audio',
-  'termoregolazione',
-  'guanti',
-  'bastoni',
-  'scarpone',
-  'attacchi',
-  'telemetria',
-  'sci'
+  'casco', 'maschera_outof', 'maschera_audio', 'termoregolazione',
+  'guanti', 'bastoni', 'scarpone', 'attacchi', 'telemetria', 'sci'
 ];
 
 const HOTSPOT_POINTS = [
@@ -129,46 +120,33 @@ const DATA = {
   }
 };
 
-/* --- CURSORE RETICOLO GUIDATO DA MOTION SPRING (ZERO DOM HACKS) --- */
 function TacticalReticle() {
   const [hovered, setHovered] = useState(false);
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
-
   const ringX = useSpring(mouseX, { stiffness: 260, damping: 24, mass: 0.45 });
   const ringY = useSpring(mouseY, { stiffness: 260, damping: 24, mass: 0.45 });
 
   useEffect(() => {
-    const isTouch = window.matchMedia('(pointer: coarse)').matches;
-    if (isTouch) return;
-
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     const handleMove = (e) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
-      const interactive = Boolean(
-        e.target && e.target.closest('button, a, input, [role="button"], [data-interactive="true"]')
-      );
+      const interactive = Boolean(e.target && e.target.closest('button, a, input, [role="button"]'));
       setHovered((prev) => (prev !== interactive ? interactive : prev));
     };
-
     window.addEventListener('pointermove', handleMove, { passive: true });
     return () => window.removeEventListener('pointermove', handleMove);
   }, [mouseX, mouseY]);
 
   return (
     <>
-      <motion.div
-        className="cursor-dot"
-        style={{ x: mouseX, y: mouseY }}
-        animate={{ scale: hovered ? 0.5 : 1 }}
-        transition={{ duration: 0.15 }}
-      />
-      <motion.div
+      <m.div className="cursor-dot" style={{ x: mouseX, y: mouseY }} animate={{ scale: hovered ? 0.5 : 1 }} transition={{ duration: 0.15 }} />
+      <m.div
         className="cursor-ring"
         style={{ x: ringX, y: ringY }}
         animate={{
-          width: hovered ? 54 : 36,
-          height: hovered ? 54 : 36,
+          scale: hovered ? 1.45 : 1,
           borderColor: hovered ? 'var(--accent-gold)' : 'rgba(0, 229, 255, 0.45)',
           backgroundColor: hovered ? 'rgba(0, 229, 255, 0.1)' : 'rgba(0, 229, 255, 0)'
         }}
@@ -178,7 +156,6 @@ function TacticalReticle() {
   );
 }
 
-/* --- PRELOADER CINETICO CON ANIME.JS V4 TIMELINE & STAGGER --- */
 function KineticIntro() {
   const { active, progress } = useProgress();
   const [displayPct, setDisplayPct] = useState(0);
@@ -193,25 +170,17 @@ function KineticIntro() {
     }).add((self) => {
       const { reduceMotion } = self.matches;
       const tl = createTimeline({ defaults: { ease: 'outExpo' } });
-
       tl.add('.intro-char', {
         y: reduceMotion ? [0, 0] : ['110%', '0%'],
         opacity: [0, 1],
-        duration: reduceMotion ? 10 : 780,
-        delay: stagger(24, { from: 'first' })
+        duration: reduceMotion ? 10 : 740,
+        delay: stagger(22, { from: 'first' })
       }).add(
         '.intro-scan-beam',
-        {
-          top: ['0%', '100%'],
-          opacity: [0, 1, 1, 0],
-          duration: 1400,
-          loop: true,
-          ease: 'inOutSine'
-        },
+        { top: ['0%', '100%'], opacity: [0, 1, 1, 0], duration: 1400, loop: true, ease: 'inOutSine' },
         0
       );
     });
-
     return () => scope.revert();
   }, []);
 
@@ -228,13 +197,13 @@ function KineticIntro() {
   }, [active, progress]);
 
   useEffect(() => {
-    const safety = setTimeout(() => setDisplayPct(100), 2800);
+    const safety = setTimeout(() => setDisplayPct(100), 2600);
     return () => clearTimeout(safety);
   }, []);
 
   useEffect(() => {
     if (displayPct >= 100) {
-      const t = setTimeout(() => setVisible(false), 260);
+      const t = setTimeout(() => setVisible(false), 240);
       return () => clearTimeout(t);
     }
   }, [displayPct]);
@@ -242,62 +211,50 @@ function KineticIntro() {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
+        <m.div
           ref={rootRef}
           className="intro-curtain"
+          aria-hidden="true"
           initial={{ y: '0%' }}
           exit={{ y: '-100%' }}
-          transition={{ duration: 0.78, ease: [0.76, 0, 0.24, 1] }}
+          transition={{ duration: 0.72, ease: [0.76, 0, 0.24, 1] }}
         >
           <div className="intro-scan-beam" />
           <div className="intro-top-bar">
             <span>SAS ACADEMY // SKITECH LAB</span>
             <span>ANDREA MONZANI · 2026</span>
           </div>
-
           <div className="intro-center">
             <div className="intro-mask-line">
               <span className="intro-kinetic-word">
                 {'INNOVAZIONE'.split('').map((c, i) => (
-                  <span key={i} className="intro-char" style={{ display: 'inline-block' }}>
-                    {c}
-                  </span>
+                  <span key={i} className="intro-char" style={{ display: 'inline-block' }}>{c}</span>
                 ))}
               </span>
             </div>
             <div className="intro-mask-line">
               <span className="intro-kinetic-word cyan">
                 {'SCI 2026'.split('').map((c, i) => (
-                  <span key={i} className="intro-char" style={{ display: 'inline-block' }}>
-                    {c === ' ' ? '\u00A0' : c}
-                  </span>
+                  <span key={i} className="intro-char" style={{ display: 'inline-block' }}>{c === ' ' ? '\u00A0' : c}</span>
                 ))}
               </span>
             </div>
           </div>
-
           <div className="intro-bottom-bar">
             <div className="intro-progress-track">
-              <motion.div
-                className="intro-progress-fill"
-                animate={{ width: `${displayPct}%` }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-              />
+              <m.div className="intro-progress-fill" animate={{ width: `${displayPct}%` }} transition={{ duration: 0.2 }} />
             </div>
             <div className="intro-counter">{String(displayPct).padStart(3, '0')}%</div>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );
 }
 
-/* --- TITOLO CON ONDA CINETICA ANIME.JS V4 --- */
 function KineticTitle({ onTriggerEgg }) {
   const titleRef = useRef(null);
   const scopeRef = useRef(null);
-  const line1 = 'INNOVAZIONE';
-  const line2 = 'SCI 2026';
 
   useEffect(() => {
     if (!titleRef.current) return;
@@ -315,7 +272,7 @@ function KineticTitle({ onTriggerEgg }) {
       animate('.kinetic-char', {
         y: [0, -7, 0],
         skewX: [0, -8, 0],
-        duration: 520,
+        duration: 500,
         delay: stagger(18, { from: 'first' }),
         ease: 'outElastic(1, .65)'
       });
@@ -323,43 +280,37 @@ function KineticTitle({ onTriggerEgg }) {
   };
 
   return (
-    <div
+    <button
       ref={titleRef}
+      type="button"
       className="kinetic-title"
-      data-interactive="true"
       onClick={onTriggerEgg}
       onMouseEnter={triggerWave}
-      title="Clicca per attivare Tactical Hyperdrive"
+      aria-label="Innovazione Sci 2026 — Attiva o disattiva modalità Tactical Hyperdrive"
     >
-      <div className="kinetic-line">
-        {line1.split('').map((ch, idx) => (
-          <span key={idx} className="kinetic-char">
-            {ch}
-          </span>
-        ))}
-      </div>
-      <div className="kinetic-line second">
-        {line2.split('').map((ch, idx) => (
-          <span key={idx} className="kinetic-char">
-            {ch === ' ' ? '\u00A0' : ch}
-          </span>
-        ))}
-      </div>
-      <div className="kinetic-underline-bar" />
-    </div>
+      <h1 className="kinetic-h1">
+        <span className="kinetic-line">
+          {'INNOVAZIONE'.split('').map((ch, idx) => (
+            <span key={idx} className="kinetic-char">{ch}</span>
+          ))}
+        </span>
+        <span className="kinetic-line second">
+          {'SCI 2026'.split('').map((ch, idx) => (
+            <span key={idx} className="kinetic-char">{ch === ' ' ? '\u00A0' : ch}</span>
+          ))}
+        </span>
+      </h1>
+      <span className="kinetic-underline-bar" aria-hidden="true" />
+    </button>
   );
 }
 
-/* --- NAVBAR CON PROIEZIONE CONDIVISA MOTION (layoutId) --- */
 function MotionNavBar({ items, activeId, onSelectItem, layoutGroupId, className = '' }) {
   const [hoveredId, setHoveredId] = useState(null);
   const highlightedId = hoveredId || activeId;
 
   return (
-    <div
-      className={`magnetic-bar ${className}`}
-      onMouseLeave={() => setHoveredId(null)}
-    >
+    <div className={`magnetic-bar ${className}`} onMouseLeave={() => setHoveredId(null)}>
       {items.map((item) => {
         const isHighlighted = highlightedId === item.id;
         return (
@@ -374,17 +325,16 @@ function MotionNavBar({ items, activeId, onSelectItem, layoutGroupId, className 
             }}
           >
             {isHighlighted && (
-              <motion.span
+              <m.span
                 layoutId={layoutGroupId}
                 className="dock-motion-pill"
+                style={{ borderRadius: 999 }}
                 transition={{ type: 'spring', stiffness: 420, damping: 32 }}
               />
             )}
             <span className="roll-wrap">
               <span className="roll-text">{item.label}</span>
-              <span className="roll-text clone" aria-hidden="true">
-                {item.label}
-              </span>
+              <span className="roll-text clone" aria-hidden="true">{item.label}</span>
             </span>
             {item.badge && <span className="macro-count">{item.badge}</span>}
           </button>
@@ -394,7 +344,6 @@ function MotionNavBar({ items, activeId, onSelectItem, layoutGroupId, className 
   );
 }
 
-/* --- TELEMETRIA NUMERICA INTERPOLATA CON ANIME.JS V4 --- */
 function LiveTelemetryMetrics({ overdriveMode, activeItem }) {
   const [metrics, setMetrics] = useState({ edge: 62.4, gLoad: 2.15 });
   const stateRef = useRef({ edge: 62.4, gLoad: 2.15 });
@@ -402,11 +351,10 @@ function LiveTelemetryMetrics({ overdriveMode, activeItem }) {
   useEffect(() => {
     const targetEdge = overdriveMode ? 72.8 : activeItem ? 66.5 : 62.4;
     const targetG = overdriveMode ? 3.24 : activeItem ? 2.58 : 2.15;
-
     const anim = animate(stateRef.current, {
       edge: targetEdge,
       gLoad: targetG,
-      duration: 680,
+      duration: 640,
       ease: 'outExpo',
       onUpdate: () => {
         setMetrics({
@@ -415,12 +363,11 @@ function LiveTelemetryMetrics({ overdriveMode, activeItem }) {
         });
       }
     });
-
     return () => anim.pause();
   }, [overdriveMode, activeItem]);
 
   return (
-    <motion.div
+    <m.div
       className="hud-easter-card"
       initial={{ opacity: 0, y: -8, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -429,15 +376,11 @@ function LiveTelemetryMetrics({ overdriveMode, activeItem }) {
     >
       <div className="hud-easter-row">
         <span style={{ color: 'var(--text-secondary)' }}>EDGE ANGLE</span>
-        <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>
-          {metrics.edge.toFixed(1)}° {overdriveMode ? 'RACE' : 'MAX'}
-        </span>
+        <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>{metrics.edge.toFixed(1)}° {overdriveMode ? 'RACE' : 'MAX'}</span>
       </div>
       <div className="hud-easter-row">
         <span style={{ color: 'var(--text-secondary)' }}>G-LOAD PEAK</span>
-        <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>
-          {metrics.gLoad.toFixed(2)} G
-        </span>
+        <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>{metrics.gLoad.toFixed(2)} G</span>
       </div>
       <div className="hud-easter-row">
         <span style={{ color: 'var(--text-secondary)' }}>SNOW TEMP</span>
@@ -447,14 +390,13 @@ function LiveTelemetryMetrics({ overdriveMode, activeItem }) {
         <IconBolt size={11} />
         <span>{overdriveMode ? 'TACTICAL HYPERDRIVE ATTIVO' : 'CLICCA O SCUOTI PER HYPERDRIVE'}</span>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
-/* --- PARTICELLINE FIOCHE CHE SALGONO (E SCIE STAR WARS IN OVERDRIVE) --- */
 const RisingParticles = memo(function RisingParticles({ overdrive }) {
   const pointsRef = useRef();
-  const count = 130;
+  const count = 110;
 
   const { positions, speeds } = useMemo(() => {
     const pos = new Float32Array(count * 3);
@@ -472,7 +414,6 @@ const RisingParticles = memo(function RisingParticles({ overdrive }) {
     if (!pointsRef.current) return;
     const arr = pointsRef.current.geometry.attributes.position.array;
     const mult = overdrive ? 24 : 1;
-
     for (let i = 0; i < count; i++) {
       arr[i * 3 + 1] += speeds[i] * delta * mult;
       if (arr[i * 3 + 1] > 2.3) {
@@ -501,16 +442,11 @@ const RisingParticles = memo(function RisingParticles({ overdrive }) {
   );
 });
 
-/* --- PEDANA RADAR OLOGRAFICA SOTTO GLI SCI --- */
 const RadarPlatform = memo(function RadarPlatform({ overdrive }) {
   const ringRef = useRef();
-
   useFrame((_, delta) => {
-    if (ringRef.current) {
-      ringRef.current.rotation.z += delta * (overdrive ? 1.4 : 0.22);
-    }
+    if (ringRef.current) ringRef.current.rotation.z += delta * (overdrive ? 1.4 : 0.22);
   });
-
   const primary = overdrive ? '#ffcc00' : '#00e5ff';
 
   return (
@@ -531,25 +467,19 @@ const RadarPlatform = memo(function RadarPlatform({ overdrive }) {
   );
 });
 
-/* --- MIRINO OLOGRAFICO 3D SULL'HOTSPOT HOVERATO --- */
 function HoverBeacon({ pos }) {
   const outerRef = useRef();
   const innerRef = useRef();
-
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     if (outerRef.current) {
       outerRef.current.rotation.z = t * 1.8;
-      const pulse = 1 + Math.sin(t * 6) * 0.14;
-      outerRef.current.scale.setScalar(pulse);
+      outerRef.current.scale.setScalar(1 + Math.sin(t * 6) * 0.14);
     }
-    if (innerRef.current) {
-      innerRef.current.rotation.z = -t * 2.6;
-    }
+    if (innerRef.current) innerRef.current.rotation.z = -t * 2.6;
   });
 
   if (!pos) return null;
-
   return (
     <group position={pos}>
       <mesh ref={outerRef}>
@@ -564,7 +494,6 @@ function HoverBeacon({ pos }) {
   );
 }
 
-/* --- SCI PROCEDURALI --- */
 const PerfectSkis = memo(function PerfectSkis({ xray, isHighlighted }) {
   const geom = useMemo(() => {
     const shape = new THREE.Shape();
@@ -574,11 +503,7 @@ const PerfectSkis = memo(function PerfectSkis({ xray, isHighlighted }) {
     shape.quadraticCurveTo(0.03, 0, 0.044, -0.88);
     shape.quadraticCurveTo(0, -0.93, -0.044, -0.88);
     const extrude = new THREE.ExtrudeGeometry(shape, {
-      depth: 0.009,
-      bevelEnabled: true,
-      bevelSize: 0.002,
-      bevelThickness: 0.002,
-      bevelSegments: 3
+      depth: 0.009, bevelEnabled: true, bevelSize: 0.002, bevelThickness: 0.002, bevelSegments: 3
     });
     extrude.rotateX(-Math.PI / 2);
     return extrude;
@@ -590,32 +515,15 @@ const PerfectSkis = memo(function PerfectSkis({ xray, isHighlighted }) {
   return (
     <group position={[0, -1.04, 0.05]}>
       <mesh geometry={geom} position={[-0.15, 0, 0]} receiveShadow>
-        <meshPhysicalMaterial
-          color={skiColor}
-          emissive={emissiveColor}
-          emissiveIntensity={isHighlighted ? 0.35 : 0}
-          wireframe={xray}
-          roughness={0.25}
-          metalness={0.85}
-          clearcoat={0.9}
-        />
+        <meshPhysicalMaterial color={skiColor} emissive={emissiveColor} emissiveIntensity={isHighlighted ? 0.35 : 0} wireframe={xray} roughness={0.25} metalness={0.85} clearcoat={0.9} />
       </mesh>
       <mesh geometry={geom} position={[0.15, 0, 0]} receiveShadow>
-        <meshPhysicalMaterial
-          color={skiColor}
-          emissive={emissiveColor}
-          emissiveIntensity={isHighlighted ? 0.35 : 0}
-          wireframe={xray}
-          roughness={0.25}
-          metalness={0.85}
-          clearcoat={0.9}
-        />
+        <meshPhysicalMaterial color={skiColor} emissive={emissiveColor} emissiveIntensity={isHighlighted ? 0.35 : 0} wireframe={xray} roughness={0.25} metalness={0.85} clearcoat={0.9} />
       </mesh>
     </group>
   );
 });
 
-/* --- HOTSPOT 3D MEMOIZZATO --- */
 const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, isExplored, onSelect, onHoverChange }) {
   const item = DATA[id];
   if (!item) return null;
@@ -626,6 +534,7 @@ const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, isE
         <button
           type="button"
           className={`hotspot-container ${side} ${isSelected ? 'active' : ''} ${isExplored ? 'explored' : ''}`}
+          aria-label={`Apri laboratorio ${item.title}`}
           onClick={(e) => {
             e.stopPropagation();
             onSelect(id);
@@ -645,28 +554,21 @@ const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, isE
   );
 });
 
-/* --- CAMERA RIG INTELLIGENTE --- */
 function CameraRig({ activeItem, controlsRef }) {
   const { camera } = useThree();
   const desiredDistRef = useRef(4.35);
   const autoZoomActiveRef = useRef(false);
 
   useEffect(() => {
-    if (activeItem) {
-      const spot = HOTSPOT_POINTS.find((h) => h.id === activeItem);
-      desiredDistRef.current = spot ? spot.focusDist : 3.75;
-    } else {
-      desiredDistRef.current = 4.35;
-    }
+    const spot = activeItem ? HOTSPOT_POINTS.find((h) => h.id === activeItem) : null;
+    desiredDistRef.current = spot ? spot.focusDist : 4.35;
     autoZoomActiveRef.current = true;
   }, [activeItem]);
 
   useEffect(() => {
     const ctrl = controlsRef.current;
     if (!ctrl) return;
-    const stopAutoZoom = () => {
-      autoZoomActiveRef.current = false;
-    };
+    const stopAutoZoom = () => { autoZoomActiveRef.current = false; };
     ctrl.addEventListener('start', stopAutoZoom);
     return () => ctrl.removeEventListener('start', stopAutoZoom);
   }, [controlsRef]);
@@ -674,36 +576,27 @@ function CameraRig({ activeItem, controlsRef }) {
   useFrame(() => {
     const ctrl = controlsRef.current;
     if (!ctrl) return;
-
     const spot = activeItem ? HOTSPOT_POINTS.find((h) => h.id === activeItem) : null;
-    const targetY = spot ? spot.focusY * 0.45 : 0;
-
-    ctrl.target.y = THREE.MathUtils.lerp(ctrl.target.y, targetY, 0.08);
+    ctrl.target.y = THREE.MathUtils.lerp(ctrl.target.y, spot ? spot.focusY * 0.45 : 0, 0.08);
 
     if (autoZoomActiveRef.current) {
       const offset = camera.position.clone().sub(ctrl.target);
-      const currentDist = offset.length();
-      const nextDist = THREE.MathUtils.lerp(currentDist, desiredDistRef.current, 0.08);
-      if (Math.abs(nextDist - desiredDistRef.current) < 0.01) {
-        autoZoomActiveRef.current = false;
-      }
+      const nextDist = THREE.MathUtils.lerp(offset.length(), desiredDistRef.current, 0.08);
+      if (Math.abs(nextDist - desiredDistRef.current) < 0.01) autoZoomActiveRef.current = false;
       offset.setLength(nextDist);
       camera.position.copy(ctrl.target).add(offset);
     }
-
     ctrl.update();
   });
 
   return null;
 }
 
-/* --- SCENA 3D MANICHINO + TELEMETRIA REALE CAMERA --- */
 function SkierScene({ activeItem, hoveredId, exploredIds, onHoverChange, onSelect, xray, onToggleXray, hdgRef }) {
   const { scene } = useGLTF('/mannequin.glb');
   const groupRef = useRef();
   const lastTelemetryRef = useRef(0);
   const materialsRef = useRef([]);
-
   const targetBaseColor = useMemo(() => new THREE.Color(), []);
   const targetEmissiveColor = useMemo(() => new THREE.Color(), []);
 
@@ -718,11 +611,7 @@ function SkierScene({ activeItem, hoveredId, exploredIds, onHoverChange, onSelec
     const maxDim = Math.max(size.x, size.y, size.z) || 1;
     const targetScale = 2.1 / maxDim;
     clone.scale.setScalar(targetScale);
-    clone.position.set(
-      -center.x * targetScale,
-      -center.y * targetScale,
-      -center.z * targetScale
-    );
+    clone.position.set(-center.x * targetScale, -center.y * targetScale, -center.z * targetScale);
 
     const mats = [];
     clone.traverse((child) => {
@@ -743,62 +632,44 @@ function SkierScene({ activeItem, hoveredId, exploredIds, onHoverChange, onSelec
     return clone;
   }, [scene, xray]);
 
-  useEffect(() => {
-    return () => {
-      materialsRef.current.forEach((m) => m.dispose());
-    };
-  }, [normalizedModel]);
+  useEffect(() => () => materialsRef.current.forEach((mat) => mat.dispose()), [normalizedModel]);
 
   useFrame((state) => {
-    if (groupRef.current) {
-      const breath = Math.sin(state.clock.elapsedTime * 1.4) * 0.014;
-      const isDesktop = window.innerWidth > 768;
-      const targetX = activeItem && isDesktop ? -0.95 : 0;
-      const targetRotY = activeItem && isDesktop ? 0.28 : 0;
+    if (!groupRef.current) return;
+    const breath = Math.sin(state.clock.elapsedTime * 1.4) * 0.014;
+    const isDesktop = window.innerWidth > 768;
+    groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, activeItem && isDesktop ? -0.95 : 0, 0.07);
+    groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, activeItem && isDesktop ? 0.28 : 0, 0.07);
+    groupRef.current.position.y = (isDesktop ? -0.04 : -0.14) + breath;
 
-      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.07);
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, 0.07);
-      groupRef.current.position.y = (isDesktop ? -0.04 : -0.14) + breath;
-
-      if (!xray && materialsRef.current.length > 0) {
-        targetBaseColor.set(hoveredId ? '#22384f' : '#1b202e');
-        targetEmissiveColor.set(hoveredId ? '#005f73' : '#000000');
-        const targetIntensity = hoveredId ? 0.45 : 0;
-
-        for (let i = 0; i < materialsRef.current.length; i++) {
-          const m = materialsRef.current[i];
-          m.color.lerp(targetBaseColor, 0.12);
-          m.emissive.lerp(targetEmissiveColor, 0.12);
-          m.emissiveIntensity = THREE.MathUtils.lerp(m.emissiveIntensity, targetIntensity, 0.12);
-        }
+    if (!xray && materialsRef.current.length > 0) {
+      targetBaseColor.set(hoveredId ? '#22384f' : '#1b202e');
+      targetEmissiveColor.set(hoveredId ? '#005f73' : '#000000');
+      const targetIntensity = hoveredId ? 0.45 : 0;
+      for (let i = 0; i < materialsRef.current.length; i++) {
+        const mat = materialsRef.current[i];
+        mat.color.lerp(targetBaseColor, 0.12);
+        mat.emissive.lerp(targetEmissiveColor, 0.12);
+        mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, targetIntensity, 0.12);
       }
+    }
 
-      // Calcolo reale dell'angolo azimutale (HDG) dalla posizione 3D della camera
-      if (hdgRef?.current && state.clock.elapsedTime - lastTelemetryRef.current > 0.15) {
-        lastTelemetryRef.current = state.clock.elapsedTime;
-        const rad = Math.atan2(state.camera.position.x, state.camera.position.z);
-        const deg = Math.round(((rad * (180 / Math.PI)) % 360 + 360) % 360);
-        hdgRef.current.textContent = `46.5405° N · 12.1357° E · HDG ${String(deg).padStart(3, '0')}°`;
-      }
+    if (hdgRef?.current && state.clock.elapsedTime - lastTelemetryRef.current > 0.15) {
+      lastTelemetryRef.current = state.clock.elapsedTime;
+      const rad = Math.atan2(state.camera.position.x, state.camera.position.z);
+      const deg = Math.round(((rad * (180 / Math.PI)) % 360 + 360) % 360);
+      hdgRef.current.textContent = `46.5405° N · 12.1357° E · HDG ${String(deg).padStart(3, '0')}°`;
     }
   });
 
   const hoveredSpot = hoveredId ? HOTSPOT_POINTS.find((h) => h.id === hoveredId) : null;
 
   return (
-    <group
-      ref={groupRef}
-      onDoubleClick={(e) => {
-        e.stopPropagation();
-        onToggleXray();
-      }}
-    >
+    <group ref={groupRef} onDoubleClick={(e) => { e.stopPropagation(); onToggleXray(); }}>
       <primitive object={normalizedModel} />
       <PerfectSkis xray={xray} isHighlighted={hoveredId === 'sci' || hoveredId === 'attacchi'} />
       <RadarPlatform overdrive={xray} />
-
       {hoveredSpot && <HoverBeacon pos={hoveredSpot.pos} />}
-
       {HOTSPOT_POINTS.map((spot) => (
         <Hotspot
           key={spot.id}
@@ -823,25 +694,20 @@ export default function App() {
   const [hoveredHotspot, setHoveredHotspot] = useState(null);
   const [overdriveMode, setOverdriveMode] = useState(false);
   const [audioOn, setAudioOn] = useState(false);
-  const [shakeToastState, setShakeToastState] = useState('hidden'); // 'hidden' | 'prompt' | 'armed'
-
+  const [shakeToastState, setShakeToastState] = useState('hidden');
   const [hudHovered, setHudHovered] = useState(false);
   const [hudLabel, setHudLabel] = useState('TELEMETRY HUD');
+
   const hdgRef = useRef(null);
   const controlsRef = useRef(null);
   const motionArmedRef = useRef(false);
 
   const dismissShakeToast = useCallback(() => {
     setShakeToastState('hidden');
-    try {
-      sessionStorage.setItem('sas_shake_hint_seen', '1');
-    } catch {}
+    try { sessionStorage.setItem('sas_shake_hint_seen', '1'); } catch {}
   }, []);
 
-  const handleToggleAudio = () => {
-    const nextState = soundEngine.toggle();
-    setAudioOn(nextState);
-  };
+  const handleToggleAudio = () => setAudioOn(soundEngine.toggle());
 
   const toggleOverdrive = useCallback(() => {
     setOverdriveMode((prev) => {
@@ -853,520 +719,350 @@ export default function App() {
 
   const markExplored = useCallback((id) => {
     if (!id) return;
-    setExploredIds((prev) => {
-      if (prev.has(id)) return prev;
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
+    setExploredIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
   }, []);
 
-  const handleToggleItem = useCallback(
-    (id) => {
-      soundEngine.play('click');
-      setActiveItem((prev) => {
-        const next = prev === id ? null : id;
-        if (next) markExplored(next);
-        return next;
-      });
-    },
-    [markExplored]
-  );
+  const handleToggleItem = useCallback((id) => {
+    soundEngine.play('click');
+    setActiveItem((prev) => {
+      const next = prev === id ? null : id;
+      if (next) markExplored(next);
+      return next;
+    });
+  }, [markExplored]);
 
-  const handleSelectDirect = useCallback(
-    (id) => {
-      soundEngine.play('click');
-      setActiveItem(id);
-      markExplored(id);
-    },
-    [markExplored]
-  );
+  const handleSelectDirect = useCallback((id) => {
+    soundEngine.play('click');
+    setActiveItem(id);
+    markExplored(id);
+  }, [markExplored]);
 
-  // Sblocca i sensori di movimento (obbligatorio su iOS Safari tramite gesto utente diretto)
-  const unlockMotionSensors = useCallback(
-    async (fromToastTap = false) => {
-      if (typeof window === 'undefined' || typeof DeviceMotionEvent === 'undefined') {
-        if (fromToastTap) {
+  const unlockMotionSensors = useCallback(async (fromToastTap = false) => {
+    if (typeof window === 'undefined' || typeof DeviceMotionEvent === 'undefined') {
+      if (fromToastTap) { toggleOverdrive(); dismissShakeToast(); }
+      return;
+    }
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      try {
+        const res = await DeviceMotionEvent.requestPermission();
+        if (res === 'granted') {
+          motionArmedRef.current = true;
+          if (fromToastTap) {
+            soundEngine.play('click');
+            setShakeToastState('armed');
+            setTimeout(() => dismissShakeToast(), 3200);
+          }
+        } else if (fromToastTap) {
           toggleOverdrive();
           dismissShakeToast();
         }
-        return;
+      } catch {
+        if (fromToastTap) { toggleOverdrive(); dismissShakeToast(); }
       }
-
-      if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        try {
-          const res = await DeviceMotionEvent.requestPermission();
-          if (res === 'granted') {
-            motionArmedRef.current = true;
-            if (fromToastTap) {
-              soundEngine.play('click');
-              setShakeToastState('armed');
-              setTimeout(() => dismissShakeToast(), 3200);
-            }
-          } else if (fromToastTap) {
-            toggleOverdrive();
-            dismissShakeToast();
-          }
-        } catch {
-          if (fromToastTap) {
-            toggleOverdrive();
-            dismissShakeToast();
-          }
-        }
-      } else {
-        motionArmedRef.current = true;
-        if (fromToastTap) {
-          soundEngine.play('click');
-          setShakeToastState('armed');
-          setTimeout(() => dismissShakeToast(), 2800);
-        }
+    } else {
+      motionArmedRef.current = true;
+      if (fromToastTap) {
+        soundEngine.play('click');
+        setShakeToastState('armed');
+        setTimeout(() => dismissShakeToast(), 2800);
       }
-    },
-    [toggleOverdrive, dismissShakeToast]
-  );
+    }
+  }, [toggleOverdrive, dismissShakeToast]);
 
-  // Popup centrato in basso su smartphone
   useEffect(() => {
-    const isSmartphone =
-      window.matchMedia('(pointer: coarse)').matches ||
-      window.innerWidth <= 768 ||
-      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
+    const isSmartphone = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 768;
     if (!isSmartphone) return;
+    try { if (sessionStorage.getItem('sas_shake_hint_seen') === '1') return; } catch {}
 
-    let alreadySeen = false;
-    try {
-      alreadySeen = sessionStorage.getItem('sas_shake_hint_seen') === '1';
-    } catch {}
-
-    if (alreadySeen) return;
-
-    const showTimer = setTimeout(() => {
-      setShakeToastState('prompt');
-    }, 1400);
-
-    const hideTimer = setTimeout(() => {
-      dismissShakeToast();
-    }, 11500);
-
-    return () => {
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
-    };
+    const showTimer = setTimeout(() => setShakeToastState('prompt'), 1400);
+    const hideTimer = setTimeout(() => dismissShakeToast(), 11500);
+    return () => { clearTimeout(showTimer); clearTimeout(hideTimer); };
   }, [dismissShakeToast]);
 
-  // Rilevamento Shake ad alta precisione (iOS & Android)
   useEffect(() => {
-    let lastX = null;
-    let lastY = null;
-    let lastZ = null;
-    let lastShakeTime = 0;
-    const SHAKE_DELTA_THRESHOLD = 15;
-
+    let lastX = null, lastY = null, lastZ = null, lastShakeTime = 0;
     const handleMotion = (e) => {
       const acc = e.acceleration || e.accelerationIncludingGravity;
       if (!acc || acc.x === null) return;
-
       motionArmedRef.current = true;
-
       if (lastX !== null) {
-        const dx = acc.x - lastX;
-        const dy = acc.y - lastY;
-        const dz = acc.z - lastZ;
-        const magnitude = Math.hypot(dx, dy, dz);
-
-        if (magnitude > SHAKE_DELTA_THRESHOLD) {
-          const now = Date.now();
-          if (now - lastShakeTime > 950) {
-            lastShakeTime = now;
-            dismissShakeToast();
-            if (typeof navigator !== 'undefined' && navigator.vibrate) {
-              try {
-                navigator.vibrate([45, 35, 70]);
-              } catch {}
-            }
-            toggleOverdrive();
-          }
+        const magnitude = Math.hypot(acc.x - lastX, acc.y - lastY, acc.z - lastZ);
+        if (magnitude > 15 && Date.now() - lastShakeTime > 950) {
+          lastShakeTime = Date.now();
+          dismissShakeToast();
+          try { navigator.vibrate?.([45, 35, 70]); } catch {}
+          toggleOverdrive();
         }
       }
-
-      lastX = acc.x;
-      lastY = acc.y;
-      lastZ = acc.z;
+      lastX = acc.x; lastY = acc.y; lastZ = acc.z;
     };
-
     window.addEventListener('devicemotion', handleMotion);
-    return () => {
-      window.removeEventListener('devicemotion', handleMotion);
-    };
+    return () => window.removeEventListener('devicemotion', handleMotion);
   }, [toggleOverdrive, dismissShakeToast]);
 
-  // Scramble effect su Hover HUD
   useEffect(() => {
-    if (overdriveMode) {
-      setHudLabel('HYPERDRIVE // ON');
-      return;
-    }
-    if (!hudHovered) {
-      setHudLabel('TELEMETRY HUD');
-      return;
-    }
+    if (overdriveMode) { setHudLabel('HYPERDRIVE // ON'); return; }
+    if (!hudHovered) { setHudLabel('TELEMETRY HUD'); return; }
     const target = 'SYS.SCAN // LIVE';
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/#*';
     let step = 0;
     const interval = setInterval(() => {
       step += 1;
-      setHudLabel(
-        target
-          .split('')
-          .map((ch, i) => (ch === ' ' || i < step ? ch : chars[Math.floor(Math.random() * chars.length)]))
-          .join('')
-      );
+      setHudLabel(target.split('').map((ch, i) => (ch === ' ' || i < step ? ch : chars[Math.floor(Math.random() * chars.length)])).join(''));
       if (step >= target.length) clearInterval(interval);
     }, 28);
     return () => clearInterval(interval);
   }, [hudHovered, overdriveMode]);
 
   const data = activeItem ? DATA[activeItem] : null;
-  const activeMacroObj = data ? MACROS.find((m) => m.id === data.macro) : null;
-
+  const activeMacroObj = data ? MACROS.find((macro) => macro.id === data.macro) : null;
   const currentIndexInAll = activeItem ? ORDERED_ITEM_IDS.indexOf(activeItem) : -1;
   const prevItemId = currentIndexInAll !== -1 ? ORDERED_ITEM_IDS[(currentIndexInAll - 1 + ORDERED_ITEM_IDS.length) % ORDERED_ITEM_IDS.length] : null;
   const nextItemId = currentIndexInAll !== -1 ? ORDERED_ITEM_IDS[(currentIndexInAll + 1) % ORDERED_ITEM_IDS.length] : null;
 
   return (
-    <MotionConfig reducedMotion="user">
-      <div
-        className={`app-shell ${overdriveMode ? 'overdrive-mode' : ''}`}
-        onClick={() => {
-          if (!motionArmedRef.current) unlockMotionSensors(false);
-        }}
-      >
-        <TacticalReticle />
-        <div className="studio-canvas" />
-        <div className="telemetry-grid-bg" />
-        <div className="overdrive-vignette" />
-        <div className="noise-film" />
-
-        <KineticIntro />
-
-        {/* Header con Titolo Impilato + KokonutUI Activity Ring */}
-        <motion.header
-          className="brand-header"
-          animate={{
-            opacity: activeItem ? 0 : 1,
-            y: activeItem ? -14 : 0
-          }}
-          style={{ pointerEvents: activeItem ? 'none' : 'auto' }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+    <LazyMotion features={domAnimation} strict>
+      <MotionConfig reducedMotion="user">
+        <div
+          className={`app-shell ${overdriveMode ? 'overdrive-mode' : ''}`}
+          onClick={() => { if (!motionArmedRef.current) unlockMotionSensors(false); }}
         >
-          <span className="kicker">
-            SAS ACADEMY //{' '}
-            <a
-              href="https://home.andreamonzani.com"
-              target="_blank"
-              rel="noreferrer"
-              className="author-inline-link"
-              onMouseEnter={() => soundEngine.play('hover')}
-            >
-              ANDREA
-            </a>
-            ,{' '}
-            <span className="team-member-tag" onMouseEnter={() => soundEngine.play('hover')}>
-              MARCO
+          <TacticalReticle />
+          <div className="studio-canvas" />
+          <div className="telemetry-grid-bg" />
+          <div className="overdrive-vignette" />
+          <div className="noise-film" />
+
+          <KineticIntro />
+
+          <m.header
+            className="brand-header"
+            animate={{ opacity: activeItem ? 0 : 1, y: activeItem ? -14 : 0 }}
+            style={{ pointerEvents: activeItem ? 'none' : 'auto' }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="kicker">
+              SAS ACADEMY //{' '}
+              <a href="https://home.andreamonzani.com" target="_blank" rel="noreferrer" className="author-inline-link" onMouseEnter={() => soundEngine.play('hover')}>
+                ANDREA
+              </a>
+              , <span className="team-member-tag" onMouseEnter={() => soundEngine.play('hover')}>MARCO</span>
+              , <span className="team-member-tag" onMouseEnter={() => soundEngine.play('hover')}>GIANLUCA</span>{' '}
+              ED <span className="team-member-tag" onMouseEnter={() => soundEngine.play('hover')}>EMMA</span>
             </span>
-            ,{' '}
-            <span className="team-member-tag" onMouseEnter={() => soundEngine.play('hover')}>
-              GIANLUCA
-            </span>{' '}
-            ED{' '}
-            <span className="team-member-tag" onMouseEnter={() => soundEngine.play('hover')}>
-              EMMA
-            </span>
-          </span>
-          <KineticTitle onTriggerEgg={toggleOverdrive} />
-          <div className="hero-sub-telemetry">
-            <TelemetryActivityRing current={exploredIds.size} total={10} />
-            <span>
-              {hoveredHotspot
-                ? `TARGET // ${DATA[hoveredHotspot]?.title.toUpperCase()}`
-                : overdriveMode
-                ? 'HYPERDRIVE ATTIVO — CLICCA HUD O SCUOTI PER USCIRE'
-                : 'TOCCA UN PUNTO SUL MODELLO 3D PER ESPLORARE'}
-            </span>
-          </div>
-        </motion.header>
-
-        {/* Popup Centrato in Basso su Smartphone (KokonutUI ParticleButton) */}
-        <AnimatePresence>
-          {shakeToastState !== 'hidden' && !activeItem && (
-            <ParticleButton
-              className="mobile-shake-toast"
-              particleColor="var(--accent-gold)"
-              onClick={(e) => {
-                e.stopPropagation();
-                unlockMotionSensors(true);
-              }}
-            >
-              <span className="shake-toast-icon">
-                <IconPhoneShake size={17} />
+            <KineticTitle onTriggerEgg={toggleOverdrive} />
+            <div className="hero-sub-telemetry">
+              <TelemetryActivityRing current={exploredIds.size} total={10} />
+              <span>
+                {hoveredHotspot
+                  ? `TARGET // ${DATA[hoveredHotspot]?.title.toUpperCase()}`
+                  : overdriveMode
+                  ? 'HYPERDRIVE ATTIVO — CLICCA HUD O SCUOTI PER USCIRE'
+                  : 'TOCCA UN PUNTO SUL MODELLO 3D PER ESPLORARE'}
               </span>
-              <span className="shake-toast-text">
-                {shakeToastState === 'armed' ? (
-                  <>
-                    <strong>Sensori attivi — Agita ora</strong>
-                    <span>Scuoti il telefono per Tactical Hyperdrive</span>
-                  </>
-                ) : (
-                  <>
-                    <strong>Prova ad agitare il telefono</strong>
-                    <span>Tocca qui per attivare i sensori Hyperdrive</span>
-                  </>
-                )}
-              </span>
-            </ParticleButton>
-          )}
-        </AnimatePresence>
-
-        {/* HUD Top-Right con MagnetButton & ParticleButton */}
-        <motion.div
-          className="hud-top-right"
-          animate={{ opacity: activeItem ? 0 : 1 }}
-          style={{ pointerEvents: activeItem ? 'none' : 'auto' }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="hud-controls-row">
-            <MagnetButton
-              className={`hud-pill-btn ${audioOn ? 'audio-on active' : ''}`}
-              onClick={handleToggleAudio}
-              aria-label={audioOn ? 'Disattiva audio' : 'Attiva audio'}
-              onMouseEnter={() => soundEngine.play('hover')}
-            >
-              <span className="eq-bars" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </span>
-              <span>{audioOn ? 'AUDIO ON' : 'AUDIO'}</span>
-            </MagnetButton>
-
-            <ParticleButton
-              className={`hud-pill-btn ${overdriveMode ? 'active' : ''}`}
-              particleColor={overdriveMode ? '#00e5ff' : '#ffcc00'}
-              onClick={toggleOverdrive}
-              onMouseEnter={() => {
-                setHudHovered(true);
-                soundEngine.play('hover');
-              }}
-              onMouseLeave={() => setHudHovered(false)}
-            >
-              <span className="hud-dot" />
-              <span>{hudLabel}</span>
-            </ParticleButton>
-          </div>
-
-          <div ref={hdgRef} className="hud-coords">
-            46.5405° N · 12.1357° E · HDG 000°
-          </div>
+            </div>
+          </m.header>
 
           <AnimatePresence>
-            {(hudHovered || overdriveMode) && (
-              <LiveTelemetryMetrics overdriveMode={overdriveMode} activeItem={activeItem} />
+            {shakeToastState !== 'hidden' && !activeItem && (
+              <ParticleButton
+                className="mobile-shake-toast"
+                particleColor="var(--accent-gold)"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  unlockMotionSensors(true);
+                }}
+              >
+                <span className="shake-toast-icon"><IconPhoneShake size={17} /></span>
+                <span className="shake-toast-text">
+                  {shakeToastState === 'armed' ? (
+                    <>
+                      <strong>Sensori attivi — Agita ora</strong>
+                      <span>Scuoti il telefono per Tactical Hyperdrive</span>
+                    </>
+                  ) : (
+                    <>
+                      <strong>Prova ad agitare il telefono</strong>
+                      <span>Tocca qui per attivare i sensori Hyperdrive</span>
+                    </>
+                  )}
+                </span>
+              </ParticleButton>
             )}
           </AnimatePresence>
-        </motion.div>
 
-        {/* Scena 3D + Pedana Radar + Camera Focus */}
-        <SceneErrorBoundary>
-          <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
-            <Canvas
-              dpr={[1, 2]}
-              camera={{ position: [0, 0.02, 4.35], fov: 44 }}
-              onPointerMissed={() => setActiveItem(null)}
-            >
-              <hemisphereLight
-                intensity={overdriveMode ? 1.8 : 1.45}
-                color={overdriveMode ? '#ffcc00' : '#ffffff'}
-                groundColor="#1e293b"
-              />
-              <directionalLight
-                position={[3, 5, 4]}
-                intensity={2.2}
-                color={overdriveMode ? '#00e5ff' : '#ffffff'}
-              />
-              <directionalLight
-                position={[-4, 2, -2]}
-                intensity={1.6}
-                color={overdriveMode ? '#ffcc00' : '#00e5ff'}
-              />
+          <m.div
+            className="hud-top-right"
+            animate={{ opacity: activeItem ? 0 : 1 }}
+            style={{ pointerEvents: activeItem ? 'none' : 'auto' }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="hud-controls-row">
+              <MagnetButton
+                className={`hud-pill-btn ${audioOn ? 'audio-on active' : ''}`}
+                onClick={handleToggleAudio}
+                aria-label={audioOn ? 'Disattiva audio' : 'Attiva audio'}
+                onMouseEnter={() => soundEngine.play('hover')}
+              >
+                <span className="eq-bars" aria-hidden="true"><span /><span /><span /></span>
+                <span>{audioOn ? 'AUDIO ON' : 'AUDIO'}</span>
+              </MagnetButton>
 
-              <RisingParticles overdrive={overdriveMode} />
+              <ParticleButton
+                className={`hud-pill-btn ${overdriveMode ? 'active' : ''}`}
+                particleColor={overdriveMode ? '#00e5ff' : '#ffcc00'}
+                onClick={toggleOverdrive}
+                aria-label="Attiva o disattiva modalità Tactical Hyperdrive"
+                onMouseEnter={() => { setHudHovered(true); soundEngine.play('hover'); }}
+                onMouseLeave={() => setHudHovered(false)}
+              >
+                <span className="hud-dot" />
+                <span>{hudLabel}</span>
+              </ParticleButton>
+            </div>
 
-              <Suspense fallback={null}>
-                <SkierScene
-                  activeItem={activeItem}
-                  hoveredId={hoveredHotspot}
-                  exploredIds={exploredIds}
-                  onHoverChange={setHoveredHotspot}
-                  onSelect={handleToggleItem}
-                  xray={overdriveMode}
-                  onToggleXray={toggleOverdrive}
-                  hdgRef={hdgRef}
-                />
-              </Suspense>
+            <div ref={hdgRef} className="hud-coords">
+              46.5405° N · 12.1357° E · HDG 000°
+            </div>
 
-              <CameraRig activeItem={activeItem} controlsRef={controlsRef} />
-
-              <OrbitControls
-                ref={controlsRef}
-                enableZoom={true}
-                enablePan={false}
-                autoRotate={!activeItem}
-                autoRotateSpeed={overdriveMode ? 3.2 : 0.45}
-                minDistance={2.7}
-                maxDistance={6.0}
-                minPolarAngle={Math.PI / 3}
-                maxPolarAngle={Math.PI / 1.85}
-                enableDamping={true}
-                dampingFactor={0.05}
-              />
-            </Canvas>
-          </div>
-        </SceneErrorBoundary>
-
-        {/* Dock Desktop a 5 Pilastri (Maschere e Telemetria IA separati) */}
-        <motion.nav
-          className="macro-dock"
-          aria-label="Categorie principali"
-          animate={{
-            opacity: activeItem ? 0 : 1,
-            y: activeItem ? 20 : 0
-          }}
-          style={{ pointerEvents: activeItem ? 'none' : 'auto' }}
-          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <MotionNavBar
-            layoutGroupId="main-dock-pill"
-            items={MACROS.map((m) => ({
-              id: m.items[0],
-              label: m.label,
-              badge: `0${m.items.length}`
-            }))}
-            activeId={null}
-            onSelectItem={handleSelectDirect}
-          />
-        </motion.nav>
-
-        {/* Pannello Laterale Desktop & Scheda Mobile con AnimatePresence */}
-        <AnimatePresence>
-          {data && (
-            <motion.aside
-              key="detail-side-panel"
-              className="side-panel"
-              aria-label="Scheda approfondimento"
-              initial={{ x: '100%' }}
-              animate={{ x: '0%' }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 360, damping: 34 }}
-            >
-              <div className="panel-top-actions">
-                <MagnetButton
-                  className="close-btn"
-                  onClick={() => {
-                    soundEngine.play('click');
-                    setActiveItem(null);
-                  }}
-                >
-                  <IconClose size={12} />
-                  <span>Torna al 3D</span>
-                </MagnetButton>
-                {activeMacroObj && (
-                  <span className="mono" style={{ fontSize: '0.64rem', color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-                    {activeMacroObj.label}
-                  </span>
-                )}
-              </div>
-
-              {/* Sottomenu con layoutId visibile solo se la categoria ha >1 elemento */}
-              {activeMacroObj && activeMacroObj.items.length > 1 && (
-                <div className="sub-nav-wrap">
-                  <MotionNavBar
-                    layoutGroupId="sub-dock-pill"
-                    className="sub-nav-bar"
-                    items={activeMacroObj.items.map((subId) => ({
-                      id: subId,
-                      label: DATA[subId].shortLabel
-                    }))}
-                    activeId={activeItem}
-                    onSelectItem={handleSelectDirect}
-                  />
-                </div>
+            <AnimatePresence>
+              {(hudHovered || overdriveMode) && (
+                <LiveTelemetryMetrics overdriveMode={overdriveMode} activeItem={activeItem} />
               )}
+            </AnimatePresence>
+          </m.div>
 
-              <motion.div
-                key={data.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <h3 style={{ fontSize: '2.15rem', marginBottom: '6px' }}>{data.title}</h3>
-                <SlideTextLink
-                  href={data.url}
-                  onMouseEnter={() => soundEngine.play('hover')}
-                >
-                  {data.brand}
-                </SlideTextLink>
+          <main aria-label="Modello 3D interattivo attrezzatura da sci" style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
+            <SceneErrorBoundary>
+              <Canvas dpr={[1, 2]} camera={{ position: [0, 0.02, 4.35], fov: 44 }} onPointerMissed={() => setActiveItem(null)}>
+                <hemisphereLight intensity={overdriveMode ? 1.8 : 1.45} color={overdriveMode ? '#ffcc00' : '#ffffff'} groundColor="#1e293b" />
+                <directionalLight position={[3, 5, 4]} intensity={2.2} color={overdriveMode ? '#00e5ff' : '#ffffff'} />
+                <directionalLight position={[-4, 2, -2]} intensity={1.6} color={overdriveMode ? '#ffcc00' : '#00e5ff'} />
 
-                <p style={{ marginTop: '14px', fontSize: '0.94rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.84)' }}>
-                  {data.summary}
-                </p>
+                <RisingParticles overdrive={overdriveMode} />
 
-                <Suspense
-                  fallback={
-                    <p className="mono" style={{ marginTop: '20px', fontSize: '0.75rem', color: 'var(--accent-cyan)' }}>
-                      Caricamento laboratorio...
-                    </p>
-                  }
-                >
-                  <InteractiveLab itemId={data.id} />
+                <Suspense fallback={null}>
+                  <SkierScene
+                    activeItem={activeItem}
+                    hoveredId={hoveredHotspot}
+                    exploredIds={exploredIds}
+                    onHoverChange={setHoveredHotspot}
+                    onSelect={handleToggleItem}
+                    xray={overdriveMode}
+                    onToggleXray={toggleOverdrive}
+                    hdgRef={hdgRef}
+                  />
                 </Suspense>
-              </motion.div>
-            </motion.aside>
-          )}
-        </AnimatePresence>
 
-        {/* Navigazione Rapida Mobile dentro la Scheda */}
-        <AnimatePresence>
-          {activeItem && (
-            <motion.div
-              className="mobile-panel-nav"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 24 }}
-              transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-            >
-              <button
-                type="button"
-                className="action-btn secondary inline-flex-btn"
-                onClick={() => handleSelectDirect(prevItemId)}
-              >
-                <IconChevronLeft size={14} />
-                <span>{DATA[prevItemId]?.shortLabel}</span>
-              </button>
-              <button
-                type="button"
-                className="action-btn inline-flex-btn"
-                onClick={() => handleSelectDirect(nextItemId)}
-              >
-                <span>{DATA[nextItemId]?.shortLabel}</span>
-                <IconChevronRight size={14} />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <CameraRig activeItem={activeItem} controlsRef={controlsRef} />
 
-        <LegalCompliance isPanelOpen={Boolean(activeItem)} />
-      </div>
-    </MotionConfig>
+                <OrbitControls
+                  ref={controlsRef}
+                  enableZoom={true}
+                  enablePan={false}
+                  autoRotate={!activeItem}
+                  autoRotateSpeed={overdriveMode ? 3.2 : 0.45}
+                  minDistance={2.7}
+                  maxDistance={6.0}
+                  minPolarAngle={Math.PI / 3}
+                  maxPolarAngle={Math.PI / 1.85}
+                  enableDamping={true}
+                  dampingFactor={0.05}
+                />
+              </Canvas>
+            </SceneErrorBoundary>
+          </main>
+
+          <m.nav
+            className="macro-dock"
+            aria-label="Categorie principali"
+            animate={{ opacity: activeItem ? 0 : 1, y: activeItem ? 20 : 0 }}
+            style={{ pointerEvents: activeItem ? 'none' : 'auto' }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <MotionNavBar
+              layoutGroupId="main-dock-pill"
+              items={MACROS.map((macro) => ({ id: macro.items[0], label: macro.label, badge: `0${macro.items.length}` }))}
+              activeId={null}
+              onSelectItem={handleSelectDirect}
+            />
+          </m.nav>
+
+          <AnimatePresence>
+            {data && (
+              <m.aside
+                key="detail-side-panel"
+                className="side-panel"
+                aria-label="Scheda approfondimento"
+                initial={{ x: '100%' }}
+                animate={{ x: '0%' }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', stiffness: 360, damping: 34 }}
+              >
+                <div className="panel-top-actions">
+                  <MagnetButton className="close-btn" onClick={() => { soundEngine.play('click'); setActiveItem(null); }}>
+                    <IconClose size={12} />
+                    <span>Torna al 3D</span>
+                  </MagnetButton>
+                  {activeMacroObj && (
+                    <span className="mono" style={{ fontSize: '0.64rem', color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+                      {activeMacroObj.label}
+                    </span>
+                  )}
+                </div>
+
+                {activeMacroObj && activeMacroObj.items.length > 1 && (
+                  <div className="sub-nav-wrap">
+                    <MotionNavBar
+                      layoutGroupId="sub-dock-pill"
+                      className="sub-nav-bar"
+                      items={activeMacroObj.items.map((subId) => ({ id: subId, label: DATA[subId].shortLabel }))}
+                      activeId={activeItem}
+                      onSelectItem={handleSelectDirect}
+                    />
+                  </div>
+                )}
+
+                <m.div key={data.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}>
+                  <h2 style={{ fontSize: '2.15rem', marginBottom: '6px' }}>{data.title}</h2>
+                  <SlideTextLink href={data.url} onMouseEnter={() => soundEngine.play('hover')}>
+                    {data.brand}
+                  </SlideTextLink>
+                  <p style={{ marginTop: '14px', fontSize: '0.94rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.86)' }}>
+                    {data.summary}
+                  </p>
+                  <Suspense fallback={<p className="mono" style={{ marginTop: '20px', fontSize: '0.75rem', color: 'var(--accent-cyan)' }}>Caricamento laboratorio...</p>}>
+                    <InteractiveLab itemId={data.id} />
+                  </Suspense>
+                </m.div>
+              </m.aside>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {activeItem && (
+              <m.div
+                className="mobile-panel-nav"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 24 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+              >
+                <button type="button" className="action-btn secondary inline-flex-btn" onClick={() => handleSelectDirect(prevItemId)}>
+                  <IconChevronLeft size={14} />
+                  <span>{DATA[prevItemId]?.shortLabel}</span>
+                </button>
+                <button type="button" className="action-btn inline-flex-btn" onClick={() => handleSelectDirect(nextItemId)}>
+                  <span>{DATA[nextItemId]?.shortLabel}</span>
+                  <IconChevronRight size={14} />
+                </button>
+              </m.div>
+            )}
+          </AnimatePresence>
+
+          <LegalCompliance isPanelOpen={Boolean(activeItem)} />
+        </div>
+      </MotionConfig>
+    </LazyMotion>
   );
 }
