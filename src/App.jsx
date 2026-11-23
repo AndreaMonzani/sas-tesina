@@ -1,9 +1,22 @@
 import React, { useState, useRef, useEffect, useMemo, Suspense, Component, memo, useCallback } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Html, useGLTF, useProgress } from '@react-three/drei';
+import { motion, AnimatePresence, MotionConfig, useMotionValue, useSpring } from 'motion/react';
+import { animate, stagger, createScope, createTimeline } from 'animejs';
 import * as THREE from 'three';
 import LegalCompliance from './LegalCompliance';
 import { soundEngine } from './soundEngine';
+import {
+  MagnetButton,
+  ParticleButton,
+  SlideTextLink,
+  TelemetryActivityRing,
+  IconBolt,
+  IconPhoneShake,
+  IconClose,
+  IconChevronLeft,
+  IconChevronRight
+} from './components/KokonutPrimitives';
 import './index.css';
 
 const InteractiveLab = React.lazy(() => import('./InteractiveLabs'));
@@ -28,7 +41,7 @@ class SceneErrorBoundary extends Component {
   }
 }
 
-/* 5 PILASTRI: Maschere e Telemetria IA ora sono categorie distinte */
+/* 5 PILASTRI: Maschere e Telemetria IA separati */
 const MACROS = [
   { id: 'performance', label: 'Performance', items: ['sci', 'scarpone'] },
   { id: 'sicurezza', label: 'Sicurezza', items: ['casco', 'attacchi', 'bastoni'] },
@@ -50,7 +63,6 @@ const ORDERED_ITEM_IDS = [
   'sci'
 ];
 
-/* Coordinate hotspot distanziate per zero sovrapposizioni + target focus camera */
 const HOTSPOT_POINTS = [
   { id: 'casco', pos: [0.06, 0.94, 0.08], side: 'right', focusY: 0.72, focusDist: 3.35 },
   { id: 'maschera_outof', pos: [-0.09, 0.80, 0.13], side: 'left', focusY: 0.70, focusDist: 3.35 },
@@ -67,61 +79,141 @@ const HOTSPOT_POINTS = [
 const DATA = {
   casco: {
     id: 'casco', macro: 'sicurezza', shortLabel: 'Caschi',
-    title: 'Caschi & Protezione', brand: 'Visita Sena Snow ↗', url: 'https://www.sena.com',
+    title: 'Caschi & Protezione', brand: 'Visita Sena Snow', url: 'https://www.sena.com',
     summary: 'Calotta esterna, nucleo assorbente EPS/EPP e sistemi per gli impatti obliqui (Mips, Koroyd, WaveCel) con comunicazione Mesh.'
   },
   maschera_outof: {
     id: 'maschera_outof', macro: 'maschere', shortLabel: 'Out Of',
-    title: 'Out Of', brand: 'Visita Out Of ↗', url: 'https://out-of.com',
+    title: 'Out Of', brand: 'Visita Out Of', url: 'https://out-of.com',
     summary: 'Lente elettronica IRID alimentata a cella solare che adatta la trasmissione luminosa tra S1 e S3 in meno di 1 secondo.'
   },
   maschera_audio: {
     id: 'maschera_audio', macro: 'maschere', shortLabel: 'Sound BRKR',
-    title: 'Sound BRKR', brand: 'Visita BoneTech ↗', url: 'https://www.bonetech.it',
+    title: 'Sound BRKR', brand: 'Visita BoneTech', url: 'https://www.bonetech.it',
     summary: 'Trasduttori a conduzione ossea integrati nella montatura per comunicare in gruppo lasciando libere le orecchie.'
   },
   termoregolazione: {
     id: 'termoregolazione', macro: 'comfort', shortLabel: 'Termoregolazione',
-    title: 'Termoregolazione', brand: 'Scopri ISPO & Aerogel ↗', url: 'https://www.ispo.com',
+    title: 'Termoregolazione', brand: 'Scopri ISPO & Aerogel', url: 'https://www.ispo.com',
     summary: 'Isolamento PrimaLoft Heat Sphere, Polartec Alpha e membrane 20.000+ mm con cuciture nastrate e DWR.'
   },
   guanti: {
     id: 'guanti', macro: 'comfort', shortLabel: 'Guanti & Grip',
-    title: 'Guanti & Grip', brand: 'Visita Leki ↗', url: 'https://www.leki.com',
+    title: 'Guanti & Grip', brand: 'Visita Leki', url: 'https://www.leki.com',
     summary: 'Strati isolanti differenziati, aggancio diretto Trigger al bastone e varianti con elementi riscaldanti alimentati a batteria.'
   },
   bastoni: {
     id: 'bastoni', macro: 'sicurezza', shortLabel: 'Bastoni',
-    title: 'Bastoni & Misura', brand: 'Visita Leki Poles ↗', url: 'https://www.leki.com',
+    title: 'Bastoni & Misura', brand: 'Visita Leki Poles', url: 'https://www.leki.com',
     summary: 'Aste in alluminio o carbonio ad alto modulo, rondelle dedicate per terreno e collegamenti sganciabili guanto–impugnatura.'
   },
   scarpone: {
     id: 'scarpone', macro: 'performance', shortLabel: 'Fit & Calzata',
-    title: 'Fit & Calzata', brand: 'Scopri BOA Fit ↗', url: 'https://www.boafit.com',
+    title: 'Fit & Calzata', brand: 'Scopri BOA Fit', url: 'https://www.boafit.com',
     summary: 'Avvolgimento uniforme BOA Fit System, termoformatura di scafo e scarpetta e attenzione ai volumi anatomici.'
   },
   attacchi: {
     id: 'attacchi', macro: 'sicurezza', shortLabel: 'Attacchi più sicuri',
-    title: 'Attacchi più sicuri', brand: 'Visita Tyrolia ↗', url: 'https://www.tyrolia.com',
+    title: 'Attacchi più sicuri', brand: 'Visita Tyrolia', url: 'https://www.tyrolia.com',
     summary: 'Bilanciamento tra ritenzione elastica e sgancio, con talloniera a rotazione laterale Tyrolia Protector e verifica norme suola.'
   },
   telemetria: {
     id: 'telemetria', macro: 'telemetria_ia', shortLabel: 'Telemetria IA',
-    title: 'Telemetria, GPS & AI', brand: 'Scopri Carv 2 ↗', url: 'https://getcarv.com',
+    title: 'Telemetria, GPS & AI', brand: 'Scopri Carv 2', url: 'https://getcarv.com',
     summary: 'Sensori inerziali Carv 2, solette Moticon OpenGo, tracciamento atleti Lympic e pettorine GPS per bambini.'
   },
   sci: {
     id: 'sci', macro: 'performance', shortLabel: 'Sci & Struttura',
-    title: 'Sci & Struttura', brand: 'Scopri ORIGINAL+ ↗', url: 'https://www.original.plus',
+    title: 'Sci & Struttura', brand: 'Scopri ORIGINAL+', url: 'https://www.original.plus',
     summary: 'Costruzioni multi-raggio con Titanal, smorzamento piezoelettrico HEAD EMC e personalizzazione algoritmica ORIGINAL+.'
   }
 };
 
-/* --- PRELOADER CINETICO FULL-SCREEN SINCRONIZZATO AL CARICAMENTO 3D --- */
+/* --- CURSORE RETICOLO GUIDATO DA MOTION SPRING (ZERO DOM HACKS) --- */
+function TacticalReticle() {
+  const [hovered, setHovered] = useState(false);
+  const mouseX = useMotionValue(-100);
+  const mouseY = useMotionValue(-100);
+
+  const ringX = useSpring(mouseX, { stiffness: 260, damping: 24, mass: 0.45 });
+  const ringY = useSpring(mouseY, { stiffness: 260, damping: 24, mass: 0.45 });
+
+  useEffect(() => {
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+    if (isTouch) return;
+
+    const handleMove = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+      const interactive = Boolean(
+        e.target && e.target.closest('button, a, input, [role="button"], [data-interactive="true"]')
+      );
+      setHovered((prev) => (prev !== interactive ? interactive : prev));
+    };
+
+    window.addEventListener('pointermove', handleMove, { passive: true });
+    return () => window.removeEventListener('pointermove', handleMove);
+  }, [mouseX, mouseY]);
+
+  return (
+    <>
+      <motion.div
+        className="cursor-dot"
+        style={{ x: mouseX, y: mouseY }}
+        animate={{ scale: hovered ? 0.5 : 1 }}
+        transition={{ duration: 0.15 }}
+      />
+      <motion.div
+        className="cursor-ring"
+        style={{ x: ringX, y: ringY }}
+        animate={{
+          width: hovered ? 54 : 36,
+          height: hovered ? 54 : 36,
+          borderColor: hovered ? 'var(--accent-gold)' : 'rgba(0, 229, 255, 0.45)',
+          backgroundColor: hovered ? 'rgba(0, 229, 255, 0.1)' : 'rgba(0, 229, 255, 0)'
+        }}
+        transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+      />
+    </>
+  );
+}
+
+/* --- PRELOADER CINETICO CON ANIME.JS V4 TIMELINE & STAGGER --- */
 function KineticIntro() {
   const { active, progress } = useProgress();
   const [displayPct, setDisplayPct] = useState(0);
-  const [dismissed, setDismissed] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (!rootRef.current) return;
+    const scope = createScope({
+      root: rootRef,
+      mediaQueries: { reduceMotion: '(prefers-reduced-motion: reduce)' }
+    }).add((self) => {
+      const { reduceMotion } = self.matches;
+      const tl = createTimeline({ defaults: { ease: 'outExpo' } });
+
+      tl.add('.intro-char', {
+        y: reduceMotion ? [0, 0] : ['110%', '0%'],
+        opacity: [0, 1],
+        duration: reduceMotion ? 10 : 780,
+        delay: stagger(24, { from: 'first' })
+      }).add(
+        '.intro-scan-beam',
+        {
+          top: ['0%', '100%'],
+          opacity: [0, 1, 1, 0],
+          duration: 1400,
+          loop: true,
+          ease: 'inOutSine'
+        },
+        0
+      );
+    });
+
+    return () => scope.revert();
+  }, []);
 
   useEffect(() => {
     const target = !active && progress >= 99 ? 100 : Math.min(95, Math.round(progress));
@@ -129,78 +221,126 @@ function KineticIntro() {
       setDisplayPct((prev) => {
         if (prev >= target) return prev;
         const step = Math.ceil((target - prev) / 4);
-        return Math.min(target, prev + Math.max(3, step));
+        return Math.min(target, prev + Math.max(4, step));
       });
-    }, 30);
+    }, 28);
     return () => clearInterval(timer);
   }, [active, progress]);
 
-  // Paracadute: garantisce apertura entro 3.2s anche su reti lente
   useEffect(() => {
-    const safety = setTimeout(() => setDisplayPct(100), 3200);
+    const safety = setTimeout(() => setDisplayPct(100), 2800);
     return () => clearTimeout(safety);
   }, []);
 
   useEffect(() => {
     if (displayPct >= 100) {
-      const t = setTimeout(() => setDismissed(true), 280);
+      const t = setTimeout(() => setVisible(false), 260);
       return () => clearTimeout(t);
     }
   }, [displayPct]);
 
   return (
-    <div className={`intro-curtain ${dismissed ? 'dismissed' : ''}`} aria-hidden={dismissed}>
-      <div className="intro-scan-beam" />
-      <div className="intro-top-bar">
-        <span>SAS ACADEMY // SKITECH LAB</span>
-        <span>ANDREA MONZANI · 2026</span>
-      </div>
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          ref={rootRef}
+          className="intro-curtain"
+          initial={{ y: '0%' }}
+          exit={{ y: '-100%' }}
+          transition={{ duration: 0.78, ease: [0.76, 0, 0.24, 1] }}
+        >
+          <div className="intro-scan-beam" />
+          <div className="intro-top-bar">
+            <span>SAS ACADEMY // SKITECH LAB</span>
+            <span>ANDREA MONZANI · 2026</span>
+          </div>
 
-      <div className="intro-center">
-        <div className="intro-mask-line">
-          <span className="intro-kinetic-word">INNOVAZIONE</span>
-        </div>
-        <div className="intro-mask-line">
-          <span className="intro-kinetic-word cyan">SCI 2026</span>
-        </div>
-      </div>
+          <div className="intro-center">
+            <div className="intro-mask-line">
+              <span className="intro-kinetic-word">
+                {'INNOVAZIONE'.split('').map((c, i) => (
+                  <span key={i} className="intro-char" style={{ display: 'inline-block' }}>
+                    {c}
+                  </span>
+                ))}
+              </span>
+            </div>
+            <div className="intro-mask-line">
+              <span className="intro-kinetic-word cyan">
+                {'SCI 2026'.split('').map((c, i) => (
+                  <span key={i} className="intro-char" style={{ display: 'inline-block' }}>
+                    {c === ' ' ? '\u00A0' : c}
+                  </span>
+                ))}
+              </span>
+            </div>
+          </div>
 
-      <div className="intro-bottom-bar">
-        <div className="intro-progress-track">
-          <div className="intro-progress-fill" style={{ width: `${displayPct}%` }} />
-        </div>
-        <div className="intro-counter">{String(displayPct).padStart(3, '0')}%</div>
-      </div>
-    </div>
+          <div className="intro-bottom-bar">
+            <div className="intro-progress-track">
+              <motion.div
+                className="intro-progress-fill"
+                animate={{ width: `${displayPct}%` }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+              />
+            </div>
+            <div className="intro-counter">{String(displayPct).padStart(3, '0')}%</div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
-/* --- TITOLO CON HOVER CINETICO 3D --- */
+/* --- TITOLO CON ONDA CINETICA ANIME.JS V4 --- */
 function KineticTitle({ onTriggerEgg }) {
+  const titleRef = useRef(null);
+  const scopeRef = useRef(null);
   const line1 = 'INNOVAZIONE';
   const line2 = 'SCI 2026';
 
+  useEffect(() => {
+    if (!titleRef.current) return;
+    scopeRef.current = createScope({
+      root: titleRef,
+      mediaQueries: { reduceMotion: '(prefers-reduced-motion: reduce)' }
+    });
+    return () => scopeRef.current?.revert();
+  }, []);
+
+  const triggerWave = () => {
+    soundEngine.play('hover');
+    scopeRef.current?.add((self) => {
+      if (self.matches.reduceMotion) return;
+      animate('.kinetic-char', {
+        y: [0, -7, 0],
+        skewX: [0, -8, 0],
+        duration: 520,
+        delay: stagger(18, { from: 'first' }),
+        ease: 'outElastic(1, .65)'
+      });
+    });
+  };
+
   return (
     <div
+      ref={titleRef}
       className="kinetic-title"
+      data-interactive="true"
       onClick={onTriggerEgg}
-      title="Clicca per attivare Hyperspace Overdrive"
-      onMouseEnter={() => {
-        soundEngine.play('hover');
-        document.body.classList.add('cursor-hovering');
-      }}
-      onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+      onMouseEnter={triggerWave}
+      title="Clicca per attivare Tactical Hyperdrive"
     >
       <div className="kinetic-line">
         {line1.split('').map((ch, idx) => (
-          <span key={idx} className="kinetic-char" style={{ '--char-idx': idx }}>
+          <span key={idx} className="kinetic-char">
             {ch}
           </span>
         ))}
       </div>
       <div className="kinetic-line second">
         {line2.split('').map((ch, idx) => (
-          <span key={idx} className="kinetic-char" style={{ '--char-idx': idx }}>
+          <span key={idx} className="kinetic-char">
             {ch === ' ' ? '\u00A0' : ch}
           </span>
         ))}
@@ -210,57 +350,104 @@ function KineticTitle({ onTriggerEgg }) {
   );
 }
 
-/* --- NAVBAR MAGNETICA RIUTILIZZABILE CON ROLLING TEXT --- */
-function MagneticNavBar({ items, activeId, onSelectItem, className = '' }) {
-  const barRef = useRef(null);
-  const [pill, setPill] = useState({ opacity: 0, width: 0, x: 0 });
-
-  const handleEnter = (e) => {
-    if (!barRef.current) return;
-    const barRect = barRef.current.getBoundingClientRect();
-    const btnRect = e.currentTarget.getBoundingClientRect();
-    setPill({
-      opacity: 1,
-      width: btnRect.width,
-      x: btnRect.left - barRect.left
-    });
-    soundEngine.play('hover');
-    document.body.classList.add('cursor-hovering');
-  };
-
-  const handleLeave = () => {
-    setPill((prev) => ({ ...prev, opacity: 0 }));
-    document.body.classList.remove('cursor-hovering');
-  };
+/* --- NAVBAR CON PROIEZIONE CONDIVISA MOTION (layoutId) --- */
+function MotionNavBar({ items, activeId, onSelectItem, layoutGroupId, className = '' }) {
+  const [hoveredId, setHoveredId] = useState(null);
+  const highlightedId = hoveredId || activeId;
 
   return (
-    <div ref={barRef} className={`magnetic-bar ${className}`} onMouseLeave={handleLeave}>
-      <div
-        className="dock-magnetic-pill"
-        style={{
-          opacity: pill.opacity,
-          width: `${pill.width}px`,
-          transform: `translateX(${pill.x}px)`
-        }}
-      />
-      {items.map((item) => (
-        <button
-          key={item.id}
-          type="button"
-          className={`mag-nav-btn ${activeId === item.id ? 'is-active' : ''}`}
-          onClick={() => onSelectItem(item.id)}
-          onMouseEnter={handleEnter}
-        >
-          <span className="roll-wrap">
-            <span className="roll-text">{item.label}</span>
-            <span className="roll-text clone" aria-hidden="true">
-              {item.label}
+    <div
+      className={`magnetic-bar ${className}`}
+      onMouseLeave={() => setHoveredId(null)}
+    >
+      {items.map((item) => {
+        const isHighlighted = highlightedId === item.id;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            className={`mag-nav-btn ${activeId === item.id ? 'is-active' : ''}`}
+            onClick={() => onSelectItem(item.id)}
+            onMouseEnter={() => {
+              setHoveredId(item.id);
+              soundEngine.play('hover');
+            }}
+          >
+            {isHighlighted && (
+              <motion.span
+                layoutId={layoutGroupId}
+                className="dock-motion-pill"
+                transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+              />
+            )}
+            <span className="roll-wrap">
+              <span className="roll-text">{item.label}</span>
+              <span className="roll-text clone" aria-hidden="true">
+                {item.label}
+              </span>
             </span>
-          </span>
-          {item.badge && <span className="macro-count">{item.badge}</span>}
-        </button>
-      ))}
+            {item.badge && <span className="macro-count">{item.badge}</span>}
+          </button>
+        );
+      })}
     </div>
+  );
+}
+
+/* --- TELEMETRIA NUMERICA INTERPOLATA CON ANIME.JS V4 --- */
+function LiveTelemetryMetrics({ overdriveMode, activeItem }) {
+  const [metrics, setMetrics] = useState({ edge: 62.4, gLoad: 2.15 });
+  const stateRef = useRef({ edge: 62.4, gLoad: 2.15 });
+
+  useEffect(() => {
+    const targetEdge = overdriveMode ? 72.8 : activeItem ? 66.5 : 62.4;
+    const targetG = overdriveMode ? 3.24 : activeItem ? 2.58 : 2.15;
+
+    const anim = animate(stateRef.current, {
+      edge: targetEdge,
+      gLoad: targetG,
+      duration: 680,
+      ease: 'outExpo',
+      onUpdate: () => {
+        setMetrics({
+          edge: Number(stateRef.current.edge.toFixed(1)),
+          gLoad: Number(stateRef.current.gLoad.toFixed(2))
+        });
+      }
+    });
+
+    return () => anim.pause();
+  }, [overdriveMode, activeItem]);
+
+  return (
+    <motion.div
+      className="hud-easter-card"
+      initial={{ opacity: 0, y: -8, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -6, scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+    >
+      <div className="hud-easter-row">
+        <span style={{ color: 'var(--text-secondary)' }}>EDGE ANGLE</span>
+        <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>
+          {metrics.edge.toFixed(1)}° {overdriveMode ? 'RACE' : 'MAX'}
+        </span>
+      </div>
+      <div className="hud-easter-row">
+        <span style={{ color: 'var(--text-secondary)' }}>G-LOAD PEAK</span>
+        <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>
+          {metrics.gLoad.toFixed(2)} G
+        </span>
+      </div>
+      <div className="hud-easter-row">
+        <span style={{ color: 'var(--text-secondary)' }}>SNOW TEMP</span>
+        <span>-6.4°C COMPACT</span>
+      </div>
+      <div className="hud-easter-hint">
+        <IconBolt size={11} />
+        <span>{overdriveMode ? 'TACTICAL HYPERDRIVE ATTIVO' : 'CLICCA O SCUOTI PER HYPERDRIVE'}</span>
+      </div>
+    </motion.div>
   );
 }
 
@@ -446,12 +633,8 @@ const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, isE
           onMouseEnter={() => {
             soundEngine.play('hover');
             onHoverChange(id);
-            document.body.classList.add('cursor-hovering');
           }}
-          onMouseLeave={() => {
-            onHoverChange(null);
-            document.body.classList.remove('cursor-hovering');
-          }}
+          onMouseLeave={() => onHoverChange(null)}
         >
           <span className="hotspot-dot" />
           <span className="hotspot-line" />
@@ -462,7 +645,7 @@ const Hotspot = memo(function Hotspot({ pos, id, side = 'right', isSelected, isE
   );
 });
 
-/* --- CAMERA RIG INTELLIGENTE (INQUADRA L'HOTSPOT SENZA BLOCCARE LO ZOOM UTENTE) --- */
+/* --- CAMERA RIG INTELLIGENTE --- */
 function CameraRig({ activeItem, controlsRef }) {
   const { camera } = useThree();
   const desiredDistRef = useRef(4.35);
@@ -514,7 +697,7 @@ function CameraRig({ activeItem, controlsRef }) {
   return null;
 }
 
-/* --- SCENA 3D MANICHINO + MATERIAL CLEANUP --- */
+/* --- SCENA 3D MANICHINO + TELEMETRIA REALE CAMERA --- */
 function SkierScene({ activeItem, hoveredId, exploredIds, onHoverChange, onSelect, xray, onToggleXray, hdgRef }) {
   const { scene } = useGLTF('/mannequin.glb');
   const groupRef = useRef();
@@ -590,10 +773,12 @@ function SkierScene({ activeItem, hoveredId, exploredIds, onHoverChange, onSelec
         }
       }
 
-      if (hdgRef?.current && state.clock.elapsedTime - lastTelemetryRef.current > 0.2) {
+      // Calcolo reale dell'angolo azimutale (HDG) dalla posizione 3D della camera
+      if (hdgRef?.current && state.clock.elapsedTime - lastTelemetryRef.current > 0.15) {
         lastTelemetryRef.current = state.clock.elapsedTime;
-        const yaw = Math.round(((state.camera.position.x * 45) % 360 + 360) % 360);
-        hdgRef.current.textContent = `46.5405° N · 12.1357° E · HDG ${String(yaw).padStart(3, '0')}°`;
+        const rad = Math.atan2(state.camera.position.x, state.camera.position.z);
+        const deg = Math.round(((rad * (180 / Math.PI)) % 360 + 360) % 360);
+        hdgRef.current.textContent = `46.5405° N · 12.1357° E · HDG ${String(deg).padStart(3, '0')}°`;
       }
     }
   });
@@ -842,42 +1027,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, [hudHovered, overdriveMode]);
 
-  // Cursore custom desktop
-  useEffect(() => {
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let trailingX = mouseX;
-    let trailingY = mouseY;
-    const dot = document.querySelector('.cursor-dot');
-    const ring = document.querySelector('.cursor-ring');
-
-    const onMove = (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    };
-
-    const isTouch = window.matchMedia('(pointer: coarse)').matches;
-    if (!isTouch) {
-      window.addEventListener('mousemove', onMove);
-    }
-
-    let raf;
-    const render = () => {
-      trailingX += (mouseX - trailingX) * 0.16;
-      trailingY += (mouseY - trailingY) * 0.16;
-      if (dot) dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
-      if (ring) ring.style.transform = `translate3d(${trailingX}px, ${trailingY}px, 0) translate(-50%, -50%)`;
-      raf = requestAnimationFrame(render);
-    };
-
-    if (!isTouch) raf = requestAnimationFrame(render);
-
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
-
   const data = activeItem ? DATA[activeItem] : null;
   const activeMacroObj = data ? MACROS.find((m) => m.id === data.macro) : null;
 
@@ -885,320 +1034,339 @@ export default function App() {
   const prevItemId = currentIndexInAll !== -1 ? ORDERED_ITEM_IDS[(currentIndexInAll - 1 + ORDERED_ITEM_IDS.length) % ORDERED_ITEM_IDS.length] : null;
   const nextItemId = currentIndexInAll !== -1 ? ORDERED_ITEM_IDS[(currentIndexInAll + 1) % ORDERED_ITEM_IDS.length] : null;
 
-  const memberHoverProps = {
-    onMouseEnter: () => {
-      soundEngine.play('hover');
-      document.body.classList.add('cursor-hovering');
-    },
-    onMouseLeave: () => document.body.classList.remove('cursor-hovering')
-  };
-
   return (
-    <div
-      className={`app-shell ${overdriveMode ? 'overdrive-mode' : ''}`}
-      onClick={() => {
-        if (!motionArmedRef.current) unlockMotionSensors(false);
-      }}
-    >
-      <div className="cursor-dot" />
-      <div className="cursor-ring" />
-      <div className="studio-canvas" />
-      <div className="telemetry-grid-bg" />
-      <div className="overdrive-vignette" />
-      <div className="noise-film" />
+    <MotionConfig reducedMotion="user">
+      <div
+        className={`app-shell ${overdriveMode ? 'overdrive-mode' : ''}`}
+        onClick={() => {
+          if (!motionArmedRef.current) unlockMotionSensors(false);
+        }}
+      >
+        <TacticalReticle />
+        <div className="studio-canvas" />
+        <div className="telemetry-grid-bg" />
+        <div className="overdrive-vignette" />
+        <div className="noise-film" />
 
-      <KineticIntro />
+        <KineticIntro />
 
-      {/* Header con Titolo Impilato + Progresso Esplorazione */}
-      <header className={`brand-header ${activeItem ? 'hidden' : ''}`}>
-        <span className="kicker">
-          SAS ACADEMY //{' '}
-          <a
-            href="https://home.andreamonzani.com"
-            target="_blank"
-            rel="noreferrer"
-            className="author-inline-link"
-            {...memberHoverProps}
-          >
-            ANDREA
-          </a>
-          ,{' '}
-          <span className="team-member-tag" {...memberHoverProps}>
-            MARCO
-          </span>
-          ,{' '}
-          <span className="team-member-tag" {...memberHoverProps}>
-            GIANLUCA
-          </span>{' '}
-          ED{' '}
-          <span className="team-member-tag" {...memberHoverProps}>
-            EMMA
-          </span>
-        </span>
-        <KineticTitle onTriggerEgg={toggleOverdrive} />
-        <div className="hero-sub-telemetry">
-          <span className="progress-pill">
-            LABS {String(exploredIds.size).padStart(2, '0')}/10
-          </span>
-          <span>
-            {hoveredHotspot
-              ? `[TARGET // ${DATA[hoveredHotspot]?.title.toUpperCase()}]`
-              : overdriveMode
-              ? '[HYPERDRIVE ATTIVO — CLICCA HUD O SCUOTI PER USCIRE]'
-              : '[TOCCA UN PUNTO SUL MODELLO 3D PER ESPLORARE]'}
-          </span>
-        </div>
-      </header>
-
-      {/* Popup Centrato in Basso su Smartphone per Shake-to-Overdrive */}
-      {shakeToastState !== 'hidden' && !activeItem && (
-        <button
-          type="button"
-          className="mobile-shake-toast"
-          onClick={(e) => {
-            e.stopPropagation();
-            unlockMotionSensors(true);
+        {/* Header con Titolo Impilato + KokonutUI Activity Ring */}
+        <motion.header
+          className="brand-header"
+          animate={{
+            opacity: activeItem ? 0 : 1,
+            y: activeItem ? -14 : 0
           }}
+          style={{ pointerEvents: activeItem ? 'none' : 'auto' }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         >
-          <span className="shake-toast-icon" aria-hidden="true">📱</span>
-          <span className="shake-toast-text">
-            {shakeToastState === 'armed' ? (
-              <>
-                <strong>Sensori attivi! Agita ora ⚡</strong>
-                <span>Scuoti il telefono per Tactical Hyperdrive</span>
-              </>
-            ) : (
-              <>
-                <strong>Prova ad agitare il telefono ⚡</strong>
-                <span>Tocca qui per attivare i sensori Hyperdrive</span>
-              </>
-            )}
-          </span>
-        </button>
-      )}
-
-      {/* HUD Top-Right */}
-      <div className={`hud-top-right ${activeItem ? 'hidden' : ''}`}>
-        <div className="hud-controls-row">
-          <button
-            type="button"
-            className={`hud-pill-btn ${audioOn ? 'audio-on active' : ''}`}
-            onClick={handleToggleAudio}
-            aria-label={audioOn ? 'Disattiva audio' : 'Attiva audio'}
-            onMouseEnter={() => {
-              soundEngine.play('hover');
-              document.body.classList.add('cursor-hovering');
-            }}
-            onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
-          >
-            <span className="eq-bars" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </span>
-            <span>{audioOn ? 'AUDIO ON' : 'AUDIO'}</span>
-          </button>
-
-          <button
-            type="button"
-            className={`hud-pill-btn ${overdriveMode ? 'active' : ''}`}
-            onClick={toggleOverdrive}
-            onMouseEnter={() => {
-              setHudHovered(true);
-              soundEngine.play('hover');
-              document.body.classList.add('cursor-hovering');
-            }}
-            onMouseLeave={() => {
-              setHudHovered(false);
-              document.body.classList.remove('cursor-hovering');
-            }}
-          >
-            <span className="hud-dot" />
-            <span>{hudLabel}</span>
-          </button>
-        </div>
-
-        <div ref={hdgRef} className="hud-coords">
-          46.5405° N · 12.1357° E · HDG 000°
-        </div>
-
-        {(hudHovered || overdriveMode) && (
-          <div className="hud-easter-card">
-            <div className="hud-easter-row">
-              <span style={{ color: 'var(--text-secondary)' }}>EDGE ANGLE</span>
-              <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>
-                {overdriveMode ? '71.4° RACE' : '64.2° MAX'}
-              </span>
-            </div>
-            <div className="hud-easter-row">
-              <span style={{ color: 'var(--text-secondary)' }}>G-LOAD PEAK</span>
-              <span style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>
-                {overdriveMode ? '3.12 G' : '2.38 G'}
-              </span>
-            </div>
-            <div className="hud-easter-row">
-              <span style={{ color: 'var(--text-secondary)' }}>SNOW TEMP</span>
-              <span>-6.4°C COMPACT</span>
-            </div>
-            <div className="hud-easter-hint">
-              {overdriveMode ? '⚡ TACTICAL HYPERDRIVE ATTIVO' : 'CLICCA O SCUOTI PER HYPERDRIVE ⚡'}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Scena 3D + Pedana Radar + Camera Focus */}
-      <SceneErrorBoundary>
-        <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
-          <Canvas
-            dpr={[1, 2]}
-            camera={{ position: [0, 0.02, 4.35], fov: 44 }}
-            onPointerMissed={() => setActiveItem(null)}
-          >
-            <hemisphereLight
-              intensity={overdriveMode ? 1.8 : 1.45}
-              color={overdriveMode ? '#ffcc00' : '#ffffff'}
-              groundColor="#1e293b"
-            />
-            <directionalLight
-              position={[3, 5, 4]}
-              intensity={2.2}
-              color={overdriveMode ? '#00e5ff' : '#ffffff'}
-            />
-            <directionalLight
-              position={[-4, 2, -2]}
-              intensity={1.6}
-              color={overdriveMode ? '#ffcc00' : '#00e5ff'}
-            />
-
-            <RisingParticles overdrive={overdriveMode} />
-
-            <Suspense fallback={null}>
-              <SkierScene
-                activeItem={activeItem}
-                hoveredId={hoveredHotspot}
-                exploredIds={exploredIds}
-                onHoverChange={setHoveredHotspot}
-                onSelect={handleToggleItem}
-                xray={overdriveMode}
-                onToggleXray={toggleOverdrive}
-                hdgRef={hdgRef}
-              />
-            </Suspense>
-
-            <CameraRig activeItem={activeItem} controlsRef={controlsRef} />
-
-            <OrbitControls
-              ref={controlsRef}
-              enableZoom={true}
-              enablePan={false}
-              autoRotate={!activeItem}
-              autoRotateSpeed={overdriveMode ? 3.2 : 0.45}
-              minDistance={2.7}
-              maxDistance={6.0}
-              minPolarAngle={Math.PI / 3}
-              maxPolarAngle={Math.PI / 1.85}
-              enableDamping={true}
-              dampingFactor={0.05}
-            />
-          </Canvas>
-        </div>
-      </SceneErrorBoundary>
-
-      {/* Dock Magnetica Desktop a 5 Pilastri (Maschere e Telemetria IA separati) */}
-      <nav className={`macro-dock ${activeItem ? 'hidden' : ''}`} aria-label="Categorie principali">
-        <MagneticNavBar
-          items={MACROS.map((m) => ({
-            id: m.items[0],
-            label: m.label,
-            badge: `0${m.items.length}`
-          }))}
-          activeId={null}
-          onSelectItem={handleSelectDirect}
-        />
-      </nav>
-
-      {/* Pannello Laterale Desktop & Scheda Mobile */}
-      <aside className={`side-panel ${activeItem ? 'open' : ''}`} aria-label="Scheda approfondimento">
-        <div className="panel-top-actions">
-          <button
-            type="button"
-            className="close-btn"
-            onClick={() => {
-              soundEngine.play('click');
-              setActiveItem(null);
-            }}
-          >
-            ✕ Torna al 3D
-          </button>
-          {activeMacroObj && (
-            <span className="mono" style={{ fontSize: '0.64rem', color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-              {activeMacroObj.label}
-            </span>
-          )}
-        </div>
-
-        {/* Sottomenu magnetico visibile solo se la categoria ha più di 1 elemento (es. Maschere -> Out Of / Sound BRKR) */}
-        {activeMacroObj && activeMacroObj.items.length > 1 && (
-          <div className="sub-nav-wrap">
-            <MagneticNavBar
-              className="sub-nav-bar"
-              items={activeMacroObj.items.map((subId) => ({
-                id: subId,
-                label: DATA[subId].shortLabel
-              }))}
-              activeId={activeItem}
-              onSelectItem={handleSelectDirect}
-            />
-          </div>
-        )}
-
-        {data && (
-          <div>
-            <h3 style={{ fontSize: '2.15rem', marginBottom: '6px' }}>{data.title}</h3>
+          <span className="kicker">
+            SAS ACADEMY //{' '}
             <a
-              href={data.url}
+              href="https://home.andreamonzani.com"
               target="_blank"
               rel="noreferrer"
-              className="brand-link"
-              onMouseEnter={() => {
-                soundEngine.play('hover');
-                document.body.classList.add('cursor-hovering');
-              }}
-              onMouseLeave={() => document.body.classList.remove('cursor-hovering')}
+              className="author-inline-link"
+              onMouseEnter={() => soundEngine.play('hover')}
             >
-              {data.brand}
+              ANDREA
             </a>
-
-            <p style={{ marginTop: '14px', fontSize: '0.94rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.84)' }}>
-              {data.summary}
-            </p>
-
-            <Suspense
-              fallback={
-                <p className="mono" style={{ marginTop: '20px', fontSize: '0.75rem', color: 'var(--accent-cyan)' }}>
-                  Caricamento laboratorio...
-                </p>
-              }
-            >
-              <InteractiveLab itemId={data.id} />
-            </Suspense>
+            ,{' '}
+            <span className="team-member-tag" onMouseEnter={() => soundEngine.play('hover')}>
+              MARCO
+            </span>
+            ,{' '}
+            <span className="team-member-tag" onMouseEnter={() => soundEngine.play('hover')}>
+              GIANLUCA
+            </span>{' '}
+            ED{' '}
+            <span className="team-member-tag" onMouseEnter={() => soundEngine.play('hover')}>
+              EMMA
+            </span>
+          </span>
+          <KineticTitle onTriggerEgg={toggleOverdrive} />
+          <div className="hero-sub-telemetry">
+            <TelemetryActivityRing current={exploredIds.size} total={10} />
+            <span>
+              {hoveredHotspot
+                ? `TARGET // ${DATA[hoveredHotspot]?.title.toUpperCase()}`
+                : overdriveMode
+                ? 'HYPERDRIVE ATTIVO — CLICCA HUD O SCUOTI PER USCIRE'
+                : 'TOCCA UN PUNTO SUL MODELLO 3D PER ESPLORARE'}
+            </span>
           </div>
-        )}
-      </aside>
+        </motion.header>
 
-      {activeItem && (
-        <div className="mobile-panel-nav">
-          <button type="button" className="action-btn secondary" onClick={() => handleSelectDirect(prevItemId)}>
-            ◀ {DATA[prevItemId]?.shortLabel}
-          </button>
-          <button type="button" className="action-btn" onClick={() => handleSelectDirect(nextItemId)}>
-            {DATA[nextItemId]?.shortLabel} ▶
-          </button>
-        </div>
-      )}
+        {/* Popup Centrato in Basso su Smartphone (KokonutUI ParticleButton) */}
+        <AnimatePresence>
+          {shakeToastState !== 'hidden' && !activeItem && (
+            <ParticleButton
+              className="mobile-shake-toast"
+              particleColor="var(--accent-gold)"
+              onClick={(e) => {
+                e.stopPropagation();
+                unlockMotionSensors(true);
+              }}
+            >
+              <span className="shake-toast-icon">
+                <IconPhoneShake size={17} />
+              </span>
+              <span className="shake-toast-text">
+                {shakeToastState === 'armed' ? (
+                  <>
+                    <strong>Sensori attivi — Agita ora</strong>
+                    <span>Scuoti il telefono per Tactical Hyperdrive</span>
+                  </>
+                ) : (
+                  <>
+                    <strong>Prova ad agitare il telefono</strong>
+                    <span>Tocca qui per attivare i sensori Hyperdrive</span>
+                  </>
+                )}
+              </span>
+            </ParticleButton>
+          )}
+        </AnimatePresence>
 
-      <LegalCompliance isPanelOpen={Boolean(activeItem)} />
-    </div>
+        {/* HUD Top-Right con MagnetButton & ParticleButton */}
+        <motion.div
+          className="hud-top-right"
+          animate={{ opacity: activeItem ? 0 : 1 }}
+          style={{ pointerEvents: activeItem ? 'none' : 'auto' }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="hud-controls-row">
+            <MagnetButton
+              className={`hud-pill-btn ${audioOn ? 'audio-on active' : ''}`}
+              onClick={handleToggleAudio}
+              aria-label={audioOn ? 'Disattiva audio' : 'Attiva audio'}
+              onMouseEnter={() => soundEngine.play('hover')}
+            >
+              <span className="eq-bars" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </span>
+              <span>{audioOn ? 'AUDIO ON' : 'AUDIO'}</span>
+            </MagnetButton>
+
+            <ParticleButton
+              className={`hud-pill-btn ${overdriveMode ? 'active' : ''}`}
+              particleColor={overdriveMode ? '#00e5ff' : '#ffcc00'}
+              onClick={toggleOverdrive}
+              onMouseEnter={() => {
+                setHudHovered(true);
+                soundEngine.play('hover');
+              }}
+              onMouseLeave={() => setHudHovered(false)}
+            >
+              <span className="hud-dot" />
+              <span>{hudLabel}</span>
+            </ParticleButton>
+          </div>
+
+          <div ref={hdgRef} className="hud-coords">
+            46.5405° N · 12.1357° E · HDG 000°
+          </div>
+
+          <AnimatePresence>
+            {(hudHovered || overdriveMode) && (
+              <LiveTelemetryMetrics overdriveMode={overdriveMode} activeItem={activeItem} />
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Scena 3D + Pedana Radar + Camera Focus */}
+        <SceneErrorBoundary>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 10 }}>
+            <Canvas
+              dpr={[1, 2]}
+              camera={{ position: [0, 0.02, 4.35], fov: 44 }}
+              onPointerMissed={() => setActiveItem(null)}
+            >
+              <hemisphereLight
+                intensity={overdriveMode ? 1.8 : 1.45}
+                color={overdriveMode ? '#ffcc00' : '#ffffff'}
+                groundColor="#1e293b"
+              />
+              <directionalLight
+                position={[3, 5, 4]}
+                intensity={2.2}
+                color={overdriveMode ? '#00e5ff' : '#ffffff'}
+              />
+              <directionalLight
+                position={[-4, 2, -2]}
+                intensity={1.6}
+                color={overdriveMode ? '#ffcc00' : '#00e5ff'}
+              />
+
+              <RisingParticles overdrive={overdriveMode} />
+
+              <Suspense fallback={null}>
+                <SkierScene
+                  activeItem={activeItem}
+                  hoveredId={hoveredHotspot}
+                  exploredIds={exploredIds}
+                  onHoverChange={setHoveredHotspot}
+                  onSelect={handleToggleItem}
+                  xray={overdriveMode}
+                  onToggleXray={toggleOverdrive}
+                  hdgRef={hdgRef}
+                />
+              </Suspense>
+
+              <CameraRig activeItem={activeItem} controlsRef={controlsRef} />
+
+              <OrbitControls
+                ref={controlsRef}
+                enableZoom={true}
+                enablePan={false}
+                autoRotate={!activeItem}
+                autoRotateSpeed={overdriveMode ? 3.2 : 0.45}
+                minDistance={2.7}
+                maxDistance={6.0}
+                minPolarAngle={Math.PI / 3}
+                maxPolarAngle={Math.PI / 1.85}
+                enableDamping={true}
+                dampingFactor={0.05}
+              />
+            </Canvas>
+          </div>
+        </SceneErrorBoundary>
+
+        {/* Dock Desktop a 5 Pilastri (Maschere e Telemetria IA separati) */}
+        <motion.nav
+          className="macro-dock"
+          aria-label="Categorie principali"
+          animate={{
+            opacity: activeItem ? 0 : 1,
+            y: activeItem ? 20 : 0
+          }}
+          style={{ pointerEvents: activeItem ? 'none' : 'auto' }}
+          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <MotionNavBar
+            layoutGroupId="main-dock-pill"
+            items={MACROS.map((m) => ({
+              id: m.items[0],
+              label: m.label,
+              badge: `0${m.items.length}`
+            }))}
+            activeId={null}
+            onSelectItem={handleSelectDirect}
+          />
+        </motion.nav>
+
+        {/* Pannello Laterale Desktop & Scheda Mobile con AnimatePresence */}
+        <AnimatePresence>
+          {data && (
+            <motion.aside
+              key="detail-side-panel"
+              className="side-panel"
+              aria-label="Scheda approfondimento"
+              initial={{ x: '100%' }}
+              animate={{ x: '0%' }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 360, damping: 34 }}
+            >
+              <div className="panel-top-actions">
+                <MagnetButton
+                  className="close-btn"
+                  onClick={() => {
+                    soundEngine.play('click');
+                    setActiveItem(null);
+                  }}
+                >
+                  <IconClose size={12} />
+                  <span>Torna al 3D</span>
+                </MagnetButton>
+                {activeMacroObj && (
+                  <span className="mono" style={{ fontSize: '0.64rem', color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+                    {activeMacroObj.label}
+                  </span>
+                )}
+              </div>
+
+              {/* Sottomenu con layoutId visibile solo se la categoria ha >1 elemento */}
+              {activeMacroObj && activeMacroObj.items.length > 1 && (
+                <div className="sub-nav-wrap">
+                  <MotionNavBar
+                    layoutGroupId="sub-dock-pill"
+                    className="sub-nav-bar"
+                    items={activeMacroObj.items.map((subId) => ({
+                      id: subId,
+                      label: DATA[subId].shortLabel
+                    }))}
+                    activeId={activeItem}
+                    onSelectItem={handleSelectDirect}
+                  />
+                </div>
+              )}
+
+              <motion.div
+                key={data.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <h3 style={{ fontSize: '2.15rem', marginBottom: '6px' }}>{data.title}</h3>
+                <SlideTextLink
+                  href={data.url}
+                  onMouseEnter={() => soundEngine.play('hover')}
+                >
+                  {data.brand}
+                </SlideTextLink>
+
+                <p style={{ marginTop: '14px', fontSize: '0.94rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.84)' }}>
+                  {data.summary}
+                </p>
+
+                <Suspense
+                  fallback={
+                    <p className="mono" style={{ marginTop: '20px', fontSize: '0.75rem', color: 'var(--accent-cyan)' }}>
+                      Caricamento laboratorio...
+                    </p>
+                  }
+                >
+                  <InteractiveLab itemId={data.id} />
+                </Suspense>
+              </motion.div>
+            </motion.aside>
+          )}
+        </AnimatePresence>
+
+        {/* Navigazione Rapida Mobile dentro la Scheda */}
+        <AnimatePresence>
+          {activeItem && (
+            <motion.div
+              className="mobile-panel-nav"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 24 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+            >
+              <button
+                type="button"
+                className="action-btn secondary inline-flex-btn"
+                onClick={() => handleSelectDirect(prevItemId)}
+              >
+                <IconChevronLeft size={14} />
+                <span>{DATA[prevItemId]?.shortLabel}</span>
+              </button>
+              <button
+                type="button"
+                className="action-btn inline-flex-btn"
+                onClick={() => handleSelectDirect(nextItemId)}
+              >
+                <span>{DATA[nextItemId]?.shortLabel}</span>
+                <IconChevronRight size={14} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <LegalCompliance isPanelOpen={Boolean(activeItem)} />
+      </div>
+    </MotionConfig>
   );
 }

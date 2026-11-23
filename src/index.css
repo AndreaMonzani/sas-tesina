@@ -1,13 +1,17 @@
 :root {
   --bg-dark: #020305;
-  --bg-panel: rgba(5, 8, 14, 0.95);
+  --bg-panel: rgba(5, 8, 14, 0.96);
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.56);
   --accent-cyan: #00e5ff;
   --accent-gold: #ffcc00;
   --accent-green: #22c55e;
   --accent-red: #f87171;
-  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.11);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
   --font-display: 'Space Grotesk', sans-serif;
   --font-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -34,7 +38,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Modalità Easter Egg: Tactical Hyperdrive (Palette nativa ad alto contrasto, 60fps senza filter: invert) */
+/* Modalità Easter Egg: Tactical Hyperdrive */
 .app-shell {
   position: fixed;
   inset: 0;
@@ -54,8 +58,7 @@ body {
   z-index: 2;
   pointer-events: none;
   opacity: 0;
-  background:
-    radial-gradient(circle at 50% 50%, transparent 38%, rgba(255, 204, 0, 0.16) 82%, rgba(0, 229, 255, 0.24) 100%);
+  background: radial-gradient(circle at 50% 50%, transparent 38%, rgba(255, 204, 0, 0.16) 82%, rgba(0, 229, 255, 0.24) 100%);
   box-shadow: inset 0 0 80px rgba(255, 204, 0, 0.15);
   transition: opacity 0.45s ease;
 }
@@ -84,35 +87,29 @@ summary:focus-visible {
   outline-offset: 2px;
 }
 
-/* Custom Cursor */
+/* Custom Reticle (Motion Spring) */
 .cursor-dot {
   position: fixed;
+  top: -3px;
+  left: -3px;
   width: 6px;
   height: 6px;
   background: var(--accent-cyan);
   border-radius: 50%;
   pointer-events: none;
   z-index: 10000;
-  transform: translate(-50%, -50%);
 }
 
 .cursor-ring {
   position: fixed;
-  width: 38px;
-  height: 38px;
+  top: -18px;
+  left: -18px;
+  width: 36px;
+  height: 36px;
   border: 1px solid rgba(0, 229, 255, 0.45);
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: width 0.22s ease, height 0.22s ease, background 0.22s ease, border-color 0.22s ease;
-}
-
-.cursor-hovering .cursor-ring {
-  width: 56px;
-  height: 56px;
-  background: rgba(0, 229, 255, 0.12);
-  border-color: var(--accent-gold);
 }
 
 /* Sfondo Studio + Griglia Telemetrica */
@@ -137,7 +134,6 @@ summary:focus-visible {
     linear-gradient(rgba(0, 229, 255, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 229, 255, 0.035) 1px, transparent 1px);
   background-size: 64px 64px;
-  transition: opacity 0.4s ease;
 }
 
 .app-shell.overdrive-mode .telemetry-grid-bg {
@@ -157,7 +153,7 @@ summary:focus-visible {
   mix-blend-mode: overlay;
 }
 
-/* --- FULL-SCREEN KINETIC INTRO / PRELOADER --- */
+/* --- FULL-SCREEN KINETIC INTRO (ANIME.JS V4) --- */
 .intro-curtain {
   position: fixed;
   inset: 0;
@@ -168,30 +164,17 @@ summary:focus-visible {
   justify-content: space-between;
   padding: 36px 44px;
   overflow: hidden;
-  transition: transform 0.85s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.65s ease;
-}
-
-.intro-curtain.dismissed {
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none;
 }
 
 .intro-scan-beam {
   position: absolute;
   left: 0;
   right: 0;
+  top: 0;
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-gold), transparent);
   box-shadow: 0 0 24px var(--accent-cyan);
-  animation: laserSweep 1.6s ease-in-out infinite;
-}
-
-@keyframes laserSweep {
-  0% { top: 0%; opacity: 0; }
-  20% { opacity: 1; }
-  80% { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
+  pointer-events: none;
 }
 
 .intro-top-bar {
@@ -222,13 +205,11 @@ summary:focus-visible {
   letter-spacing: -0.035em;
   text-transform: uppercase;
   color: #ffffff;
-  animation: slideUpReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .intro-kinetic-word.cyan {
   color: transparent;
   -webkit-text-stroke: 1.5px var(--accent-cyan);
-  animation-delay: 0.14s;
 }
 
 .intro-bottom-bar {
@@ -250,7 +231,6 @@ summary:focus-visible {
 .intro-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--accent-cyan), var(--accent-gold));
-  transition: width 0.25s ease;
 }
 
 .intro-counter {
@@ -259,17 +239,6 @@ summary:focus-visible {
   font-weight: 700;
   color: var(--accent-gold);
   line-height: 1;
-}
-
-@keyframes slideUpReveal {
-  from {
-    transform: translateY(105%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
 }
 
 /* --- TITOLO PRINCIPALE + HOVER TEAM --- */
@@ -282,13 +251,6 @@ summary:focus-visible {
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.brand-header.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-12px);
 }
 
 .kicker {
@@ -320,7 +282,6 @@ summary:focus-visible {
   color: rgba(255, 255, 255, 0.82);
   padding: 1px 4px;
   border-radius: 4px;
-  cursor: default;
   transition: color 0.25s ease, background 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -348,7 +309,6 @@ summary:focus-visible {
 }
 
 .kinetic-title {
-  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -368,20 +328,17 @@ summary:focus-visible {
 
 .kinetic-char {
   display: inline-block;
-  position: relative;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s ease, text-shadow 0.3s ease;
-  transition-delay: calc(var(--char-idx) * 20ms);
+  transition: color 0.25s ease, text-shadow 0.3s ease;
 }
 
 .kinetic-title:hover .kinetic-char {
-  transform: translateY(-5px) rotateX(18deg) skewX(-6deg);
   color: var(--accent-cyan);
-  text-shadow: 0 8px 22px rgba(0, 229, 255, 0.45);
+  text-shadow: 0 8px 22px rgba(0, 229, 255, 0.42);
 }
 
 .kinetic-title:hover .kinetic-line.second .kinetic-char {
   color: var(--accent-gold);
-  text-shadow: 0 8px 22px rgba(255, 204, 0, 0.45);
+  text-shadow: 0 8px 22px rgba(255, 204, 0, 0.42);
 }
 
 .kinetic-underline-bar {
@@ -398,7 +355,7 @@ summary:focus-visible {
 }
 
 .hero-sub-telemetry {
-  margin-top: 2px;
+  margin-top: 4px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -406,23 +363,49 @@ summary:focus-visible {
   font-size: 0.64rem;
   color: var(--text-secondary);
   letter-spacing: 0.08em;
-  transition: color 0.25s ease;
 }
 
-.progress-pill {
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: rgba(0, 229, 255, 0.1);
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  color: var(--accent-cyan);
+/* --- KOKONUTUI TELEMETRY ACTIVITY RING --- */
+.telemetry-ring-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 10px 3px 5px;
+  border-radius: var(--radius-pill);
+  background: rgba(6, 10, 18, 0.85);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(14px);
+}
+
+.telemetry-ring-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
   font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.08em;
 }
 
-.brand-header:hover .hero-sub-telemetry {
-  color: rgba(255, 255, 255, 0.85);
+/* --- KOKONUTUI PARTICLE BURST PRIMITIVE --- */
+.particle-btn-host {
+  position: relative;
+  overflow: visible;
 }
 
-/* --- HUD TELEMETRICO, AUDIO EQUALIZER & EASTER EGG --- */
+.particle-burst-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.particle-spark {
+  position: absolute;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* --- HUD TELEMETRICO & AUDIO EQUALIZER --- */
 .hud-top-right {
   position: fixed;
   top: 28px;
@@ -432,12 +415,6 @@ summary:focus-visible {
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
-  transition: opacity 0.35s ease;
-}
-
-.hud-top-right.hidden {
-  opacity: 0;
-  pointer-events: none;
 }
 
 .hud-controls-row {
@@ -451,24 +428,24 @@ summary:focus-visible {
   align-items: center;
   gap: 8px;
   padding: 9px 15px;
-  border-radius: 999px;
-  background: rgba(6, 10, 18, 0.82);
+  border-radius: var(--radius-pill);
+  background: rgba(6, 10, 18, 0.84);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   font-family: var(--font-mono);
   font-size: 0.66rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.88);
-  cursor: pointer;
-  transition: all 0.25s ease;
+  transition: border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .hud-pill-btn:hover,
 .hud-pill-btn.active {
   border-color: var(--accent-cyan);
   color: var(--accent-cyan);
-  box-shadow: 0 0 22px rgba(0, 229, 255, 0.25);
+  box-shadow: 0 0 22px rgba(0, 229, 255, 0.22);
 }
 
 .hud-dot {
@@ -498,7 +475,6 @@ summary:focus-visible {
   height: 3px;
   background: var(--text-secondary);
   border-radius: 2px;
-  transition: height 0.2s ease, background 0.2s ease;
 }
 
 .hud-pill-btn.audio-on .eq-bars span {
@@ -530,7 +506,7 @@ summary:focus-visible {
 .hud-easter-card {
   width: 248px;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(5, 9, 16, 0.94);
   border: 1px solid rgba(0, 229, 255, 0.35);
   backdrop-filter: blur(20px);
@@ -538,12 +514,6 @@ summary:focus-visible {
   font-family: var(--font-mono);
   font-size: 0.64rem;
   color: rgba(255, 255, 255, 0.85);
-  animation: fadeSlideDown 0.22s ease both;
-}
-
-@keyframes fadeSlideDown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .hud-easter-row {
@@ -562,11 +532,14 @@ summary:focus-visible {
   padding-top: 6px;
   border-top: 1px dashed rgba(255, 204, 0, 0.35);
   color: var(--accent-gold);
-  font-size: 0.6rem;
-  text-align: center;
+  font-size: 0.59rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
-/* --- HOTSPOT 3D STABILI CON CAMBIO COLORE HOVER & BADGE ESPLORATO --- */
+/* --- HOTSPOT 3D STABILI --- */
 .hotspot-anchor {
   position: relative;
   width: 0;
@@ -580,7 +553,6 @@ summary:focus-visible {
   transform: translateY(-50%);
   display: flex;
   align-items: center;
-  cursor: pointer;
   pointer-events: auto;
   padding: 6px;
   background: none;
@@ -628,7 +600,7 @@ summary:focus-visible {
 
 .hotspot-tag {
   padding: 5px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: rgba(4, 7, 13, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(10px);
@@ -680,16 +652,16 @@ summary:focus-visible {
   box-shadow: 0 0 24px rgba(255, 204, 0, 0.7);
 }
 
-/* --- SISTEMA UNIFICATO NAVBAR MAGNETICA CON ROLLING TEXT (5 CATEGORIE) --- */
+/* --- DOCK CON PROIEZIONE CONDIVISA MOTION (layoutId) --- */
 .magnetic-bar {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 3px;
   padding: 6px;
-  background: rgba(6, 10, 18, 0.84);
+  background: rgba(6, 10, 18, 0.86);
   border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   backdrop-filter: blur(26px);
   box-shadow: 0 18px 46px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
@@ -701,25 +673,15 @@ summary:focus-visible {
   transform: translateX(-50%);
   z-index: 25;
   max-width: calc(100vw - 32px);
-  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-.macro-dock.hidden {
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, 16px);
-}
-
-.dock-magnetic-pill {
+.dock-motion-pill {
   position: absolute;
-  top: 6px;
-  bottom: 6px;
-  left: 0;
-  border-radius: 999px;
+  inset: 0;
+  border-radius: var(--radius-pill);
   background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(255, 204, 0, 0.14));
   border: 1px solid rgba(0, 229, 255, 0.48);
-  pointer-events: none;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  z-index: 0;
 }
 
 .mag-nav-btn {
@@ -728,25 +690,22 @@ summary:focus-visible {
   background: none;
   border: none;
   padding: 10px 15px;
-  border-radius: 999px;
-  color: rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius-pill);
+  color: rgba(255, 255, 255, 0.82);
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  cursor: pointer;
-  overflow: hidden;
   white-space: nowrap;
-  transition: color 0.25s ease, background 0.25s ease;
+  transition: color 0.25s ease;
 }
 
 .mag-nav-btn.is-active {
-  background: rgba(0, 229, 255, 0.16);
   color: var(--accent-cyan);
-  box-shadow: inset 0 0 0 1px rgba(0, 229, 255, 0.45);
 }
 
 .roll-wrap {
   position: relative;
+  z-index: 2;
   display: block;
   height: 1.2em;
   overflow: hidden;
@@ -775,10 +734,12 @@ summary:focus-visible {
 }
 
 .macro-count {
+  position: relative;
+  z-index: 2;
   font-family: var(--font-mono);
   font-size: 0.6rem;
   padding: 2px 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.07);
   color: var(--text-secondary);
   transition: all 0.25s ease;
@@ -790,13 +751,13 @@ summary:focus-visible {
   font-weight: 700;
 }
 
-/* --- EFFETTO HOVER UNIFICATO SU TUTTI I LINK PRODUTTORI ESTERNI --- */
-.brand-link,
+/* --- KOKONUTUI SLIDE TEXT LINK & FONTI ESTERNE --- */
+.slide-text-link,
 .lab-sources a {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-family: var(--font-mono);
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -805,38 +766,41 @@ summary:focus-visible {
   text-decoration: none;
   padding: 4px 8px;
   margin-left: -8px;
-  border-radius: 6px;
-  background: transparent;
-  transition: color 0.22s ease, background 0.22s ease, transform 0.22s ease;
+  border-radius: var(--radius-sm);
+  transition: color 0.22s ease, background 0.22s ease;
 }
 
-.brand-link::after,
-.lab-sources a::after {
-  content: '';
+.slide-text-track {
+  position: relative;
+  display: inline-block;
+  height: 1.25em;
+  overflow: hidden;
+  line-height: 1.25em;
+}
+
+.slide-text-line {
+  display: block;
+}
+
+.slide-text-line.clone {
   position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 2px;
-  height: 1px;
-  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-gold));
-  transform: scaleX(0.35);
-  transform-origin: left;
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  top: 0;
+  left: 0;
+  color: var(--accent-gold);
 }
 
-.brand-link:hover,
+.slide-text-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.slide-text-link:hover,
 .lab-sources a:hover {
   color: var(--accent-gold);
   background: rgba(0, 229, 255, 0.08);
-  transform: translateX(3px);
 }
 
-.brand-link:hover::after,
-.lab-sources a:hover::after {
-  transform: scaleX(1);
-}
-
-/* --- PANNELLO LATERALE DESKTOP & SCHEDA MOBILE --- */
+/* --- PANNELLO LATERALE DESKTOP (MOTION SPRING DRAWER) --- */
 .side-panel {
   position: fixed;
   top: 0;
@@ -849,13 +813,7 @@ summary:focus-visible {
   padding: 32px 42px 100px;
   z-index: 40;
   overflow-y: auto;
-  transform: translateX(100%);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: -24px 0 60px rgba(0, 0, 0, 0.82);
-}
-
-.side-panel.open {
-  transform: translateX(0);
 }
 
 .panel-top-actions {
@@ -869,18 +827,17 @@ summary:focus-visible {
 .close-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--glass-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 9px 16px;
   color: var(--text-secondary);
   font-family: var(--font-mono);
   font-size: 0.66rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  cursor: pointer;
   min-height: 40px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   transition: all 0.22s ease;
 }
 
@@ -919,7 +876,7 @@ summary:focus-visible {
 .lab-shell {
   margin-top: 20px;
   padding: 20px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--glass-border);
 }
@@ -952,7 +909,7 @@ summary:focus-visible {
   grid-template-columns: repeat(4, 1fr);
   gap: 6px;
   padding: 5px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
   margin-bottom: 18px;
@@ -967,8 +924,7 @@ summary:focus-visible {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 10px 6px;
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: var(--radius-sm);
   min-height: 40px;
   overflow: hidden;
   transition: all 0.22s ease;
@@ -987,7 +943,7 @@ summary:focus-visible {
 
 .diagram-stage {
   position: relative;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background:
     linear-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 229, 255, 0.04) 1px, transparent 1px),
@@ -1024,13 +980,12 @@ summary:focus-visible {
   align-items: center;
   gap: 7px;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--glass-border);
   color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 500;
-  cursor: pointer;
   min-height: 38px;
   transition: all 0.2s ease;
 }
@@ -1055,7 +1010,7 @@ summary:focus-visible {
 
 .lab-card {
   padding: 16px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.03);
   border-left: 2px solid var(--accent-cyan);
   margin-bottom: 12px;
@@ -1084,7 +1039,7 @@ summary:focus-visible {
 }
 
 .tech-accordion {
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: rgba(4, 6, 10, 0.74);
   border: 1px solid var(--glass-border);
   overflow: hidden;
@@ -1105,7 +1060,6 @@ summary:focus-visible {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
   color: inherit;
 }
 
@@ -1152,7 +1106,7 @@ summary:focus-visible {
 .subtab-btn {
   flex: 1;
   padding: 8px 6px;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--glass-border);
   color: var(--text-secondary);
@@ -1160,7 +1114,6 @@ summary:focus-visible {
   font-size: 0.66rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  cursor: pointer;
   min-height: 38px;
 }
 
@@ -1172,7 +1125,7 @@ summary:focus-visible {
 
 .sim-box {
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(0, 229, 255, 0.03);
   border: 1px solid rgba(0, 229, 255, 0.2);
   margin-bottom: 14px;
@@ -1208,7 +1161,6 @@ input[type='range'] {
   -webkit-appearance: none;
   width: 100%;
   background: transparent;
-  cursor: pointer;
 }
 
 input[type='range']::-webkit-slider-runnable-track {
@@ -1252,9 +1204,8 @@ input[type='range']:active::-webkit-slider-thumb {
   padding: 10px 8px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   text-align: center;
-  cursor: pointer;
   color: inherit;
   min-height: 46px;
   transition: all 0.2s ease;
@@ -1289,7 +1240,7 @@ input[type='range']:active::-webkit-slider-thumb {
 
 .action-btn {
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--accent-gold);
   color: #020305;
   border: none;
@@ -1298,8 +1249,14 @@ input[type='range']:active::-webkit-slider-thumb {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  cursor: pointer;
   min-height: 40px;
+}
+
+.inline-flex-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .action-btn.secondary {
@@ -1325,12 +1282,11 @@ input[type='range']:active::-webkit-slider-thumb {
   width: 100%;
   text-align: left;
   padding: 12px 14px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--glass-border);
   color: #ffffff;
   font-size: 0.88rem;
-  cursor: pointer;
   min-height: 46px;
   transition: all 0.2s ease;
 }
@@ -1353,7 +1309,7 @@ input[type='range']:active::-webkit-slider-thumb {
 .quiz-letter {
   width: 24px;
   height: 24px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--glass-border);
   display: grid;
   place-items: center;
@@ -1375,7 +1331,7 @@ input[type='range']:active::-webkit-slider-thumb {
   flex-direction: column;
   justify-content: space-between;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: rgba(4, 6, 10, 0.72);
   border: 1px solid var(--glass-border);
   text-decoration: none;
@@ -1447,7 +1403,7 @@ input[type='range']:active::-webkit-slider-thumb {
   align-items: center;
   gap: 10px;
   padding: 5px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(4, 6, 10, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(14px);
@@ -1482,7 +1438,6 @@ input[type='range']:active::-webkit-slider-thumb {
   font-size: 0.6rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  cursor: pointer;
   padding: 2px 3px;
   transition: color 0.2s ease;
 }
@@ -1504,7 +1459,7 @@ input[type='range']:active::-webkit-slider-thumb {
   justify-content: space-between;
   gap: 18px;
   padding: 15px 20px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: rgba(6, 9, 15, 0.96);
   border: 1px solid rgba(0, 229, 255, 0.35);
   backdrop-filter: blur(24px);
@@ -1527,7 +1482,6 @@ input[type='range']:active::-webkit-slider-thumb {
   color: var(--accent-gold);
   text-decoration: underline;
   font-size: 0.78rem;
-  cursor: pointer;
 }
 
 .cookie-banner-actions {
@@ -1538,13 +1492,12 @@ input[type='range']:active::-webkit-slider-thumb {
 
 .cookie-btn {
   padding: 9px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  cursor: pointer;
   min-height: 38px;
 }
 
@@ -1577,7 +1530,7 @@ input[type='range']:active::-webkit-slider-thumb {
   overflow-y: auto;
   background: #070b12;
   border: 1px solid var(--glass-border);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 26px 28px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.9);
 }
@@ -1595,7 +1548,7 @@ input[type='range']:active::-webkit-slider-thumb {
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   padding: 4px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.04);
   margin-bottom: 18px;
 }
@@ -1609,8 +1562,7 @@ input[type='range']:active::-webkit-slider-thumb {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 10px 8px;
-  border-radius: 7px;
-  cursor: pointer;
+  border-radius: var(--radius-sm);
 }
 
 .legal-tab.active {
@@ -1663,7 +1615,7 @@ input[type='range']:active::-webkit-slider-thumb {
   flex-direction: column;
   justify-content: space-between;
   padding: 11px 13px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--glass-border);
   text-decoration: none;
@@ -1707,13 +1659,6 @@ input[type='range']:active::-webkit-slider-thumb {
   animation: pulseFlow 2s infinite ease-in-out;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
 /* ============================================================================
    MOBILE UX: POPUP IN BASSO CENTRATO + SOLO MODELLINO 3D (ZERO DOCK IN BASSO)
    ============================================================================ */
@@ -1730,17 +1675,11 @@ input[type='range']:active::-webkit-slider-thumb {
   80% { transform: rotate(8deg); }
 }
 
-@keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 @media (max-width: 768px) {
   .intro-curtain {
     padding: 24px 20px;
   }
 
-  /* 1. Barra superiore con AUDIO a sinistra e TELEMETRY HUD a destra */
   .hud-top-right {
     top: 14px;
     left: 14px;
@@ -1766,7 +1705,6 @@ input[type='range']:active::-webkit-slider-thumb {
     display: none;
   }
 
-  /* 2. Titolo e nomi del team sotto la barra HUD a piena larghezza */
   .brand-header {
     top: 56px;
     left: 16px;
@@ -1790,12 +1728,12 @@ input[type='range']:active::-webkit-slider-thumb {
 
   .hero-sub-telemetry {
     display: flex;
+    flex-wrap: wrap;
     font-size: 0.54rem;
     letter-spacing: 0.05em;
     margin-top: 2px;
   }
 
-  /* 3. Popup Shake centrato in basso (così non copre mai testa e maschere del manichino) */
   .mobile-shake-toast {
     position: fixed;
     bottom: 42px;
@@ -1810,19 +1748,17 @@ input[type='range']:active::-webkit-slider-thumb {
     width: fit-content;
     max-width: calc(100vw - 28px);
     padding: 10px 16px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: rgba(6, 11, 20, 0.94);
     border: 1px solid rgba(255, 204, 0, 0.65);
     backdrop-filter: blur(20px);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85), 0 0 22px rgba(255, 204, 0, 0.22);
     color: #ffffff;
-    cursor: pointer;
-    animation: fadeSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .shake-toast-icon {
-    display: inline-block;
-    font-size: 1.05rem;
+    display: inline-flex;
+    color: var(--accent-gold);
     flex-shrink: 0;
     animation: phoneWiggle 1.25s ease-in-out infinite;
   }
@@ -1847,7 +1783,6 @@ input[type='range']:active::-webkit-slider-thumb {
     color: rgba(255, 255, 255, 0.78);
   }
 
-  /* 4. Nessun menu in basso: navigazione pura via modellino 3D */
   .macro-dock {
     display: none !important;
   }
@@ -1871,20 +1806,14 @@ input[type='range']:active::-webkit-slider-thumb {
     letter-spacing: 0.06em;
   }
 
-  /* Scheda Lab su Mobile */
   .side-panel {
     top: auto;
     height: 88vh;
     width: 100vw;
-    transform: translateY(100%);
     border-left: none;
     border-top: 1px solid rgba(0, 229, 255, 0.35);
-    border-radius: 26px 26px 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     padding: 16px 16px 84px;
-  }
-
-  .side-panel.open {
-    transform: translateY(0);
   }
 
   .lab-tabs {
