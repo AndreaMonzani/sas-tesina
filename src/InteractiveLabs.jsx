@@ -1491,7 +1491,7 @@ function PoleLab() {
   const [tab, setTab] = useState('anatomy');
   const [part, setPart] = useState('impugnatura');
   const [triggerMode, setTriggerMode] = useState('attached');
-  const [discipline, setDiscipline] = useState('pista');
+  const [discipline, setDiscipline] = useState('pista'); // 'pista' | 'sl' | 'gs' | 'freeride'
   const [height, setHeight] = useState(176);
   const [skierLvl, setSkierLvl] = useState('l1');
 
@@ -1533,16 +1533,17 @@ function PoleLab() {
     },
     {
       badge: 'Geometrie specialistiche',
-      title: 'Da Pista vs Da Gigante vs Freeride',
-      subtitle: 'La forma segue la funzione.',
-      body: 'Pista All-Round: asta perfettamente dritta, rondella piccola (50mm). Gara (GS/SG): asta curvata a "banana" per adagiarsi sui fianchi in posizione a uovo aerodinamica. Freeride: impugnatura in foam prolungata sul tubo per spostare le mani nei traversi in salita e rondella enorme (90+ mm).'
+      title: 'Campo libero vs Gara SL vs Gara GS vs Freeride',
+      subtitle: 'La forma e la lunghezza seguono la funzione.',
+      body: 'Campo libero (Pista): asta dritta, rondella media (50 mm), taglio ogni 5 cm. Gara SL: asta dritta con paramano, più corto di ~5 cm (step 2,5 cm) per rapidità nei pali snodati. Gara GS: asta curvata aerodinamica più lunga di 5–10 cm rispetto allo SL per spinta al cancelletto e posizione a uovo. Freeride: impugnatura prolungata in foam e rondella larga (90+ mm).'
     }
   ];
 
   const discNotes = {
-    pista: 'Asta dritta e rigida in Alluminio 7075 o Carbonio, impugnatura ergonomica standard in gomma bimateriale e rondella media (50–55 mm).',
-    gara: 'Tubo curvato per seguire l\'aerodinamica del corpo, protezione (paramani) in slalom speciale, e rondella conica minuscola per non impigliare i pali.',
-    freeride: 'Impugnatura molto lunga (Touring grip) in schiuma isolante per cambiare presa sui pendii inclinati, e rondella molto larga (85–100 mm) stile racchetta da neve.'
+    pista: 'Campo libero (All-round): asta dritta e rigida in Alluminio 7075 o Carbonio, impugnatura ergonomica standard in gomma bimateriale e rondella media (50–55 mm).',
+    sl: 'Gara SL (Slalom Speciale): asta dritta rinforzata con paramano chiuso e rondella conica compatta. Più corto di ~5 cm rispetto al campo libero per velocizzare l’appoggio e non impigliare i pali snodati.',
+    gs: 'Gara GS (Slalom Gigante): asta curvata per seguire l’aerodinamica del corpo in posizione a uovo e rondella conica. Più lungo di 5–10 cm rispetto allo SL per compensare la curvatura e massimizzare la spinta al cancelletto.',
+    freeride: 'Fresca / Powder: impugnatura molto lunga (Touring grip) in schiuma isolante per cambiare presa sui pendii inclinati, e rondella molto larga (85–100 mm) stile racchetta da neve.'
   };
 
   const quiz = [
@@ -1567,19 +1568,48 @@ function PoleLab() {
       explanation: 'Solo i sistemi di bloccaggio integrati (come Trigger, o altri brevetti meccanici a molla) possiedono una via di fuga di sicurezza certificata. La fettuccia va sempre infilata correttamente dal basso verso l\'alto.'
     },
     {
-      question: 'Sgancio "manuale" volontario (tramite pulsante) e rilascio "sotto sollecitazione" (in caduta) sono garantiti nello stesso modo?',
+      question: 'A parità di altezza dello sciatore, perché i bastoni da Gigante (GS) sono più lunghi rispetto a quelli da Slalom (SL)?',
       answers: [
-        'No: il bottone si apre quando lo pigi col dito in seggiovia. Il rilascio di emergenza interviene SOLO per specifiche traiettorie di forza previste dalla molla, non in ogni singola torsione umana.',
-        'Sì, indicano lo stesso pulsante magico.',
-        'Sì, si chiama intelligenza artificiale del bastone.'
+        'Non è vero: SL e GS usano esattamente la stessa misura.',
+        'Perché l’asta curva del GS accorcia la distanza effettiva impugnatura-puntale e serve maggiore leva nella spinta al cancelletto e in posizione a uovo, mentre nello SL un bastone più corto velocizza il ritmo.',
+        'Perché in Slalom non si usano mai i bastoni.'
       ],
-      correct: 0,
-      explanation: 'Un meccanismo a molla è puramente meccanico e tarato per rilasci verticali (o 3D in alcuni casi), ma non può leggere le dinamiche folli di un ruzzolone a 80 km/h in ogni asse.'
+      correct: 1,
+      explanation: 'In gara si usano tagli ogni 2,5 cm: lo SL resta più corto (~H × 0,65) per agilità tra i pali snodati, mentre il GS (~H × 0,71) è più lungo e curvo per aerodinamica e spinta.'
     }
   ];
 
-  const exactPole = Math.round(height / (skierLvl === 'l1' ? 1.5 : 1.53));
-  const commPole = Math.round(exactPole / 5) * 5;
+  const roundTo = (val, step) => Math.round(val / step) * step;
+
+  const pistaCoeff = skierLvl === 'l1' ? 0.685 : 0.675;
+  const previewSizes = {
+    pista: roundTo(height * pistaCoeff, 5),
+    sl: roundTo(height * 0.65, 2.5),
+    gs: roundTo(height * 0.71, 2.5),
+    freeride: roundTo(height * 0.67, 5)
+  };
+
+  const exactPole =
+    discipline === 'sl'
+      ? Math.round(height * 0.65)
+      : discipline === 'gs'
+      ? Math.round(height * 0.71)
+      : discipline === 'freeride'
+      ? Math.round(height * 0.67)
+      : Math.round(height * pistaCoeff);
+
+  const commPole = previewSizes[discipline];
+
+  const formulaCaption =
+    discipline === 'sl'
+      ? 'Formula Gara SL: H × 0,65 (Taglio race ogni 2,5 cm)'
+      : discipline === 'gs'
+      ? 'Formula Gara GS: H × 0,71 (Taglio race ogni 2,5 cm)'
+      : discipline === 'freeride'
+      ? 'Formula Freeride: H × 0,67 (Taglio ogni 5 cm)'
+      : skierLvl === 'l1'
+      ? 'Campo libero L1–L5: H × 0,685 (Taglio commerciale ogni 5 cm)'
+      : 'Campo libero L6–L7+: H × 0,675 (Taglio commerciale ogni 5 cm)';
 
   return (
     <div className="lab-shell">
@@ -1732,20 +1762,24 @@ function PoleLab() {
 
           <div className="sim-box" style={{ marginBottom: 0 }}>
             <h5 style={{ fontFamily: 'Syne, sans-serif', fontSize: '0.96rem', color: 'var(--accent-gold)', marginBottom: '10px' }}>
-              Consigliatore: Specialità & Taglio
+              Consigliatore: Specialità &amp; Taglio
             </h5>
-            <div className="choice-grid-3" style={{ marginBottom: '10px' }}>
+            <div className="choice-grid-2" style={{ marginBottom: '10px' }}>
               <button type="button" className={`choice-card ${discipline === 'pista' ? 'active' : ''}`} onClick={() => setDiscipline('pista')}>
-                <strong>Pista</strong>
-                <small>All-round</small>
+                <strong>Campo libero</strong>
+                <small>Pista · {previewSizes.pista} cm</small>
               </button>
-              <button type="button" className={`choice-card ${discipline === 'gara' ? 'active' : ''}`} onClick={() => setDiscipline('gara')}>
-                <strong>Gara</strong>
-                <small>SL / GS</small>
+              <button type="button" className={`choice-card ${discipline === 'sl' ? 'active' : ''}`} onClick={() => setDiscipline('sl')}>
+                <strong>Gara SL</strong>
+                <small>Slalom · {previewSizes.sl} cm</small>
+              </button>
+              <button type="button" className={`choice-card ${discipline === 'gs' ? 'active' : ''}`} onClick={() => setDiscipline('gs')}>
+                <strong>Gara GS</strong>
+                <small>Gigante · {previewSizes.gs} cm</small>
               </button>
               <button type="button" className={`choice-card ${discipline === 'freeride' ? 'active' : ''}`} onClick={() => setDiscipline('freeride')}>
                 <strong>Fresca</strong>
-                <small>Powder</small>
+                <small>Powder · {previewSizes.freeride} cm</small>
               </button>
             </div>
             <p style={{ fontSize: '0.84rem', color: 'rgba(255,255,255,0.84)', lineHeight: 1.5, marginBottom: '14px' }}>
@@ -1759,19 +1793,28 @@ function PoleLab() {
               </div>
               <input type="range" min="145" max="205" value={height} onChange={(e) => setHeight(Number(e.target.value))} />
             </div>
-            <div className="choice-grid-2">
-              <button type="button" className={`choice-card ${skierLvl === 'l1' ? 'active' : ''}`} onClick={() => setSkierLvl('l1')}>
-                <strong>Sciata Tradizionale</strong>
-                <small>Livelli 1-5 (Formula: H / 1,50)</small>
-              </button>
-              <button type="button" className={`choice-card ${skierLvl === 'l6' ? 'active' : ''}`} onClick={() => setSkierLvl('l6')}>
-                <strong>Assetto "Moderno"</strong>
-                <small>Livelli 6-7+ (Formula: H / 1,53)</small>
-              </button>
-            </div>
+
+            {discipline === 'pista' && (
+              <div className="choice-grid-2" style={{ marginBottom: '6px' }}>
+                <button type="button" className={`choice-card ${skierLvl === 'l1' ? 'active' : ''}`} onClick={() => setSkierLvl('l1')}>
+                  <strong>Sciata Tradizionale</strong>
+                  <small>Livelli 1–5 (H × 0,685)</small>
+                </button>
+                <button type="button" className={`choice-card ${skierLvl === 'l6' ? 'active' : ''}`} onClick={() => setSkierLvl('l6')}>
+                  <strong>Assetto &quot;Moderno&quot;</strong>
+                  <small>Livelli 6–7+ (H × 0,675)</small>
+                </button>
+              </div>
+            )}
+
             <p style={{ marginTop: '12px', textAlign: 'center', fontFamily: 'Syne, sans-serif', fontSize: '1.35rem', color: 'var(--accent-gold)' }}>
-              Misura Matematica: {exactPole} cm <br/>
-              <small style={{ fontSize: '0.85rem', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Taglio Acquisto: {commPole} cm</small>
+              Misura Matematica: {exactPole} cm <br />
+              <small style={{ fontSize: '0.85rem', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Taglio Acquisto: {commPole} cm
+              </small>
+              <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '0.66rem', color: 'var(--accent-cyan)', marginTop: '4px' }}>
+                {formulaCaption}
+              </span>
             </p>
           </div>
         </div>
@@ -2035,17 +2078,17 @@ function ThermoLab() {
                 <svg viewBox="0 0 540 165" role="img" aria-label="Struttura PrimaLoft Heat Sphere a tre strati">
                   <path d="M 35 30 L 505 30 L 505 70 L 35 70 Z" fill="rgba(255, 204, 0, 0.15)" stroke="#ffcc00" strokeWidth="2" strokeDasharray="4 2" />
                   <path d="M 45 40 Q 60 65 75 40 T 105 40 T 135 40 T 165 40 T 195 40 T 225 40 T 255 40 T 285 40 T 315 40 T 345 40 T 375 40 T 405 40 T 435 40 T 465 40 T 495 40" stroke="#ffcc00" strokeWidth="1.5" fill="none" opacity="0.6" />
-                  
+
                   <line x1="35" y1="82" x2="505" y2="82" stroke="#00e5ff" strokeWidth="4" />
                   <line x1="35" y1="82" x2="505" y2="82" stroke="#ffffff" strokeWidth="1.5" />
-                  
+
                   <path className="anim-pulse" d="M 120 145 L 120 95 L 105 110 M 120 95 L 135 110" stroke="#f87171" strokeWidth="2" fill="none" />
                   <path className="anim-pulse" d="M 270 145 L 270 95 L 255 110 M 270 95 L 285 110" stroke="#f87171" strokeWidth="2" fill="none" />
                   <path className="anim-pulse" d="M 420 145 L 420 95 L 405 110 M 420 95 L 435 110" stroke="#f87171" strokeWidth="2" fill="none" />
 
                   <path d="M 35 94 L 505 94 L 505 134 L 35 134 Z" fill="rgba(255, 204, 0, 0.15)" stroke="#ffcc00" strokeWidth="2" strokeDasharray="4 2" />
                   <path d="M 45 104 Q 60 129 75 104 T 105 104 T 135 104 T 165 104 T 195 104 T 225 104 T 255 104 T 285 104 T 315 104 T 345 104 T 375 104 T 405 104 T 435 104 T 465 104 T 495 104" stroke="#ffcc00" strokeWidth="1.5" fill="none" opacity="0.6" />
-                  
+
                   <text x="42" y="18" fill="#ffcc00" fontSize="11">1. Isolante sintetico passivo (Blocca il freddo esterno, non teme l'acqua)</text>
                   <text x="42" y="77" fill="#00e5ff" fontSize="11">2. Core Termo-Riflettente a Film (Specchio Termico Ultra-Leggero)</text>
                   <text x="42" y="155" fill="#f87171" fontSize="11">3. Le Frecce rosse del tuo calore emesso "rimbalzano" indietro verso il tuo corpo</text>
